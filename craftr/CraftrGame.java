@@ -75,7 +75,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public String getVersion()
 	{
-		return "0.0.9";
+		return "0.0.9.1";
 	}
 	public CraftrGame()
 	{
