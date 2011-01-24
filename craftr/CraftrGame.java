@@ -1115,6 +1115,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 			if(waitTime>0) waitTime--;
 			told = new Date();
+			if(gs.drawType==7) gs.cw.isMelodium=true;
+			else gs.cw.isMelodium=false;
 			if(told.compareTo(tnew) >= 0)
 			{
 				fps = (int)(frame-fold);
@@ -1125,7 +1127,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 			if(multiplayer)
 			{
-				//net.loop(this);
 				for(int i=0;i<256;i++)
 				{
 					if(players[i] != null && players[i].posChanged)

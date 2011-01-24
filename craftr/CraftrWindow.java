@@ -7,6 +7,7 @@ public class CraftrWindow
 {
 	public int type;
 	public int w,h;
+	public boolean isMelodium = false;
 	public String title;
 	public static int[] linechr; 
 	public int x,y;
@@ -14,6 +15,8 @@ public class CraftrWindow
 	public byte[] recBlockChr;
 	public byte[] recBlockCol;
 	public byte[] recBlockType;
+	public static final String[] note_names={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
+	public static final String[] drum_names={"Kick","Snare","(C) HiHat","(O) HiHat","HiTom","MidTom","LoTom","Crash"};
 	
 	public CraftrWindow(int _type)
 	{
@@ -23,6 +26,12 @@ public class CraftrWindow
 		recBlockType = new byte[16];
 	}
 	
+	public static String getNoteName(int v)
+	{
+		int chr = v%248;
+		if(chr>=240) return drum_names[chr-240];
+		else return note_names[(chr%24)>>1]+"-"+(chr/24);
+	}
 	public void resize()
 	{
 		switch(type)
@@ -127,7 +136,9 @@ public class CraftrWindow
 						g.setColor(new Color(0xAAAAAA));
 						g.drawRect(fx+((i&31)<<3),fy+((i>>5)<<3),7,7);
 					}
+					String tn = getNoteName(charChosen&0xFF);
 					String t = "" + (charChosen&0xFF);
+					if(isMelodium) cc.DrawString1x((x+w-2-t.length()-tn.length())<<3,(y+h-1)<<3,tn,142,g);
 					cc.DrawString1x((x+w-1-t.length())<<3,(y+h-1)<<3,t,142,g);
 				}
 				break;
