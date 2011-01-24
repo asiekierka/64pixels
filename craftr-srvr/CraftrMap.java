@@ -756,7 +756,7 @@ public class CraftrMap
 		{ 
 			int px = x&63;
 			int py = y&63;
-			synchronized(chunks) { findCachedChunk((x>>6),(y>>6)).place(px,py,data[0],data[2],data[3],data[1]); }
+			synchronized(chunks) { grabChunk((x>>6),(y>>6)).place(px,py,data[0],data[2],data[3],data[1]); }
 		}
 		catch(NullPointerException e)
 		{
@@ -801,12 +801,12 @@ public class CraftrMap
 			int px = x&63;
 			int py = y&63;
 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
-			synchronized(chunks) { findCachedChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,p1); }
+			synchronized(chunks) { grabChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,p1); }
 		}
 		catch(NullPointerException e)
 		{
 			System.out.println("setBlock: no cached chunk near player found. ODD.");
-			if(!multiplayer) System.exit(1);
+			//if(!multiplayer) System.exit(1);
 		}
 	}
 	
