@@ -448,7 +448,7 @@ public class CraftrClient implements Runnable
 								{
 									out.writeByte(0x11);
 									out.writeInt(rcX);
-									out.writeInt(rcY);s
+									out.writeInt(rcY);
 									out.writeInt(t2.length);
 									sendPacket();
 								}

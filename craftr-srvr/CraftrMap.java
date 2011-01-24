@@ -763,6 +763,12 @@ public class CraftrMap
 			System.out.println("setBlock: no cached chunk near player found. ODD.");
 			//if(!multiplayer) System.exit(1);
 		}
+		catch(NoChunkMemException e2)
+		{
+			System.out.println("setBlock: no chunk memory found! Shutting down...");
+			System.exit(1);
+			//if(!multiplayer) System.exit(1);
+		}
 	}
 	
 	public void setBlockNet(int x, int y, byte t1, byte ch1, byte co1)
@@ -806,6 +812,12 @@ public class CraftrMap
 		catch(NullPointerException e)
 		{
 			System.out.println("setBlock: no cached chunk near player found. ODD.");
+			//if(!multiplayer) System.exit(1);
+		}
+		catch(NoChunkMemException e2)
+		{
+			System.out.println("setBlock: no chunk memory found! Shutting down...");
+			System.exit(1);
 			//if(!multiplayer) System.exit(1);
 		}
 	}
