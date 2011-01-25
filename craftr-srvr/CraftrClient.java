@@ -584,9 +584,9 @@ public class CraftrClient implements Runnable
 									t33[3] = aco;
 									t33[2] = ach;
 									while(serv.map.maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
+									System.out.println("BLOCK: " + at + "," + aco + "," + ach);
 									serv.map.modlock=true;
 									//while(serv.map.bslock) { Thread.sleep(1); }
-	 								byte[] lastderp = serv.map.getBlock(ax,ay);
 	 								synchronized(serv.map)
 	 								{
 	 									if(at == -1)
@@ -649,8 +649,9 @@ public class CraftrClient implements Runnable
  									int loly = this.y;
  									int lolvx = in.readByte();
  									int lolvy = in.readByte();
+									System.out.println("push " + lolvx + " " + lolvy + " " + lolx + " " + loly);
  									
- 									if(lolvx != 0 && lolvy != 0)
+ 									if((lolvx != 0 && lolvy != 0) || (lolvx == 0 && lolvy == 0))
  										kick("Invalid touch distance!");
  									else if(lolvx < -1 || lolvx > 1 || lolvy < -1 || lolvy > 1)
  										kick("Invalid touch distance!");

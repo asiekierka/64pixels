@@ -10,7 +10,7 @@ public class CraftrMap
 	public int genMode = 0;
 	public static Random rand = new Random();
 	public String saveDir;
-	public static final int maxType = 8;
+	public static final int maxType = 10;
 	public boolean multiplayer;
 	public boolean maplock;
 	public boolean modlock;
@@ -197,7 +197,7 @@ public class CraftrMap
 					return out;
 				case 3:
 					out = new byte[(4096*10)+hdrsize];
-					while(i<((4096*8)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
+					while(i<((4096*8)+hdrsize) && i>-1) i += gin.read(out,i,((4096*8)+hdrsize)-i);
 					gin.close();
 					for(int ri=0;ri<4096;ri++)
 					{
@@ -453,16 +453,40 @@ public class CraftrMap
 			{
 				byte[] t = getBlock(x+ix,y+iy);
 				System.arraycopy(t,4,blocks,((iy*xs)+ix)*2,2);
-				setPushable(x+ix,y+iy,0,0);
+				setPushable(x+ix,y+iy,(byte)0,(byte)0);
 			}
 		}
 		for(int iy=0;iy<ys;iy++)
 		{
 			for(int ix=0;ix<xs;ix++)
 			{
-				setPushable(x+ix,y+iy,t[((iy*xs)+ix)*2],t[(((iy*xs)+ix)*2)+1]);
+				setPushable(x+ix,y+iy,blocks[((iy*xs)+ix)*2],blocks[(((iy*xs)+ix)*2)+1]);
+				for(int i=0;i<4;i++)
+				{
+					addbc(new CraftrBlockPos(x+ix+xMovement[i],y+iy+yMovement[i]));
+				}
 			}
 		}
+	}
+
+	public void tryPushM(int x, int y, int dx, int dy, byte chr, byte col)
+	{
+		if((dx!=0 && dy!=0) || (dx==0 && dy==0)) return; // don't do diagonals.
+		if(col==0) return; // we do not want non-colored pushables
+		if(isEmpty(x+dx,y+dy)) // can we not push?
+		{
+			setPushable(x+dx,y+dy,chr,col);
+		}
+		int posx = x+dx;
+		int posy = y+dy;
+		// we'll have to push unless we see a wall and until we have pushiums
+		while(getBlock(posx,posy)[0]==(byte)-1)
+		{
+			posx+=dx;
+			posy+=dy;
+		}
+		if(!isEmpty(posx,posy)) return;
+		pushMultiple(x+dx,y+dy,posx-x-dx,posy-y-dy,dx,dy);
 	}
 	public boolean isEmpty(int x, int y)
 	{
@@ -494,11 +518,11 @@ public class CraftrMap
 	{
 		byte[] d = getBlock(x,y);
 		byte[][] dt = new byte[4][];
-		int[][] d2 = new int[4][4];
+		int[][] d2 = new int[4][6];
 		for(int i=0;i<4;i++)
 		{
 			dt[i]=getBlock(x+xMovement[i],y+yMovement[i]);
-			for(int j=0;j<4;j++)
+			for(int j=0;j<6;j++)
 			{
 				d2[i][j]=0xFF&(int)dt[i][j];
 			}
@@ -518,6 +542,7 @@ public class CraftrMap
 					if( ((d2[i][1]>>(i^1))&1)!=0 ) strength[i]=d2[i][1]>>4;
 					break;
 				case 5:
+				case 9:
 					if(d2[i][1]>0) strength[i]=15;
 					break;
 				default:
@@ -718,6 +743,46 @@ public class CraftrMap
 				int np=sig7>0?1:0;
 				if((d[1]&1)!=np) addbs(new CraftrBlock(x,y,d[0],(byte)np,d[2],d[3]));
 				break;
+			case 9: // Pensor
+				int co8 = d[1]&0x7F;
+				int on8 = (int)d[1]&0x80;
+				int si8 = 0;
+				boolean dc8 = false;
+				for(int i=0;i<4;i++)
+				{
+					if(((d2[i][5]&0x0f)!=0) && ( ((d2[i][5]&0x0F)==(d[3]&0x0F)) || (d[3]&0x0F)==0 )) si8++;
+				}
+				if(co8>0)
+				{
+					dc8=true;
+					if(co8>1) addbc(new CraftrBlockPos(x,y));
+					else on8=0;
+					addbs(new CraftrBlock(x,y,d[0],on8|(co8-1),d[2],d[3]));
+				}
+				else if(on8==0 && si8>0)
+				{
+					dc8=true;
+					on8=0x80;
+					addbs(new CraftrBlock(x,y,d[0],0x84,d[2],d[3]));
+					addbc(new CraftrBlockPos(x,y));
+				}
+				else if(on8>0 && si8==0)
+				{
+					dc8=true;
+					on8=0;
+					addbs(new CraftrBlock(x,y,d[0],0,d[2],d[3]));
+					addbc(new CraftrBlockPos(x,y));
+				}
+				if(dc8)
+				{
+					for(int i=0;i<4;i++)
+					{
+						int t = d2[i][0];
+						int str = strength[i];
+						if(t==2 ||t==3||t==4 || t==6 || t==7) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+					}
+				}
+				break;
 			default:
 				break;
 		}
@@ -728,7 +793,8 @@ public class CraftrMap
  	{
  		byte[] dc = getBlock(lolx,loly);
  		byte[] dt = getBlock(lolx+lolvx,loly+lolvy);
-		
+		System.out.println("dc[5] of type " + dc[0] + " is " + dc[5] + ", block " + dt[0] + ", " + dt[5] + " is empty? " + isEmpty(lolx+lolvx,loly+lolvy));
+		for(int i=0;i<6;i++) System.out.println(dc[i] + " / " + dt[i]);
  		if(dc[5] != 0 && isEmpty(lolx+lolvx,loly+lolvy))
  		{
  			if(!multiplayer)
@@ -738,6 +804,11 @@ public class CraftrMap
  					setPushable(lolx,loly,(byte)0,(byte)0);
  					setPushable(lolx+lolvx,loly+lolvy,dc[4],dc[5]);
  				}
+				for(int i=0;i<4;i++)
+				{
+					addbc(new CraftrBlockPos(lolx+xMovement[i],loly+yMovement[i]));
+					addbc(new CraftrBlockPos(lolx+lolvx+xMovement[i],loly+lolvy+yMovement[i]));
+				}
  			}
  			return true;
  		} else {
@@ -798,6 +869,7 @@ public class CraftrMap
 		{ 
 			int px = x&63;
 			int py = y&63;
+			System.out.println("setBlock: " + data[0]);
 			synchronized(chunks) { grabChunk((x>>6),(y>>6)).place(px,py,data[0],data[2],data[3],data[1]); }
 		}
 		catch(NullPointerException e)
@@ -849,6 +921,7 @@ public class CraftrMap
 			int px = x&63;
 			int py = y&63;
 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
+			System.out.println("setBlock: " + t1);
 			synchronized(chunks) { grabChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,p1); }
 		}
 		catch(NullPointerException e)
@@ -870,26 +943,6 @@ public class CraftrMap
 	}
 	public void setBlockSuper(int x, int y, byte t1, byte p1, byte ch1, byte co1)
 	{
-		try
-		{ 
-			int px = x&63;
-			int py = y&63;
-			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
-			synchronized(chunks)
-			{
-				grabChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,p1);
-			}
-		}
-		catch(NullPointerException e)
-		{
-			System.out.println("setBlock: no cached chunk near player found. ODD.");
-			//if(!multiplayer) System.exit(1);
-		}
-		catch(NoChunkMemException e2)
-		{
-			System.out.println("setBlock: no chunk memory found! Shutting down...");
-			System.exit(1);
-			//if(!multiplayer) System.exit(1);
-		}
+		setBlock(x,y,t1,p1,ch1,co1);
 	}
 }

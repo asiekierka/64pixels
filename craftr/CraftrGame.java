@@ -778,20 +778,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	{
 		int px = players[255].px+dpx;
 		int py = players[255].py+dpy;
-		if(map.isEmpty(px,py))
-		{
-			if(multiplayer) net.playerMove(dpx,dpy);
-			else
-			{
-				map.setPlayer(players[255].px,players[255].py,0);
-				map.setPlayer(px,py,1);
-			}
-			oldmx=-1;
-			oldmy=-1;
-			players[255].move(px,py);
-			playerChange = true;
-			return 3;
- 		} else if(map.pushAttempt(px,py,dpx,dpy))
+		if(map.pushAttempt(px,py,dpx,dpy))
 		{
 			if(multiplayer)
 			{
@@ -807,6 +794,20 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 			return 3;
 		}
+		else if(map.isEmpty(px,py))
+		{
+			if(multiplayer) net.playerMove(dpx,dpy);
+			else
+			{
+				map.setPlayer(players[255].px,players[255].py,0);
+				map.setPlayer(px,py,1);
+			}
+			oldmx=-1;
+			oldmy=-1;
+			players[255].move(px,py);
+			playerChange = true;
+			return 3;
+ 		}
 		return waitTime;
 	}
 	public void spawnPlayer(int cx, int cy, int id)

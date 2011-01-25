@@ -523,6 +523,7 @@ public class CraftrNet implements Runnable
  									synchronized(game.map)
  									{
  										game.map.setBlock(bx1,by1,t3,ch1,co1);
+ 										game.map.setPushable(bx1,by1,(byte)0,(byte)0);
  									}
  								}
 								game.blockChange=true;

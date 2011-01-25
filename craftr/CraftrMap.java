@@ -786,7 +786,7 @@ public class CraftrMap
 				boolean dc8 = false;
 				for(int i=0;i<4;i++)
 				{
-					if((d2[i][5]!=0) && ( ((d2[i][5]&0x0F)==(d[3]&0x0F)) || (d[3]&0x0F)==0 )) si8++;
+					if(((d2[i][5]&0x0f)!=0) && ( ((d2[i][5]&0x0F)==(d[3]&0x0F)) || (d[3]&0x0F)==0 )) si8++;
 				}
 				if(co8>0)
 				{

@@ -139,7 +139,7 @@ public class CraftrChunk {
 	
 	public byte getBlockType(int x, int y)
 	{
-		if(colp[x+(y<<6)] != 0) return -1;
+		//if(colp[x+(y<<6)] != 0) return -1;
 		return type[x+(y<<6)];
 	}
 	public byte getBlockChar(int x, int y)
