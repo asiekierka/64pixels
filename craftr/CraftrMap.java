@@ -10,7 +10,7 @@ public class CraftrMap
 	public int genMode = 0;
 	public static Random rand = new Random();
 	public String saveDir;
-	public static final int maxType = 8;
+	public static final int maxType = 10;
 	public boolean multiplayer;
 	public boolean maplock;
 	public boolean modlock;
@@ -520,11 +520,11 @@ public class CraftrMap
 	{
 		byte[] d = getBlock(x,y);
 		byte[][] dt = new byte[4][];
-		int[][] d2 = new int[4][4];
+		int[][] d2 = new int[4][6];
 		for(int i=0;i<4;i++)
 		{
 			dt[i]=getBlock(x+xMovement[i],y+yMovement[i]);
-			for(int j=0;j<4;j++)
+			for(int j=0;j<6;j++)
 			{
 				d2[i][j]=0xFF&(int)dt[i][j];
 			}
@@ -544,6 +544,7 @@ public class CraftrMap
 					if( ((d2[i][1]>>(i^1))&1)!=0 ) strength[i]=d2[i][1]>>4;
 					break;
 				case 5:
+				case 9:
 					if(d2[i][1]>0) strength[i]=15;
 					break;
 				default:
@@ -777,6 +778,46 @@ public class CraftrMap
 				}
 				int np=sig7>0?1:0;
 				if((d[1]&1)!=np) addbs(new CraftrBlock(x,y,d[0],(byte)np,d[2],d[3]));
+				break;
+			case 9: // Pensor
+				int co8 = d[1]&0x7F;
+				int on8 = (int)d[1]&0x80;
+				int si8 = 0;
+				boolean dc8 = false;
+				for(int i=0;i<4;i++)
+				{
+					if((d2[i][5]!=0) && ( ((d2[i][5]&0x0F)==(d[3]&0x0F)) || (d[3]&0x0F)==0 )) si8++;
+				}
+				if(co8>0)
+				{
+					dc8=true;
+					if(co8>1) addbc(new CraftrBlockPos(x,y));
+					else on8=0;
+					addbs(new CraftrBlock(x,y,d[0],on8|(co8-1),d[2],d[3]));
+				}
+				else if(on8==0 && si8>0)
+				{
+					dc8=true;
+					on8=0x80;
+					addbs(new CraftrBlock(x,y,d[0],0x84,d[2],d[3]));
+					addbc(new CraftrBlockPos(x,y));
+				}
+				else if(on8>0 && si8==0)
+				{
+					dc8=true;
+					on8=0;
+					addbs(new CraftrBlock(x,y,d[0],0,d[2],d[3]));
+					addbc(new CraftrBlockPos(x,y));
+				}
+				if(dc8)
+				{
+					for(int i=0;i<4;i++)
+					{
+						int t = d2[i][0];
+						int str = strength[i];
+						if(t==2 ||t==3||t==4 || t==6 || t==7) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+					}
+				}
 				break;
 			default:
 				break;
