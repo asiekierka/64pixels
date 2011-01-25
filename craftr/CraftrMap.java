@@ -188,36 +188,36 @@ public class CraftrMap
 			int hdrsize = CraftrChunk.hdrsize;
 			switch(buf[0])
 			{
-				case 1: // ver. 1
-					while(i<16384) i += gin.read(out,i,16384-i);
-					gin.close();
-					byte[] out2 = new byte[(4096*7)+hdrsize];
-					System.arraycopy(out,0,out2,hdrsize,4096);
-					for(i=0;i<4096;i++)
-					{
-						if(out2[i]==0)
-						{
-							out2[(4096*2)+i+hdrsize] = out[4096+i];
-							out2[(4096*4)+i+hdrsize] = out[8192+i];
-							out2[(4096*6)+i+hdrsize] = out[12288+i];
-						}
-						else
-						{
-							out2[4096+i+hdrsize] = out[4096+i];
-							out2[(4096*3)+i+hdrsize] = out[8192+i];
-							out2[(4096*5)+i+hdrsize] = out[12288+i];
-						}
-					}
-					return out2;
 				case 2:
-					out = new byte[(4096*7)+hdrsize+4096];
+					out = new byte[(4096*10)+hdrsize];
 					while(i<(4096*7)) i += gin.read(out,i+hdrsize,(4096*7)-i);
 					gin.close();
 					return out;
 				case 3:
-					out = new byte[(4096*7)+hdrsize+4096];
-					while(i<out.length && i>-1) i += gin.read(out,i,out.length-i);
+					out = new byte[(4096*10)+hdrsize];
+					while(i<((4096*8)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
 					gin.close();
+					for(int ri=0;ri<4096;ri++)
+					{
+						if(out[ri+hdrsize]==5 && (0x80&(int)out[ri+hdrsize+4096])>0)
+						{
+							out[ri+hdrsize+4096]=(byte)1;
+							addbc(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
+						}
+					}
+					return out;
+				case 4:
+					out = new byte[(4096*10)+hdrsize];
+					while(i<((4096*10)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
+					gin.close();
+					for(int ri=0;ri<4096;ri++)
+					{
+						if(out[ri+hdrsize]==5 && (0x80&(int)out[ri+hdrsize+4096])>0)
+						{
+							out[ri+hdrsize+4096]=(byte)1;
+							addbc(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
+						}
+					}
 					return out;
 				default:
 					System.out.println("ReadChunkFile: unknown version: " + buf[0]);
@@ -298,7 +298,7 @@ public class CraftrMap
 	{
 		try
 		{ 
-			byte[] data = new byte[4];
+			byte[] data = new byte[6];
 			int px = x&63;
 			int py = y&63;
 			CraftrChunk cnk = grabChunk((x>>6),(y>>6));
@@ -306,6 +306,8 @@ public class CraftrMap
 			data[1] = cnk.getBlockParam(px,py);
 			data[2] = cnk.getBlockChar(px,py);
 			data[3] = cnk.getBlockColor(px,py);
+			data[4] = cnk.getPushableChar(px,py);
+			data[5] = cnk.getPushableColor(px,py);
 			return data;
 		}
 		catch(NoChunkMemException e)
@@ -313,9 +315,47 @@ public class CraftrMap
 			System.out.println("getBlock: exception: no chunk memory found. Odd...");
 			//System.exit(1); // someone might still use this
 			return null;
+ 		}
+ 	}
+ 	
+ 	// returns true if it needs to pull the player along with it
+ 	public boolean pushAttempt(int lolx, int loly, int lolvx, int lolvy)
+ 	{
+ 		byte[] dc = getBlock(lolx,loly);
+ 		byte[] dt = getBlock(lolx+lolvx,loly+lolvy);
+		
+ 		if(dc[5] != 0 && isEmpty(lolx+lolvx,loly+lolvy))
+ 		{
+ 			if(!multiplayer)
+ 			{
+ 				synchronized(this)
+ 				{
+ 					setPushable(lolx,loly,(byte)0,(byte)0);
+ 					setPushable(lolx+lolvx,loly+lolvy,dc[4],dc[5]);
+ 				}
+ 			}
+ 			return true;
+ 		} else {
+ 			return false;
+ 		}
+ 	}
+ 	
+ 	public void setPushable(int x, int y, byte aChr, byte aCol)
+ 	{
+ 		try
+ 		{ 
+ 			int px = x&63;
+ 			int py = y&63;
+ 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
+ 			findCachedChunk((x>>6),(y>>6)).placePushable(px,py,aChr,aCol);
+ 		}
+ 		catch(NullPointerException e)
+ 		{
+ 			System.out.println("setPushable: no cached chunk near player found. ODD.");
+ 			if(!multiplayer) System.exit(1);
 		}
 	}
-	
+
 	public void loop()
 	{
 		if(multiplayer)return;
@@ -406,6 +446,26 @@ public class CraftrMap
 		byte[] d = getBlock(x,y);
 		if(d[0]==0 || d[0]==2 || d[0]==5 || (d[0]==6 && ((int)d[1]&0x80)>0) || d[0]==8) return true;
 		return false;
+	}
+	public void pushMultiple(int x, int y, int xs, int ys, int dx, int dy)
+	{
+		byte[] blocks = new byte[xs*ys*2];
+		for(int iy=0;iy<ys;iy++)
+		{
+			for(int ix=0;ix<xs;ix++)
+			{
+				byte[] t = getBlock(x+ix,y+iy);
+				System.arraycopy(t,4,blocks,((iy*xs)+ix)*2,2);
+				setPushable(x+ix,y+iy,(byte)0,(byte)0);
+			}
+		}
+		for(int iy=0;iy<ys;iy++)
+		{
+			for(int ix=0;ix<xs;ix++)
+			{
+				setPushable(x+ix,y+iy,blocks[((iy*xs)+ix)*2],blocks[(((iy*xs)+ix)*2)+1]);
+			}
+		}
 	}
 	public static final int[] xMovement = { -1, 1, 0, 0 };
 	public static final int[] yMovement = { 0, 0, -1, 1 };

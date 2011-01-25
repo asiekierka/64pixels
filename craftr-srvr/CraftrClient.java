@@ -315,6 +315,8 @@ public class CraftrClient implements Runnable
 			e.printStackTrace();
 		}
 	}
+
+	// This game is a TEMPORARY MEASURE!!! -asie
 	public void run()
 	{
 		// Inner loop.
@@ -355,9 +357,9 @@ public class CraftrClient implements Runnable
 									{
 										kick("Invalid nickname!");
 									}
-									else if(version!=12)
+									else if(version!=13)
 									{
-										kick("Invalid protocol! Needs 0.0.9 or higher.");
+										kick("Invalid protocol! Needs 0.0.10 or higher.");
 									}
 									else if(serv.isBanned(socket.getInetAddress().getHostAddress()))
 									{
@@ -523,9 +525,9 @@ public class CraftrClient implements Runnable
 								byte ach = in.readByte();
 								byte aco = in.readByte();
 								if(passWait) break;
+								byte[] zc = map.getBlock(ax,ay);
 								if(op && (isCopying || isPasting))
 								{
-									byte[] zc = map.getBlock(ax,ay);
 									out.writeByte(0x31);
 									out.writeByte((byte)id);
 									out.writeInt(ax);
@@ -569,7 +571,7 @@ public class CraftrClient implements Runnable
 								}
 								else
 								{
-									if((int)(at&0xFF) > CraftrMap.maxType)
+									if((int)(at&0xFF) > CraftrMap.maxType && at != -1)
 									{
 										kick("Invalid block type!");
 									}
@@ -584,7 +586,17 @@ public class CraftrClient implements Runnable
 									while(serv.map.maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
 									serv.map.modlock=true;
 									//while(serv.map.bslock) { Thread.sleep(1); }
-									serv.map.setBlock(ax,ay,t33[0],t33[1],t33[2],t33[3]);
+	 								byte[] lastderp = serv.map.getBlock(ax,ay);
+	 								synchronized(serv.map)
+	 								{
+	 									if(at == -1)
+	 									{
+	 										serv.map.setPushable(ax,ay,ach,aco);
+	 									} else {
+	 										serv.map.setBlock(ax,ay,t33[0],t33[1],t33[2],t33[3]);
+	 										serv.map.setPushable(ax,ay,(byte)0,(byte)0);
+	 									}
+	 								}
 									serv.map.addbc(new CraftrBlockPos(ax,ay));
 									for(int i=0;i<4;i++)
 									{
@@ -600,6 +612,17 @@ public class CraftrClient implements Runnable
 										out.writeByte(t33[2]);
 										out.writeByte(t33[3]);
 										serv.sendOthers(id,getPacket());
+	 									if(at != -1 && zc[5] != 0)
+	 									{
+	 										out.writeByte(0x31);
+	 										out.writeByte((byte)id);
+	 										out.writeInt(ax);
+	 										out.writeInt(ay);
+	 										out.writeByte(-1);
+	 										out.writeByte(0);
+	 										out.writeByte(0);
+	 										serv.sendOthers(id,getPacket());
+	 									}
 									}
 									serv.map.modlock=false;
 								}
@@ -619,6 +642,57 @@ public class CraftrClient implements Runnable
 									kick("Incorrect password!");
 								}
 								else passWait=false;
+ 								break;
+ 							case 0xE0:
+ 								{
+ 									int lolx = this.x;
+ 									int loly = this.y;
+ 									int lolvx = in.readByte();
+ 									int lolvy = in.readByte();
+ 									
+ 									if(lolvx != 0 && lolvy != 0)
+ 										kick("Invalid touch distance!");
+ 									else if(lolvx < -1 || lolvx > 1 || lolvy < -1 || lolvy > 1)
+ 										kick("Invalid touch distance!");
+ 									else {
+ 										byte[] dq;
+ 										boolean pa;
+ 										synchronized(serv.map)
+ 										{
+ 											dq = serv.map.getBlock(lolx+lolvx,loly+lolvy);
+ 											pa = serv.map.pushAttempt(lolx+lolvx,loly+lolvy,lolvx,lolvy);
+ 										}
+ 										if(pa)
+ 										{
+ 											serv.map.setPlayer(this.x,this.y,0);
+ 											this.x = lolx+lolvx;
+ 											this.y = loly+lolvy;
+ 											synchronized(out)
+ 											{
+ 												out.writeByte(0x32);
+ 												out.writeByte(255);
+ 												out.writeInt(lolx+lolvx);
+ 												out.writeInt(loly+lolvy);
+ 												out.writeByte((byte)lolvx);
+ 												out.writeByte((byte)lolvy);
+ 												out.writeByte(dq[4]);
+ 												out.writeByte(dq[5]);
+ 												sendPacket();
+ 												out.writeByte(0x32);
+ 												out.writeByte(id);
+ 												out.writeInt(lolx+lolvx);
+ 												out.writeInt(loly+lolvy);
+ 												out.writeByte((byte)lolvx);
+ 												out.writeByte((byte)lolvy);
+ 												out.writeByte(dq[4]);
+ 												out.writeByte(dq[5]);
+ 												serv.sendOthers(id,getPacket());
+ 												serv.map.setPlayer(this.x,this.y,1);
+ 												serv.map.setPlayer(this.x+lolvx,this.y+lolvy,1);
+ 											}
+ 										}
+ 									}
+ 								}
 								break;
 							case 0xF0:
 								synchronized(out)
@@ -658,4 +732,5 @@ public class CraftrClient implements Runnable
 			dc = 1;
 		}
 	}
+	// for people who didn't get the earlier comment, it's an inside joke of sorts
 }

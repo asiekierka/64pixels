@@ -288,7 +288,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				else if(key.contains("drawn-type"))
 				{
 					gs.drawType = nf.parse(val).byteValue();
-					if(gs.drawType>map.maxType) gs.drawType = 0;
+					if(gs.drawType>map.maxType || gs.drawType<-1) gs.drawType = 0;
 				}
 				else if(key.contains("player-char"))
 				{
@@ -402,11 +402,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		    if (insideRect(mx,my,7*16+8,gs.BARPOS_Y,8,8)) // type, up
 			{
 				gs.drawType = (gs.drawType-1);
-				if(gs.drawType < 0) gs.drawType = map.maxType;
+				if(gs.drawType < -1) gs.drawType = map.maxType;
 			} else if (insideRect(mx,my,7*16+8,gs.BARPOS_Y+8,8,8)) // type, down
 			{
 				gs.drawType = (gs.drawType+1);
-				if(gs.drawType > map.maxType) gs.drawType = 0;
+				if(gs.drawType > map.maxType) gs.drawType = -1;
 			} else if (insideRect(mx,my,8*16+8,gs.BARPOS_Y,24,8)) // mode, chr
 			{
 				gs.barselMode = 1;
@@ -548,11 +548,18 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(mb == ev_2)
 				{
 					byte[] tmpg = map.getBlock(players[255].px-15+(mx>>4),players[255].py-12+(my>>4));
-					gs.drawChr = tmpg[2];
+ 					if(tmpg[5] == 0)
+ 					{
+ 						gs.drawType = tmpg[0];
+ 						gs.drawChr = tmpg[2];
+ 						gs.drawCol = tmpg[3];
+ 					} else {
+ 						gs.drawType = -1;
+ 						gs.drawChr = tmpg[4];
+ 						gs.drawCol = tmpg[5];
+ 					}
 					gs.chrBarOff = gs.drawChr&(~15);
-					gs.drawCol = tmpg[3];
-					gs.drawType = tmpg[0];
-					gs.cw.addRecBlock(tmpg[0],tmpg[2],tmpg[3]);
+					gs.cw.addRecBlock((byte)gs.drawType,(byte)gs.drawChr,(byte)gs.drawCol);
 				}
 				else if(oldmb != mb || (mx>>4 != oldmx>>4 || my>>4 != oldmy>>4))
 				{
@@ -575,17 +582,23 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						tmparr[3]=(byte)(tmparr[3]&7);
 						tmparr[0]=(byte)2;
 					}
-					gs.cw.addRecBlock(tmparr[0],tmparr[2],tmparr[3]);
-					map.setBlock(ttx,tty,tmparr);
-					blockChange = true;
-					if(mb == ev_1 || mb == ev_3)
+					blockChange=true;
+					if(tmparr[0]==-1)
 					{
-						byte[] t = map.getBlock(ttx,tty);
-						map.setBlock(ttx,tty,t[0],t[1],(byte)map.updateLooks(ttx,tty,t[2]),t[3]);
-						for(int i=0;i<4;i++)
+						map.setPushable(ttx,tty,tmparr[2],tmparr[3]);
+					} else {
+ 						map.setPushable(ttx,tty,(byte)0,(byte)0);
+ 						gs.cw.addRecBlock(tmparr[0],tmparr[2],tmparr[3]);
+ 						map.setBlock(ttx,tty,tmparr);
+ 						if(mb == ev_1 || mb == ev_3)
 						{
-							t = map.getBlock(ttx+map.xMovement[i],tty+map.yMovement[i]);
-							map.setBlock(ttx+map.xMovement[i],tty+map.yMovement[i],t[0],t[1],(byte)map.updateLooks(ttx+map.xMovement[i],tty+map.yMovement[i],t[2]),t[3]);
+							byte[] t = map.getBlock(ttx,tty);
+							map.setBlock(ttx,tty,t[0],t[1],(byte)map.updateLooks(ttx,tty,t[2]),t[3]);
+							for(int i=0;i<4;i++)
+							{
+								t = map.getBlock(ttx+map.xMovement[i],tty+map.yMovement[i]);
+								map.setBlock(ttx+map.xMovement[i],tty+map.yMovement[i],t[0],t[1],(byte)map.updateLooks(ttx+map.xMovement[i],tty+map.yMovement[i],t[2]),t[3]);
+							}
 						}
 					}
 					if(multiplayer)
@@ -778,6 +791,21 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			players[255].move(px,py);
 			playerChange = true;
 			return 3;
+ 		} else if(map.pushAttempt(px,py,dpx,dpy))
+		{
+			if(multiplayer)
+			{
+				net.playerPush(dpx,dpy);
+			} else {
+				map.setPlayer(players[255].px,players[255].py,0);
+				map.setPlayer(px,py,1);
+				map.setPlayer(px+dpx,py+dpy,1);
+				oldmx=-1;
+				oldmy=-1;
+				players[255].move(px,py);
+				playerChange = true;
+			}
+			return 3;
 		}
 		return waitTime;
 	}
@@ -898,6 +926,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 							System.arraycopy(surr[0][0].chr,4096+((spy+iy)<<6)+spx,gs.f_chr,iy*canvas.FULLGRID_W,tspx);
 							System.arraycopy(surr[0][0].col,4096+((spy+iy)<<6)+spx,gs.f_col,iy*canvas.FULLGRID_W,tspx);
 							System.arraycopy(surr[1][0].chr,4096+((spy+iy)<<6),gs.f_chr,(iy*canvas.FULLGRID_W)+tspx,tspx2);
+
 							System.arraycopy(surr[1][0].col,4096+((spy+iy)<<6),gs.f_col,(iy*canvas.FULLGRID_W)+tspx,tspx2);	
 							System.arraycopy(surr[0][0].type,((spy+iy)<<6)+spx,gs.scr_typ,iy*canvas.FULLGRID_W,tspx);
 							System.arraycopy(surr[1][0].type,((spy+iy)<<6),gs.scr_typ,(iy*canvas.FULLGRID_W)+tspx,tspx2);

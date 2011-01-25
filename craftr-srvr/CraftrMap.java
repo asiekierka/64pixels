@@ -181,7 +181,7 @@ public class CraftrMap
 		try	// The code proper
 		{
 			// Load file
-			in = new FileInputStream("map/" + CraftrChunk.getFilename(x,y));
+			in = new FileInputStream(saveDir + "map/" + CraftrChunk.getFilename(x,y));
 			gin = new GZIPInputStream(in);
 			// Create buffer, check version
 			byte[] buf = new byte[256];
@@ -190,38 +190,14 @@ public class CraftrMap
 			int hdrsize = CraftrChunk.hdrsize;
 			switch(buf[0])
 			{
-				case 1: // ver. 1
-					while(i<16384) i += gin.read(out,i,16384-i);
-					gin.close();
-					byte[] out2 = new byte[(4096*7)+hdrsize];
-					System.arraycopy(out,0,out2,hdrsize,4096);
-					for(i=0;i<4096;i++)
-					{
-						if(out2[i]==0)
-						{
-							out2[(4096*2)+i+hdrsize] = out[4096+i];
-							out2[(4096*4)+i+hdrsize] = out[8192+i];
-							out2[(4096*6)+i+hdrsize] = out[12288+i];
-						}
-						else
-						{
-							out2[4096+i+hdrsize] = out[4096+i];
-							out2[(4096*3)+i+hdrsize] = out[8192+i];
-							out2[(4096*5)+i+hdrsize] = out[12288+i];
-						}
-					}
-					for(int ri=0;ri<4096;ri++)
-					{
-						if(out2[ri+hdrsize]==5 && (0x80&(int)out2[ri+hdrsize+4096])>0)
-						{
-							out2[ri+hdrsize+4096]=(byte)1;
-							addbc(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
-						}
-					}
-					return out2;
 				case 2:
-					out = new byte[(4096*7)+hdrsize+4096];
+					out = new byte[(4096*10)+hdrsize];
 					while(i<(4096*7)) i += gin.read(out,i+hdrsize,(4096*7)-i);
+					gin.close();
+					return out;
+				case 3:
+					out = new byte[(4096*10)+hdrsize];
+					while(i<((4096*8)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
 					gin.close();
 					for(int ri=0;ri<4096;ri++)
 					{
@@ -232,9 +208,9 @@ public class CraftrMap
 						}
 					}
 					return out;
-				case 3:
-					out = new byte[(4096*7)+hdrsize+4096];
-					while(i<out.length && i>-1) i += gin.read(out,i,out.length-i);
+				case 4:
+					out = new byte[(4096*10)+hdrsize];
+					while(i<((4096*10)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
 					gin.close();
 					for(int ri=0;ri<4096;ri++)
 					{
@@ -249,7 +225,6 @@ public class CraftrMap
 					System.out.println("ReadChunkFile: unknown version: " + buf[0]);
 					break;
 			}
-			System.out.println("Read chunk " + x + ", " + y);
 		}
 		catch (FileNotFoundException e)
 		{
@@ -276,6 +251,7 @@ public class CraftrMap
 		}
 		return out;
 	}
+
 	
 	// SAVING
 	public void saveChunkFile(int cid)
@@ -364,7 +340,7 @@ public class CraftrMap
 						setBlockNet(cb.x+xMovement[i],cb.y+yMovement[i],t[0],tc,t[3]);
 					}
 				}
-				if(z[0]!=cb.type || z[2]!=cb.chr || z[3]!=cb.col)	 setBlockNet(cb.x,cb.y,cb.type,cb.chr,cb.col);
+				if(z[0]!=cb.type || z[2]!=cb.chr || z[3]!=cb.col) setBlockNet(cb.x,cb.y,cb.type,cb.chr,cb.col);
 			}
 			else
 			{
@@ -466,6 +442,26 @@ public class CraftrMap
 				break;
 			default:
 				break;
+		}
+	}
+	public void pushMultiple(int x, int y, int xs, int ys, int dx, int dy)
+	{
+		byte[] blocks = new byte[xs*ys*2];
+		for(int iy=0;iy<ys;iy++)
+		{
+			for(int ix=0;ix<xs;ix++)
+			{
+				byte[] t = getBlock(x+ix,y+iy);
+				System.arraycopy(t,4,blocks,((iy*xs)+ix)*2,2);
+				setPushable(x+ix,y+iy,0,0);
+			}
+		}
+		for(int iy=0;iy<ys;iy++)
+		{
+			for(int ix=0;ix<xs;ix++)
+			{
+				setPushable(x+ix,y+iy,t[((iy*xs)+ix)*2],t[(((iy*xs)+ix)*2)+1]);
+			}
 		}
 	}
 	public boolean isEmpty(int x, int y)
@@ -726,11 +722,55 @@ public class CraftrMap
 				break;
 		}
 	}
+
+ 	// returns true if it needs to pull the player along with it
+ 	public boolean pushAttempt(int lolx, int loly, int lolvx, int lolvy)
+ 	{
+ 		byte[] dc = getBlock(lolx,loly);
+ 		byte[] dt = getBlock(lolx+lolvx,loly+lolvy);
+		
+ 		if(dc[5] != 0 && isEmpty(lolx+lolvx,loly+lolvy))
+ 		{
+ 			if(!multiplayer)
+ 			{
+ 				synchronized(this)
+ 				{
+ 					setPushable(lolx,loly,(byte)0,(byte)0);
+ 					setPushable(lolx+lolvx,loly+lolvy,dc[4],dc[5]);
+ 				}
+ 			}
+ 			return true;
+ 		} else {
+ 			return false;
+ 		}
+ 	}
+ 	
+ 	public void setPushable(int x, int y, byte aChr, byte aCol)
+ 	{
+ 		try
+ 		{ 
+ 			int px = x&63;
+ 			int py = y&63;
+ 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
+ 			synchronized(chunks) { grabChunk((x>>6),(y>>6)).placePushable(px,py,aChr,aCol); }
+ 		}
+		catch(NoChunkMemException e)
+		{
+			System.out.println("setPushable: exception: no chunk memory found. Odd...");
+			//System.exit(1); // someone might still use this
+		}
+ 		catch(NullPointerException e)
+ 		{
+ 			System.out.println("setPushable: no cached chunk near player found. ODD.");
+ 			//if(!multiplayer) System.exit(1);
+		}
+	}
+
 	public byte[] getBlock(int x, int y)
 	{
 		try
 		{ 
-			byte[] data = new byte[4];
+			byte[] data = new byte[6];
 			int px = x&63;
 			int py = y&63;
 			synchronized(chunks)
@@ -740,6 +780,8 @@ public class CraftrMap
 				data[1] = cnk.getBlockParam(px,py);
 				data[2] = cnk.getBlockChar(px,py);
 				data[3] = cnk.getBlockColor(px,py);
+				data[4] = cnk.getPushableChar(px,py);
+				data[5] = cnk.getPushableColor(px,py);
 			}
 			return data;
 		}

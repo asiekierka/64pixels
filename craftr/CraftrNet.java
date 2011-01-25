@@ -178,6 +178,25 @@ public class CraftrNet implements Runnable
 		} else return a1;
 	}
 	
+ 	public void playerPush(int dx, int dy)
+ 	{
+ 		try
+ 		{
+ 			synchronized(out)
+ 			{
+ 				out.writeByte(0xE0);
+ 				out.writeByte((byte)dx);
+ 				out.writeByte((byte)dy);
+ 				sendPacket();
+ 			}
+ 		}
+ 		catch(Exception e)
+		{
+ 			System.out.println("Fatal craftrNet playerPush Error!");
+ 			System.exit(1);
+ 		}
+ 	}
+
 	public void sendChatMsg(String msg)
 	{
 		try
@@ -318,10 +337,10 @@ public class CraftrNet implements Runnable
 				{
 					out.writeByte(0x0F);
 					writeString(nick);
-					writeString("copier power and pasta awesome, it's the sign of oh-oh-nine");
+					writeString("i think _we'd_ be more concerned if more people were reverse-engineering - a sign of gm2 fork integration");
 					out.writeByte(0x00);
 					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE
-					out.writeInt(0x0C); // protocol version 12
+					out.writeInt(0x0D); // protocol version 13
 					out.writeByte(game.players[255].pchr);
 					out.writeByte(game.players[255].pcol);
 					sendPacket();
@@ -367,7 +386,10 @@ public class CraftrNet implements Runnable
 								lcY = in.readInt();
 								lcP = 0;
 								System.out.println("getting chunk " + lcX + "," + lcY);
-								loadChunkID = game.map.findNewChunkID(lcX,lcY);
+								synchronized(game.map)
+								{
+									loadChunkID = game.map.findNewChunkID(lcX,lcY);
+								}
 								if(loadChunkID < 0) isLoadingChunk = false; // haha! take that, silly servers
 								chunkPacketsLeft=in.readInt();
 								chunkSize=chunkPacketsLeft;
@@ -399,7 +421,10 @@ public class CraftrNet implements Runnable
 										ttp+=rp;
 										rp = gin.read(tmp1,ttp,65536-ttp);
 									}
-									game.map.chunks[loadChunkID].loadByteNet(tmp1);
+									synchronized(game.map)
+									{
+										game.map.chunks[loadChunkID].loadByteNet(tmp1);
+									}
 									game.netChange=true;
 								}
 								/*
@@ -455,7 +480,8 @@ public class CraftrNet implements Runnable
 							case 0x2D:
 								int bx2c=in.readInt();
 								int by2c=in.readInt();
-								byte[] d2c = game.map.getBlock(bx2c,by2c);
+								byte[] d2c;
+								synchronized(game.map) { d2c = game.map.getBlock(bx2c,by2c); }
 								int t2c = buf[0]&0x01;
 								int t22c = 0x80&(int)d2c[1];
 								int t32c = -1;
@@ -475,7 +501,10 @@ public class CraftrNet implements Runnable
 											break;
 									}
 								}  
-								game.map.setBlock(bx2c,by2c,d2c[0],(byte)((d2c[1]&0x7f)|((buf[0]&0x01)<<7)),d2c[2],d2c[3]);
+								synchronized(game.map)
+								{
+									game.map.setBlock(bx2c,by2c,d2c[0],(byte)((d2c[1]&0x7f)|((buf[0]&0x01)<<7)),d2c[2],d2c[3]);
+								}
 								break;
 							case 0x31:
 								in.readByte();
@@ -484,7 +513,37 @@ public class CraftrNet implements Runnable
 								byte t3 = in.readByte();
 								byte ch1 = in.readByte();
 								byte co1 = in.readByte();
-								game.map.setBlock(bx1,by1,t3,ch1,co1);
+ 								if(t3 == -1)
+ 								{
+ 									synchronized(game.map)
+ 									{
+ 										game.map.setPushable(bx1,by1,ch1,co1);
+ 									}
+ 								} else {
+ 									synchronized(game.map)
+ 									{
+ 										game.map.setBlock(bx1,by1,t3,ch1,co1);
+ 									}
+ 								}
+								game.blockChange=true;
+								break;
+ 							case 0x32:
+								int pid = in.readUnsignedByte();
+								int lolx = in.readInt();
+								int loly = in.readInt();
+								byte lolvx = in.readByte();
+								byte lolvy = in.readByte();
+								byte nchr = in.readByte();
+								byte ncol = in.readByte();
+								synchronized(game.map)
+								{
+									game.map.setPushable(lolx,loly,(byte)0,(byte)0);
+									game.map.setPushable(lolx+lolvx,loly+lolvy,nchr,ncol);
+								}
+								if(game.players[pid] != null)
+								{
+									game.players[pid].move(lolx,loly);
+								}
 								game.blockChange=true;
 								break;
 							case 0x41:
@@ -508,6 +567,15 @@ public class CraftrNet implements Runnable
 								{
 									game.audio.playSampleByNumber(ta60x,ta60y,ta60v-248,1.0);
 								}
+								break;
+							case 0xE1: // push me
+								int e1x = in.readInt();
+								int e1y = in.readInt();
+								int e1xs = in.readShort();
+								int e1ys = in.readShort();
+								int e1dx = in.readByte();
+								int e1dy = in.readByte();
+								game.map.pushMultiple(e1x,e1y,e1xs,e1ys,e1dx,e1dy);
 								break;
 							case 0xF0:
 								synchronized(out)
