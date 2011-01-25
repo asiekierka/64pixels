@@ -333,6 +333,11 @@ public class CraftrMap
  					setPushable(lolx,loly,(byte)0,(byte)0);
  					setPushable(lolx+lolvx,loly+lolvy,dc[4],dc[5]);
  				}
+				for(int i=0;i<4;i++)
+				{
+					addbc(new CraftrBlockPos(lolx+xMovement[i],loly+yMovement[i]));
+					addbc(new CraftrBlockPos(lolx+lolvx+xMovement[i],loly+lolvy+yMovement[i]));
+				}
  			}
  			return true;
  		} else {
@@ -464,8 +469,32 @@ public class CraftrMap
 			for(int ix=0;ix<xs;ix++)
 			{
 				setPushable(x+ix,y+iy,blocks[((iy*xs)+ix)*2],blocks[(((iy*xs)+ix)*2)+1]);
+				for(int i=0;i<4;i++)
+				{
+					addbc(new CraftrBlockPos(x+ix+xMovement[i],y+iy+yMovement[i]));
+				}
 			}
 		}
+	}
+
+	public void tryPushM(int x, int y, int dx, int dy, byte chr, byte col)
+	{
+		if((dx!=0 && dy!=0) || (dx==0 && dy==0)) return; // don't do diagonals.
+		if(col==0) return; // we do not want non-colored pushables
+		if(isEmpty(x+dx,y+dy)) // can we not push?
+		{
+			setPushable(x+dx,y+dy,chr,col);
+		}
+		int posx = x+dx;
+		int posy = y+dy;
+		// we'll have to push unless we see a wall and until we have pushiums
+		while(getBlock(posx,posy)[0]==(byte)-1)
+		{
+			posx+=dx;
+			posy+=dy;
+		}
+		if(!isEmpty(posx,posy)) return;
+		pushMultiple(x+dx,y+dy,posx-x-dx,posy-y-dy,dx,dy);
 	}
 	public static final int[] xMovement = { -1, 1, 0, 0 };
 	public static final int[] yMovement = { 0, 0, -1, 1 };

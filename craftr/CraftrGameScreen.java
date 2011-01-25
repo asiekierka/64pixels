@@ -207,6 +207,10 @@ public class CraftrGameScreen extends CraftrScreen
 				return "Meloder";
 			case 8:
 				return "Roofy";
+			case 9:
+				return "Pensor";
+			case 10:
+				return "Pumulty";
 			case -1:
 				return "Pushium";
 		}
