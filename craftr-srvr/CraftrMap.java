@@ -533,7 +533,7 @@ public class CraftrMap
 		for(int i=0;i<4;i++)
 		{
 			d2=getBlock(x+xMovement[i],y+yMovement[i]);
-			if((d2[0]>=2 && d2[0]<=7)) wcp|=(1<<(3-i));
+			if((d2[0]>=2 && d2[0]<=7) || d2[0]==9 || d2[0]==10) wcp|=(1<<(3-i));
 		}
 		return wiriumChr[wcp];
 	}
