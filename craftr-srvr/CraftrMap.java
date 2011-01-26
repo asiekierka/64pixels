@@ -491,7 +491,8 @@ public class CraftrMap
 	public boolean isEmpty(int x, int y)
 	{
 		byte[] d = getBlock(x,y);
-		if(d[0]==0 || d[0]==2 || d[0]==5 || (d[0]==6 && ((int)d[1]&0x80)>0) || d[0]==8) return true;
+		if(d[5]!=0) return false;
+		if(d[0]==0 || d[0]==2 || d[0]==5 || (d[0]==6 && ((int)d[1]&0x80)!=0) || d[0]==8) return true;
 		return false;
 	}
 	public static final int[] xMovement = { -1, 1, 0, 0 };
@@ -793,7 +794,7 @@ public class CraftrMap
  	{
  		byte[] dc = getBlock(lolx,loly);
  		byte[] dt = getBlock(lolx+lolvx,loly+lolvy);
-		System.out.println("dc[5] of type " + dc[0] + " is " + dc[5] + ", block " + dt[0] + ", " + dt[5] + " is empty? " + isEmpty(lolx+lolvx,loly+lolvy));
+		System.out.println(lolx + ", " + loly + ", " + lolvx + ", " + lolvy + ", dc[5] of type " + dc[0] + " is " + dc[5] + ", " + dc[3] + ", block " + dt[0] + ", " + dt[5] + " is empty? " + isEmpty(lolx+lolvx,loly+lolvy));
 		for(int i=0;i<6;i++) System.out.println(dc[i] + " / " + dt[i]);
  		if(dc[5] != 0 && isEmpty(lolx+lolvx,loly+lolvy))
  		{

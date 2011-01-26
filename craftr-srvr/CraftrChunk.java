@@ -48,19 +48,19 @@ public class CraftrChunk {
 	{
 		// i love arraycopy, and all its mysteries!
 		// boom de yada, boom de yada...
-		System.arraycopy(rawdata,hdrsize,type,0,4096);
-		System.arraycopy(rawdata,hdrsize+4096,param,0,8192);
-		System.arraycopy(rawdata,hdrsize+(4096*3),chr,0,8192);
-		System.arraycopy(rawdata,hdrsize+(4096*5),col,0,8192);
- 		System.arraycopy(rawdata,hdrsize+(4096*7),chrp,0,4096);
- 		System.arraycopy(rawdata,hdrsize+(4096*8),colp,0,4096);
+		System.arraycopy(rawdata,1+hdrsize,type,0,4096);
+		System.arraycopy(rawdata,1+hdrsize+4096,param,0,8192);
+		System.arraycopy(rawdata,1+hdrsize+(4096*3),chr,0,8192);
+		System.arraycopy(rawdata,1+hdrsize+(4096*5),col,0,8192);
+ 		System.arraycopy(rawdata,1+hdrsize+(4096*7),chrp,0,4096);
+ 		System.arraycopy(rawdata,1+hdrsize+(4096*8),colp,0,4096);
 		byte[] tmp = new byte[2];
-		System.arraycopy(rawdata,3,tmp,0,2);
+		System.arraycopy(rawdata,4,tmp,0,2);
 		mapinfo_len = CraftrConvert.arrShort(tmp);
-		mapinfo_type = rawdata[2];
+		mapinfo_type = rawdata[3];
 		if(mapinfo_len > 0 && mapinfo_type > 0) System.arraycopy(rawdata,hdrsize+(4096*9),mapinfo,0,mapinfo_len);
-		spawnX = rawdata[0];
-		spawnY = rawdata[1];
+		spawnX = rawdata[1];
+		spawnY = rawdata[2];
 		fixDisplay();
 	}
 	
@@ -139,7 +139,6 @@ public class CraftrChunk {
 	
 	public byte getBlockType(int x, int y)
 	{
-		//if(colp[x+(y<<6)] != 0) return -1;
 		return type[x+(y<<6)];
 	}
 	public byte getBlockChar(int x, int y)

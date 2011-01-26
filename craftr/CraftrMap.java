@@ -449,7 +449,8 @@ public class CraftrMap
 	public boolean isEmpty(int x, int y)
 	{
 		byte[] d = getBlock(x,y);
-		if(d[0]==0 || d[0]==2 || d[0]==5 || (d[0]==6 && ((int)d[1]&0x80)>0) || d[0]==8) return true;
+		if(d[5]!=0) return false;
+		if(d[0]==0 || d[0]==2 || d[0]==5 || (d[0]==6 && ((int)d[1]&0x80)!=0) || d[0]==8) return true;
 		return false;
 	}
 	public void pushMultiple(int x, int y, int xs, int ys, int dx, int dy)
