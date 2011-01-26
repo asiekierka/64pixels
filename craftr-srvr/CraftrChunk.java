@@ -58,7 +58,7 @@ public class CraftrChunk {
 		System.arraycopy(rawdata,4,tmp,0,2);
 		mapinfo_len = CraftrConvert.arrShort(tmp);
 		mapinfo_type = rawdata[3];
-		if(mapinfo_len > 0 && mapinfo_type > 0) System.arraycopy(rawdata,hdrsize+(4096*9),mapinfo,0,mapinfo_len);
+		if(mapinfo_len > 0 && mapinfo_type > 0) System.arraycopy(rawdata,1+hdrsize+(4096*9),mapinfo,0,mapinfo_len);
 		spawnX = rawdata[1];
 		spawnY = rawdata[2];
 		fixDisplay();

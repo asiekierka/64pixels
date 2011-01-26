@@ -839,7 +839,14 @@ public class CraftrMap
 				if(non10!=on10)
 				{
 					addbs(new CraftrBlock(x,y,d[0],non10,d[2],d[3]));
-					if(non10>0 && non10<5) tryPushM(x,y,xMovement[non10-1],yMovement[non10-1],(byte)254,d[3]);
+					if(non10>0 && non10<5)
+					{
+						if((d[3]&0x0F)!=0)
+						{
+							tryPushM(x,y,xMovement[non10-1],yMovement[non10-1],(byte)254,(byte)(d[3]&0x0F));
+						}
+						else if (d2[(non10-1)][5]!=0) setPushable(x+xMovement[non10-1],y+yMovement[non10-1],(byte)0,(byte)0);
+					}
 				}
 				break;
 			default:
