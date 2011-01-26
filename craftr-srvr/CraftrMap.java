@@ -820,7 +820,7 @@ public class CraftrMap
 					{
 						if((d[3]&0x0F)!=0)
 						{
-							tryPushM(x,y,xMovement[non10-1],yMovement[non10-1],(byte)254,(byte)(d[3]&0x0F));
+							tryPushM(x,y,xMovement[non10-1],yMovement[non10-1],d[2],(byte)(d[3]&0x0F));
 						}
 						else if (d2[(non10-1)][5]!=0) setPushable(x+xMovement[non10-1],y+yMovement[non10-1],(byte)0,(byte)0);
 					}
@@ -836,8 +836,6 @@ public class CraftrMap
  	{
  		byte[] dc = getBlock(lolx,loly);
  		byte[] dt = getBlock(lolx+lolvx,loly+lolvy);
-		System.out.println(lolx + ", " + loly + ", " + lolvx + ", " + lolvy + ", dc[5] of type " + dc[0] + " is " + dc[5] + ", " + dc[3] + ", block " + dt[0] + ", " + dt[5] + " is empty? " + isEmpty(lolx+lolvx,loly+lolvy));
-		for(int i=0;i<6;i++) System.out.println(dc[i] + " / " + dt[i]);
  		if(dc[5] != 0 && isEmpty(lolx+lolvx,loly+lolvy))
  		{
  			if(!multiplayer)
@@ -912,7 +910,6 @@ public class CraftrMap
 		{ 
 			int px = x&63;
 			int py = y&63;
-			System.out.println("setBlock: " + data[0]);
 			synchronized(chunks) { grabChunk((x>>6),(y>>6)).place(px,py,data[0],data[2],data[3],data[1]); }
 		}
 		catch(NullPointerException e)
@@ -954,27 +951,7 @@ public class CraftrMap
 	}
 	public void setPushableNet(int x, int y, byte ch1, byte co1)
 	{
-		try
-		{ 
-			int px = x&63;
-			int py = y&63;
-			//findCachedChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,(byte)0);
-			se.out.writeByte(0x31);
-			se.out.writeByte((byte)255);
-			se.out.writeInt(x);
-			se.out.writeInt(y);
-			se.out.writeByte((byte)-1);
-			se.out.writeByte(ch1);
-			se.out.writeByte(co1);
-			byte[] t = se.getPacket();
-			se.sendAll(t,t.length);
-		}
-		catch(Exception e)
-		{
-			System.out.println("setBlockNet exception!");
-			e.printStackTrace();
-			//if(!multiplayer) System.exit(1);
-		}
+		setBlockNet(x,y,(byte)-1,ch1,co1);
 	}
 	
 	public void setBlock(int x, int y, byte t1, byte ch1, byte co1)
@@ -988,7 +965,6 @@ public class CraftrMap
 			int px = x&63;
 			int py = y&63;
 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
-			System.out.println("setBlock: " + t1);
 			synchronized(chunks) { grabChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,p1); }
 		}
 		catch(NullPointerException e)

@@ -52,6 +52,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public CraftrGameScreen gs;
 	public CraftrInScreen is;
 	public CraftrSound audio;
+	public int chrArrowWaiter = 0;
 	public boolean[] keyHeld;
 	public int netThreadRequest = 0;
 	public int key_up = KeyEvent.VK_UP;
@@ -75,7 +76,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public String getVersion()
 	{
-		return "0.0.9.1";
+		return "0.0.10";
 	}
 	public CraftrGame()
 	{
@@ -230,12 +231,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			s = "drawn-type=" + gs.drawType;
 			out.write(s,0,s.length());
 			out.newLine();
-			s = "drawn-char=" + gs.drawChr;
-			out.write(s,0,s.length());
-			out.newLine();
-			s = "drawn-color=" + gs.drawCol;
-			out.write(s,0,s.length());
-			out.newLine();
 			if(!multiplayer)
 			{
 				lpx = players[255].px;
@@ -276,16 +271,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				String key = config.key[i];
 				String val = config.value[i];
 				System.out.println("Config key found: " + key);
-				if(key.contains("drawn-char"))
-				{
-					gs.drawChr = nf.parse(val).byteValue();
-					gs.chrBarOff = gs.drawChr&(~15);
-				}
-				else if(key.contains("drawn-color"))
-				{
-					gs.drawCol = nf.parse(val).byteValue();
-				}
-				else if(key.contains("drawn-type"))
+				if(key.contains("drawn-type"))
 				{
 					gs.drawType = nf.parse(val).byteValue();
 					if(gs.drawType>map.maxType || gs.drawType<-1) gs.drawType = 0;
@@ -423,11 +409,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				switch(gs.cw.type)
 				{
 					case 1: // char selecting, char window only
-						gs.drawChr = (((mx-((gs.cw.x+1)<<3))>>3)&31) | (((my-((gs.cw.y+1)<<3))<<2)&224);
-						gs.chrBarOff = gs.drawChr&(~15);					
+						gs.sdrawChr((((mx-((gs.cw.x+1)<<3))>>3)&31) | (((my-((gs.cw.y+1)<<3))<<2)&224));
+						gs.chrBarOff = gs.gdrawChr()&(~15);					
 						break;
 					case 2:
-						gs.drawCol = (((mx-((gs.cw.x+1)<<3))>>3)&15) | (((my-((gs.cw.y+1)<<3))<<1)&240);
+						gs.sdrawCol((((mx-((gs.cw.x+1)<<3))>>3)&15) | (((my-((gs.cw.y+1)<<3))<<1)&240));
 						break;
 					case 3:
 						if(insideRect(mx,my,(gs.cw.x+2)<<3,(gs.cw.y+2)<<3,(gs.cw.w-4)<<3,(gs.cw.h-4)<<3))
@@ -436,9 +422,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 							int iy = (my-((gs.cw.y+2)<<3))>>4;
 							int ip = ix+iy*4;
 							gs.drawType = gs.cw.recBlockType[ip];
-							gs.drawChr = gs.cw.recBlockChr[ip];
-							gs.chrBarOff = gs.drawChr&(~15);
-							gs.drawCol = gs.cw.recBlockCol[ip];
+							gs.sdrawChr(gs.cw.recBlockChr[ip]);
+							gs.chrBarOff = gs.gdrawChr()&(~15);
+							gs.sdrawCol(gs.cw.recBlockCol[ip]);
 							gs.cwOpen = false;
 							canMousePress = false;
 							mouseChange = true;
@@ -463,32 +449,34 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			{
 				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,128,16))
 				{
-					gs.drawCol = ((mx-(12*16+8))>>4);
+					gs.sdrawCol((mx-(12*16+8))>>4);
 				}
 			}
 			else if (gs.barselMode == 1 && gs.drawType == 3)
 			{
 				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,64,16))
 				{
-					gs.drawChr= 24+((mx-(12*16+8))>>4);
+					gs.sdrawChr(24+((mx-(12*16+8))>>4));
 				}
 			}
 			else if (gs.barselMode == 1) // checkings, chr
 			{
-				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,256,16))
+				if(insideRect(mx,my,13*16,gs.BARPOS_Y,256,16))
 				{
-					gs.drawChr = ((mx-(12*16+8))>>4)+gs.chrBarOff;
-					gs.chrBarOff = gs.drawChr&(~15);
+					gs.sdrawChr(((mx-(13*16))>>4)+gs.chrBarOff);
+					gs.chrBarOff = gs.gdrawChr()&(~15);
 				}
-				else if(insideRect(mx,my,28*16+8,gs.BARPOS_Y,8,8))
+				else if(mb==ev_3 && insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
 				{
 					gs.chrBarOff -= 16;
-					if(gs.chrBarOff<0) gs.chrBarOff = 240;
+					mouseChange=true;
+					if(gs.chrBarOff<0) gs.chrBarOff += 256;
 				}
-				else if(insideRect(mx,my,28*16+8,gs.BARPOS_Y+8,8,8))
+				else if(mb==ev_3 && insideRect(mx,my,29*16,gs.BARPOS_Y+1,8,14))
 				{
 					gs.chrBarOff += 16;
-					if(gs.chrBarOff>240) gs.chrBarOff=0;
+					mouseChange=true;
+					if(gs.chrBarOff>255) gs.chrBarOff -= 256;
 				}
 			} else if (gs.barselMode == 2) // checkings, col
 			{
@@ -499,10 +487,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					int colMode = my-gs.BARPOS_Y;
 					if(colMode>7) // FG
 					{
-						gs.drawCol = (gs.drawCol&240)|(colChoose&15);
+						gs.sdrawCol((gs.gdrawCol()&240)|(colChoose&15));
 					} else // BG
 					{
-						gs.drawCol = (gs.drawCol&15)|((colChoose&15)<<4);
+						gs.sdrawCol((gs.gdrawCol()&15)|((colChoose&15)<<4));
 					}
 				}
 			}
@@ -542,8 +530,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				{
 					tmparr[0] = (byte)gs.drawType;
 					tmparr[1] = (byte)0;
-					tmparr[2] = (byte)gs.drawChr;
-					tmparr[3] = (byte)gs.drawCol;
+					tmparr[2] = (byte)gs.gdrawChr();
+					tmparr[3] = (byte)gs.gdrawCol();
 				}
 				if(mb == ev_2)
 				{
@@ -551,15 +539,15 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
  					if(tmpg[5] == 0)
  					{
  						gs.drawType = tmpg[0];
- 						gs.drawChr = tmpg[2];
- 						gs.drawCol = tmpg[3];
+ 						gs.sdrawChr(tmpg[2]);
+ 						gs.sdrawCol(tmpg[3]);
  					} else {
  						gs.drawType = -1;
- 						gs.drawChr = tmpg[4];
- 						gs.drawCol = tmpg[5];
+ 						gs.sdrawChr(tmpg[4]);
+ 						gs.sdrawCol(tmpg[5]);
  					}
-					gs.chrBarOff = gs.drawChr&(~15);
-					gs.cw.addRecBlock((byte)gs.drawType,(byte)gs.drawChr,(byte)gs.drawCol);
+					gs.chrBarOff = gs.gdrawChr()&(~15);
+					gs.cw.addRecBlock((byte)gs.drawType,(byte)gs.gdrawChr(),(byte)gs.gdrawCol());
 				}
 				else if(oldmb != mb || (mx>>4 != oldmx>>4 || my>>4 != oldmy>>4))
 				{
@@ -645,8 +633,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				char chr = ev.getKeyChar();
 				if(chr >= 32 && chr <= 127)
 				{
-					gs.drawChr=(byte)chr;
-					gs.chrBarOff = gs.drawChr&(~15);
+					gs.sdrawChr(0xFF*(int)((byte)chr));
+					gs.chrBarOff = gs.gdrawChr()-8;
 					mouseChange=true;
 				}
 				else if(kc==KeyEvent.VK_ESCAPE)
@@ -1070,6 +1058,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public void start(String[] args)
 	{
+		ev_1=65535; // temp so weird stuff doesnt happen
 		if(!isApplet)
 		{
 			window.getRootPane().addComponentListener(this);
@@ -1144,6 +1133,23 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 			}
 			if(waitTime>0) waitTime--;
+			if(chrArrowWaiter>0) chrArrowWaiter--;
+			else if(mb == ev_1) {
+				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
+				{
+					gs.chrBarOff -= 1;
+					chrArrowWaiter=2;
+					mouseChange=true;
+					if(gs.chrBarOff<0) gs.chrBarOff = 255;
+				}
+				else if(insideRect(mx,my,29*16,gs.BARPOS_Y+1,8,14))
+				{
+					gs.chrBarOff += 1;
+					chrArrowWaiter=2;
+					mouseChange=true;
+					if(gs.chrBarOff>255) gs.chrBarOff=0;
+				}
+			}
 			told = new Date();
 			if(gs.drawType==7) gs.cw.isMelodium=true;
 			else gs.cw.isMelodium=false;

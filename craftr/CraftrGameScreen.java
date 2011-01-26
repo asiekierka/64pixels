@@ -13,7 +13,10 @@ public class CraftrGameScreen extends CraftrScreen
 	public static final int CHATBOTTOM_X = 11;
 	public static final int CHATBOTTOM_Y = (GRID_H*16)-17;
 	public static final int BARPOS_Y = GRID_H*16;
-	public int drawCol, drawChr, drawType;
+	//public int drawCol, drawChr, drawType;
+	public int drawType;
+	public int[] drawChrA = new int[256];
+	public int[] drawColA = new int[256];
 	public int barselMode;
 	public int barType = 0;
 	public int chrBarOff;
@@ -49,8 +52,8 @@ public class CraftrGameScreen extends CraftrScreen
 		scr_typ = new byte[FULLGRID_W*FULLGRID_H];
 		chatarr = new CraftrChatMsg[20];
 		chatlen = 0;
-		drawCol = 15;
-		drawChr = 1;
+		for(int i=0;i<256;i++) drawColA[i] = 15;
+		for(int i=0;i<256;i++) drawChrA[i] = 1;
 		drawType = 0;
 		barselMode = 1; // char
 		cw = new CraftrWindow(1);
@@ -59,7 +62,23 @@ public class CraftrGameScreen extends CraftrScreen
 		chatMsg = "";
 		barType = 0;
 	}
-	
+
+	public int gdrawChr()
+	{
+		return drawChrA[drawType<0?(0xFF&(int)((byte)drawType)):drawType];
+	}
+	public int gdrawCol()
+	{
+		return drawColA[drawType<0?(0xFF&(int)((byte)drawType)):drawType];
+	}
+	public void sdrawChr(int c)
+	{
+		drawChrA[drawType<0?(0xFF&(int)((byte)drawType)):drawType] = c;
+	}
+	public void sdrawCol(int c)
+	{
+		drawColA[drawType<0?(0xFF&(int)((byte)drawType)):drawType] = c;
+	}
 	public void paint(Graphics g, int mmx, int mmy)
 	{
 		mx = mmx;
@@ -88,8 +107,8 @@ public class CraftrGameScreen extends CraftrScreen
 		}
 		DrawMouse(g);
 		DrawChatMsg(g);
-		cw.charChosen = drawChr;
-		cw.colorChosen = drawCol;
+		cw.charChosen = gdrawChr();
+		cw.colorChosen = gdrawCol();
 		if(cwOpen) cw.render(c,g);
 		for(int i=0;i<256;i++)
 		{
@@ -247,33 +266,33 @@ public class CraftrGameScreen extends CraftrScreen
 		c.DrawChar1x(8*16,BARPOS_Y+8,(byte)179,(byte)15,g);
 		c.DrawChar1x(10*16,BARPOS_Y,(byte)179,(byte)15,g);
 		c.DrawChar1x(10*16,BARPOS_Y+8,(byte)179,(byte)15,g);
-		if(drawType==2) c.DrawChar(10*16+12,BARPOS_Y,(byte)197,(byte)((drawCol&7)+8),g);
-		else c.DrawChar(10*16+12,BARPOS_Y,(byte)drawChr,(byte)drawCol,g);
+		if(drawType==2) c.DrawChar(10*16+12,BARPOS_Y,(byte)197,(byte)((gdrawCol()&7)+8),g);
+		else c.DrawChar(10*16+12,BARPOS_Y,(byte)gdrawChr(),(byte)gdrawCol(),g);
 		c.DrawChar1x(12*16,BARPOS_Y,(byte)179,(byte)15,g);
 		c.DrawChar1x(12*16,BARPOS_Y+8,(byte)179,(byte)15,g);
 		if(drawType == 4) barselMode=2;
 		int bsmt= barselMode;
 		if(drawType == 2) bsmt=3;
 		else if(drawType == 3 && barselMode == 1) bsmt=4;
-		if(drawType == 3 && (drawChr<24 || drawChr>=28)) drawChr=25;
-		else if(drawType==4) drawChr=206;
+		if(drawType == 3 && (gdrawChr()<24 || gdrawChr()>=28)) sdrawChr(25);
+		else if(drawType==4) sdrawChr(206);
 		switch(bsmt)
 		{
 			case 1: // char
 				c.DrawString1x(8*16+8,BARPOS_Y,"Chr",240,g);
 				c.DrawString1x(8*16+8,BARPOS_Y+8,"Col",15,g);
+				c.DrawChar1x(12*16+8,BARPOS_Y+4,(byte)17,(byte)14,g);
 				for(int j=0;j<16;j++)
 				{
-					c.DrawChar(12*16+8+(j<<4),BARPOS_Y,(byte)(chrBarOff+j),(byte)drawCol,g);
+					c.DrawChar(13*16+(j<<4),BARPOS_Y,(byte)(chrBarOff+j),(byte)gdrawCol(),g);
 				}
-				c.DrawChar1x(28*16+8,BARPOS_Y,(byte)30,(byte)14,g);
-				c.DrawChar1x(28*16+8,BARPOS_Y+8,(byte)31,(byte)14,g);
-				c.DrawChar1x(29*16,BARPOS_Y,(byte)179,(byte)15,g);
-				c.DrawChar1x(29*16,BARPOS_Y+8,(byte)179,(byte)15,g);
-				if(drawChr >= chrBarOff && drawChr < chrBarOff+16)
+				c.DrawChar1x(29*16,BARPOS_Y+4,(byte)16,(byte)14,g);
+				c.DrawChar1x(29*16+8,BARPOS_Y,(byte)179,(byte)15,g);
+				c.DrawChar1x(29*16+8,BARPOS_Y+8,(byte)179,(byte)15,g);
+				if(gdrawChr() >= chrBarOff && gdrawChr() < chrBarOff+16)
 				{
 					g.setColor(new Color(0xAAAAAA));
-					g.drawRect(12*16+8+((drawChr-chrBarOff)*16),BARPOS_Y,15,15);
+					g.drawRect(13*16+((gdrawChr()-chrBarOff)*16),BARPOS_Y,15,15);
 				}
 				break;
 			case 2: // color
@@ -282,8 +301,8 @@ public class CraftrGameScreen extends CraftrScreen
 				c.DrawString1x(8*16+8,BARPOS_Y+8,"Col",240,g);
 				for(int j=0;j<16;j++)
 				{
-					c.DrawChar1x(12*16+8+(j<<3),BARPOS_Y,(byte)254,(byte)((j<<4)|(drawCol&15)),g);
-					c.DrawChar1x(12*16+8+(j<<3),BARPOS_Y+8,(byte)254,(byte)(j|(drawCol&240)),g);
+					c.DrawChar1x(12*16+8+(j<<3),BARPOS_Y,(byte)254,(byte)((j<<4)|(gdrawCol()&15)),g);
+					c.DrawChar1x(12*16+8+(j<<3),BARPOS_Y+8,(byte)254,(byte)(j|(gdrawCol()&240)),g);
 				}
 				c.DrawChar1x(20*16+10,BARPOS_Y,(byte)'B',(byte)15,g);
 				c.DrawChar1x(20*16+10,BARPOS_Y+8,(byte)'F',(byte)15,g);
@@ -292,8 +311,8 @@ public class CraftrGameScreen extends CraftrScreen
 				c.DrawChar1x(21*16+10,BARPOS_Y,(byte)179,(byte)15,g);
 				c.DrawChar1x(21*16+10,BARPOS_Y+8,(byte)179,(byte)15,g);
 				g.setColor(new Color(0xAAAAAA));
-				g.drawRect(12*16+8+((drawCol>>4)<<3),BARPOS_Y,7,7);
-				g.drawRect(12*16+8+((drawCol&15)<<3),BARPOS_Y+8,7,7);
+				g.drawRect(12*16+8+((gdrawCol()>>4)<<3),BARPOS_Y,7,7);
+				g.drawRect(12*16+8+((gdrawCol()&15)<<3),BARPOS_Y+8,7,7);
 				break;
 			case 3: // wirium color
 				for(int j=0;j<8;j++)
@@ -305,7 +324,7 @@ public class CraftrGameScreen extends CraftrScreen
 				c.DrawChar1x(24*16,BARPOS_Y,(byte)179,(byte)15,g);
 				c.DrawChar1x(24*16,BARPOS_Y+8,(byte)179,(byte)15,g);
 				g.setColor(new Color(0xAAAAAA));
-				g.drawRect(12*16+8+((drawCol&7)<<4),BARPOS_Y,15,15);
+				g.drawRect(12*16+8+((gdrawCol()&7)<<4),BARPOS_Y,15,15);
 				break;
 			case 4: // p-nand direction
 				c.DrawString1x(8*16+8,BARPOS_Y,"Dir",240,g);
@@ -318,7 +337,7 @@ public class CraftrGameScreen extends CraftrScreen
 				c.DrawChar1x(21*16+8,BARPOS_Y,(byte)179,(byte)15,g);
 				c.DrawChar1x(21*16+8,BARPOS_Y+8,(byte)179,(byte)15,g);
 				g.setColor(new Color(0xAAAAAA));
-				g.drawRect(12*16+8+((drawChr-24)<<4),BARPOS_Y,15,15);
+				g.drawRect(12*16+8+((gdrawChr()-24)<<4),BARPOS_Y,15,15);
 			default:
 				break;
 		}
