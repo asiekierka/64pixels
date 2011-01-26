@@ -184,37 +184,32 @@ public class CraftrMap
 			// Create buffer, check version
 			byte[] buf = new byte[256];
 			gin.read(buf,0,1);
-			int i = 0;
+			int i = 1;
 			int hdrsize = CraftrChunk.hdrsize;
 			switch(buf[0])
 			{
-				case 2:
-					out = new byte[(4096*10)+hdrsize];
-					while(i<(4096*7)) i += gin.read(out,i+hdrsize,(4096*7)-i);
-					gin.close();
-					return out;
 				case 3:
-					out = new byte[(4096*10)+hdrsize];
-					while(i<((4096*8)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
+					out = new byte[1+(4096*10)+hdrsize];
+					while(i<(1+(4096*8)+hdrsize) && i>-1) i += gin.read(out,i,(1+(4096*8)+hdrsize)-i);
 					gin.close();
 					for(int ri=0;ri<4096;ri++)
 					{
-						if(out[ri+hdrsize]==5 && (0x80&(int)out[ri+hdrsize+4096])>0)
+						if(out[1+ri+hdrsize]==5 && (0x80&(int)out[1+ri+hdrsize+4096])>0)
 						{
-							out[ri+hdrsize+4096]=(byte)1;
+							out[1+ri+hdrsize+4096]=(byte)1;
 							addbc(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
 						}
 					}
 					return out;
 				case 4:
-					out = new byte[(4096*10)+hdrsize];
-					while(i<((4096*10)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
+					out = new byte[1+(4096*10)+hdrsize];
+					while(i<(1+(4096*10)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
 					gin.close();
 					for(int ri=0;ri<4096;ri++)
 					{
-						if(out[ri+hdrsize]==5 && (0x80&(int)out[ri+hdrsize+4096])>0)
+						if(out[1+ri+hdrsize]==5 && (0x80&(int)out[1+ri+hdrsize+4096])>0)
 						{
-							out[ri+hdrsize+4096]=(byte)1;
+							out[1+ri+hdrsize+4096]=(byte)1;
 							addbc(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
 						}
 					}
@@ -469,10 +464,10 @@ public class CraftrMap
 		{
 			for(int ix=0;ix<xs;ix++)
 			{
-				setPushable(x+ix,y+iy,blocks[((iy*xs)+ix)*2],blocks[(((iy*xs)+ix)*2)+1]);
+				setPushable(x+ix+dx,y+iy+dy,blocks[((iy*xs)+ix)*2],blocks[(((iy*xs)+ix)*2)+1]);
 				for(int i=0;i<4;i++)
 				{
-					addbc(new CraftrBlockPos(x+ix+xMovement[i],y+iy+yMovement[i]));
+					addbc(new CraftrBlockPos(x+ix+dx+xMovement[i],y+iy+dy+yMovement[i]));
 				}
 			}
 		}
@@ -485,17 +480,37 @@ public class CraftrMap
 		if(isEmpty(x+dx,y+dy)) // can we not push?
 		{
 			setPushable(x+dx,y+dy,chr,col);
+			game.blockChange=true;
+			return;
 		}
 		int posx = x+dx;
 		int posy = y+dy;
+		System.out.println("step 1");
 		// we'll have to push unless we see a wall and until we have pushiums
-		while(getBlock(posx,posy)[0]==(byte)-1)
+		while(getBlock(posx,posy)[5]!=(byte)0)
 		{
+		System.out.println("step 2: " + posx + ", " + posy);
 			posx+=dx;
 			posy+=dy;
 		}
 		if(!isEmpty(posx,posy)) return;
-		pushMultiple(x+dx,y+dy,posx-x-dx,posy-y-dy,dx,dy);
+		// posx,posy is the point we want to move TO
+		// x+dx,y+dy is the point we're moving FROM
+		// posx-dx,posy-dy should be the endpoint of the moving FROM
+		int tx = posx-(x+dx);
+		int ty = posy-(y+dy);
+		if(tx<0) tx=-tx;
+		if(ty<0) ty=-ty;
+		if(dx<=0) tx++;
+		if(dy<=0) ty++;
+		int txs = x+dx;
+		int tys = y+dy;
+		if((posx-dx)<txs) txs=posx-dx;
+		if((posy-dy)<tys) tys=posy-dy;
+		System.out.println("step 3: " + tx + ", " + ty);
+		game.blockChange=true;
+		pushMultiple(txs,tys,tx,ty,dx,dy);
+		setPushable(x+dx,y+dy,chr,col);
 	}
 	public static final int[] xMovement = { -1, 1, 0, 0 };
 	public static final int[] yMovement = { 0, 0, -1, 1 };
@@ -579,7 +594,7 @@ public class CraftrMap
 						for(int i=0;i<4;i++)
 						{
 							int ty = d2[i][0];
-							if(ty==2 || (ty==3) || ty==4 || ty==6 || ty==7) { addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i])); }
+							if(ty==2 || (ty==3) || ty==4 || ty==6 || ty==7 || ty==10) { addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i])); }
 						}
 					}
 				}
@@ -593,7 +608,7 @@ public class CraftrMap
 						for(int i=0;i<4;i++)
 						{
 							int ty = d2[i][0];
-							if(ty==2 || (ty==3) || ty==4 || ty==6 || ty==7) { addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i])); }
+							if(ty==2 || (ty==3) || ty==4 || ty==6 || ty==7 || ty==10) { addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i])); }
 						}
 					}
 				}
@@ -625,7 +640,7 @@ public class CraftrMap
 					int ty = d2[pnps][0];
 					d[1]=15;
 					int str = strength[pnps];
-					if(oldd1!=15 && (ty==2|| ty==3 || ty==4 || ty==6 || ty==7)) { addbc(new CraftrBlockPos(x+xMovement[pnps],y+yMovement[pnps])); }
+					if(oldd1!=15 && (ty==2|| ty==3 || ty==4 || ty==6 || ty==7 || ty==10)) { addbc(new CraftrBlockPos(x+xMovement[pnps],y+yMovement[pnps])); }
 				}
 				else
 				{
@@ -634,7 +649,7 @@ public class CraftrMap
 					int ty = d2[pnps][0];
 					d[1]=0;
 					int str = strength[pnps];
-					if(oldd1!=0 && (ty==2 || ty==3 || ty==4 || ty==6 || ty==7)) { addbc(new CraftrBlockPos(x+xMovement[pnps],y+yMovement[pnps])); }
+					if(oldd1!=0 && (ty==2 || ty==3 || ty==4 || ty==6 || ty==7 || ty==10)) { addbc(new CraftrBlockPos(x+xMovement[pnps],y+yMovement[pnps])); }
 				}
 				if(oldd1!=d[1])
 				{
@@ -642,7 +657,7 @@ public class CraftrMap
 					{
 						int t = d2[i][0];
 						int str = strength[i];
-						if(t==2 ||t==3||t==4 ||  t==6 || t==7) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+						if(t==2 ||t==3||t==4 ||  t==6 || t==7 || t==10) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
 					}
 				}
 				break;
@@ -703,7 +718,7 @@ public class CraftrMap
 					{
 						int t = d2[i][0];
 						int str = strength[i];
-						if(t==2 ||t==3||t==4 || t==6 || t==7) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+						if(t==2 ||t==3||t==4 || t==6 || t==7 || t==10) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
 					}
 				}
 				break;
@@ -717,7 +732,7 @@ public class CraftrMap
 					{
 						int t = d2[i][0];
 						int str = strength[i];
-						if(t==2 ||t==3||t==4 || t==6 || t==7) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+						if(t==2 ||t==3||t==4 || t==6 || t==7 || t==10) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
 					}
 					addbs(new CraftrBlock(x,y,d[0],on|(co5-1),d[2],d[3]));
 				}
@@ -746,7 +761,7 @@ public class CraftrMap
 				{
 					int t = d2[i][0];
 					int str = strength[i];
-					if(t==2 ||t==3||t==4 || t==6 || t==7) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+					if(t==2 ||t==3||t==4 || t==6 || t==7 || t==10) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
 				}
 				break;
 			/* bullet code, do not touch unless you want to re-add it!
@@ -817,6 +832,24 @@ public class CraftrMap
 						int t = d2[i][0];
 						int str = strength[i];
 						if(t==2 ||t==3||t==4 || t==6 || t==7) addbc(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+					}
+				}
+				break;
+			case 10: // Finally, Pumulty
+				int on10 = d[1]&0x07;
+				int non10 = 0;
+				System.out.println("tryPushM: in");
+				for(int i=0;i<4;i++)
+				{
+					if(strength[i]>0 && d2[i][0]!=9) { non10 = (i^1)+1; break; } 
+				}
+				if(non10!=on10)
+				{
+					addbs(new CraftrBlock(x,y,d[0],non10,d[2],d[3]));
+					if(non10>0 && non10<5)
+					{
+						System.out.println("tryPushM: " + xMovement[non10-1] + " " + yMovement[non10-1]);
+						tryPushM(x,y,xMovement[non10-1],yMovement[non10-1],(byte)254,d[3]);
 					}
 				}
 				break;
