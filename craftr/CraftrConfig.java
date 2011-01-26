@@ -6,13 +6,13 @@ public class CraftrConfig
 {
 	public String[] key;
 	public String[] value;
-	public static final int defLen = 256;
+	public static final int defLen = 512;
 	public int maxkeys, keys;
 	public CraftrConfig()
 	{
 		key = new String[defLen];
 		value = new String[defLen];
-		maxkeys = 256;
+		maxkeys = 512;
 	}
 	public CraftrConfig(int len)
 	{
@@ -24,7 +24,7 @@ public class CraftrConfig
 	{
 		key = new String[defLen];
 		value = new String[defLen];
-		maxkeys = 256;
+		maxkeys = 512;
 		load(filename);
 	}
 	public CraftrConfig(String filename, int len)

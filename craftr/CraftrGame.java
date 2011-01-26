@@ -178,6 +178,21 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			BufferedWriter out = new BufferedWriter(new FileWriter(map.saveDir + "config.txt"));
 			String s = "";
+			for(int i=0;i<256;i++)
+			{
+				if(gs.drawChrA[i]!=1)
+				{
+					s = "dch|" + i + "=" + gs.drawChrA[i];
+					out.write(s,0,s.length());
+					out.newLine();
+				}
+				if(gs.drawColA[i]!=15)
+				{
+					s = "dco|" + i + "=" + gs.drawColA[i];
+					out.write(s,0,s.length());
+					out.newLine();
+				}
+			}
 			if(players[255].pchr != (byte)2)
 			{
 				s = "player-char=" + players[255].pchr;
@@ -257,7 +272,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		}
 		catch (Exception e)
 		{
-			System.out.println("Error reading config data! " + e.getMessage());
+			System.out.println("Error saving config data! " + e.getMessage());
 		}
 	}
 	
@@ -270,7 +285,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			{
 				String key = config.key[i];
 				String val = config.value[i];
-				System.out.println("Config key found: " + key);
+				//System.out.println("Config key found: " + key);
 				if(key.contains("drawn-type"))
 				{
 					gs.drawType = nf.parse(val).byteValue();
@@ -360,6 +375,24 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					{
 						scm2 = nf.parse(val).intValue();
 						if(scm2<0 || scm2>1) scm2=0;
+					}
+				}
+				else if(key.contains("dch|"))
+				{
+					String[] dchi = key.split("\\|");
+					/* as | is a special character here, we need to escape it with \. *
+					 *  but \ is also special so we escape THAT with another \! duhh  */
+					if(dchi.length==2)
+					{
+						gs.drawChrA[nf.parse(dchi[1]).intValue()]=nf.parse(val).intValue();
+					}
+				}
+				else if(key.contains("dco|"))
+				{
+					String[] dcoi = key.split("\\|");
+					if(dcoi.length==2)
+					{
+						gs.drawColA[nf.parse(dcoi[1]).intValue()]=nf.parse(val).intValue();
 					}
 				}
 			}
