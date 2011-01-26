@@ -485,18 +485,13 @@ public class CraftrMap
 		}
 		int posx = x+dx;
 		int posy = y+dy;
-		System.out.println("step 1");
 		// we'll have to push unless we see a wall and until we have pushiums
 		while(getBlock(posx,posy)[5]!=(byte)0)
 		{
-		System.out.println("step 2: " + posx + ", " + posy);
 			posx+=dx;
 			posy+=dy;
 		}
 		if(!isEmpty(posx,posy)) return;
-		// posx,posy is the point we want to move TO
-		// x+dx,y+dy is the point we're moving FROM
-		// posx-dx,posy-dy should be the endpoint of the moving FROM
 		int tx = posx-(x+dx);
 		int ty = posy-(y+dy);
 		if(tx<0) tx=-tx;
@@ -507,7 +502,6 @@ public class CraftrMap
 		int tys = y+dy;
 		if((posx-dx)<txs) txs=posx-dx;
 		if((posy-dy)<tys) tys=posy-dy;
-		System.out.println("step 3: " + tx + ", " + ty);
 		game.blockChange=true;
 		pushMultiple(txs,tys,tx,ty,dx,dy);
 		setPushable(x+dx,y+dy,chr,col);
@@ -838,7 +832,6 @@ public class CraftrMap
 			case 10: // Finally, Pumulty
 				int on10 = d[1]&0x07;
 				int non10 = 0;
-				System.out.println("tryPushM: in");
 				for(int i=0;i<4;i++)
 				{
 					if(strength[i]>0 && d2[i][0]!=9) { non10 = (i^1)+1; break; } 
@@ -846,11 +839,7 @@ public class CraftrMap
 				if(non10!=on10)
 				{
 					addbs(new CraftrBlock(x,y,d[0],non10,d[2],d[3]));
-					if(non10>0 && non10<5)
-					{
-						System.out.println("tryPushM: " + xMovement[non10-1] + " " + yMovement[non10-1]);
-						tryPushM(x,y,xMovement[non10-1],yMovement[non10-1],(byte)254,d[3]);
-					}
+					if(non10>0 && non10<5) tryPushM(x,y,xMovement[non10-1],yMovement[non10-1],(byte)254,d[3]);
 				}
 				break;
 			default:
