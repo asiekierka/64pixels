@@ -11,7 +11,7 @@ public class CraftrWindow
 	public String title;
 	public static int[] linechr; 
 	public int x,y;
-	public int charChosen, colorChosen;
+	public int charChosen, colorChosen, typeChosen;
 	public byte[] recBlockChr;
 	public byte[] recBlockCol;
 	public byte[] recBlockType;
@@ -50,6 +50,11 @@ public class CraftrWindow
 				w = 12;
 				h = 12;
 				title = "History";
+				break;
+			case 4: // type screen
+				w = 12;
+				h = 14;
+				title = "Types";
 				break;
 			default:
 				w = 8;
@@ -166,6 +171,16 @@ public class CraftrWindow
 						g.setColor(new Color(0xAAAAAA));
 						g.drawRect(tmx,tmy,15,15);
 					}
+				}
+				break;
+			case 4: // types screen
+				for(int i=-1;i<11;i++)
+				{
+					int col=143;
+					if(i==typeChosen) col=248;
+					String t = CraftrGameScreen.getName(i);
+					int xm = (x+((w-1)>>1));
+					cc.DrawString1x(((x<<3)+(w<<2))-(t.length()<<2),(y+1+(i+1))<<3,t,col,g);
 				}
 				break;
 			default:

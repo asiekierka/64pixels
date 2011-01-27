@@ -204,7 +204,7 @@ public class CraftrGameScreen extends CraftrScreen
 		}
 	}
 	
-	public String getName(int t)
+	public static String getName(int t)
 	{
 		switch(t)
 		{
@@ -260,6 +260,7 @@ public class CraftrGameScreen extends CraftrScreen
 		g.setColor(new Color(0x000000));
 		g.fillRect(0,BARPOS_Y,WIDTH,16);
 		c.DrawString(0,BARPOS_Y,getName(drawType),15,g);
+		c.DrawChar1x(7*16,BARPOS_Y+8,(byte)'T',(byte)10,g);
 		c.DrawChar1x(7*16+8,BARPOS_Y,(byte)30,(byte)14,g);
 		c.DrawChar1x(7*16+8,BARPOS_Y+8,(byte)31,(byte)14,g);
 		c.DrawChar1x(8*16,BARPOS_Y,(byte)179,(byte)15,g);

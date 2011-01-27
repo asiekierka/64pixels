@@ -426,7 +426,14 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			{
 				gs.drawType = (gs.drawType+1);
 				if(gs.drawType > map.maxType) gs.drawType = -1;
-			} else if (insideRect(mx,my,8*16+8,gs.BARPOS_Y,24,8)) // mode, chr
+			}
+			else if (insideRect(mx,my,7*16,gs.BARPOS_Y+8,8,8)) // T
+			{
+				if(gs.cw.type == 4) gs.cwOpen = !gs.cwOpen;
+				else gs.cwOpen = true;
+				gs.cw.type = 4;
+			}
+			 else if (insideRect(mx,my,8*16+8,gs.BARPOS_Y,24,8)) // mode, chr
 			{
 				gs.barselMode = 1;
 			} else if (insideRect(mx,my,8*16+8,gs.BARPOS_Y+8,24,8)) // mode, col
@@ -462,6 +469,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 							canMousePress = false;
 							mouseChange = true;
 						}
+					case 4:
+						gs.drawType=((my-((gs.cw.y+1)<<3))>>3)-1;
+						break;
 					default:
 						break;
 				}
@@ -1146,6 +1156,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			Thread.sleep(33);
 			}
 			catch (Exception e) { }
+			gs.cw.typeChosen=gs.drawType;
 			if(waitTime==0)
 			{
 				if(keyHeld[0]==true)
