@@ -37,8 +37,8 @@ public class CraftrWindow
 		switch(type)
 		{
 			case 1: // char screen
-				w = 34;
-				h = 10;
+				if(typeChosen==7) { w = 26; h=13; }
+				else { w = 34; h=10; }
 				title = "Choose char:";
 				break;
 			case 2: // color screen
@@ -135,11 +135,11 @@ public class CraftrWindow
 			case 1: // char screen
 				for(int i=0;i<256;i++)
 				{
-					cc.DrawChar1x(fx+((i&31)<<3),fy+((i>>5)<<3),(byte)i,(byte)143,g);
+					cc.DrawChar1x(fx+((i%(w-2))<<3),fy+((i/(w-2))<<3),(byte)i,(byte)143,g);
 					if(i==charChosen)
 					{
 						g.setColor(new Color(0xAAAAAA));
-						g.drawRect(fx+((i&31)<<3),fy+((i>>5)<<3),7,7);
+						g.drawRect(fx+((i%(w-2))<<3),fy+((i/(w-2))<<3),7,7);
 					}
 					String tn = getNoteName(charChosen&0xFF);
 					String t = "" + (charChosen&0xFF);

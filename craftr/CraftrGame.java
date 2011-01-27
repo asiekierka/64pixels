@@ -15,7 +15,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public JApplet applet;
 	public boolean gameOn;
 	public static Random rand = new Random();
-	
+
 	public CraftrMap map;
 	public CraftrPlayer players[] = new CraftrPlayer[256];
 	
@@ -73,6 +73,22 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		int x=players[255].px-tx;
 		int y=players[255].py-ty;
 		audio.playSampleByNumber(x,y,val,1.0);
+	}
+	public void changeKeyMode(int t)
+	{
+		kim=t;
+		if(t==0)
+		{
+			key_up = KeyEvent.VK_UP;
+			key_left = KeyEvent.VK_LEFT;
+			key_right = KeyEvent.VK_RIGHT;
+			key_down = KeyEvent.VK_DOWN;
+		} else {
+			key_up = KeyEvent.VK_W;
+			key_down = KeyEvent.VK_S;
+			key_left = KeyEvent.VK_A;
+			key_right = KeyEvent.VK_D;
+		}
 	}
 	public String getVersion()
 	{
@@ -324,13 +340,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				else if(key.contains("wsad-mode"))
 				{
 					kim = nf.parse(val).intValue();
-					if(kim==1)
-					{
-						key_up = KeyEvent.VK_W;
-						key_down = KeyEvent.VK_S;
-						key_left = KeyEvent.VK_A;
-						key_right = KeyEvent.VK_D;
-					}
+					changeKeyMode(kim);
 				}
 				else if(key.contains("use-nagle"))
 				{
@@ -449,8 +459,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				switch(gs.cw.type)
 				{
 					case 1: // char selecting, char window only
-						gs.sdrawChr((((mx-((gs.cw.x+1)<<3))>>3)&31) | (((my-((gs.cw.y+1)<<3))<<2)&224));
-						gs.chrBarOff = gs.gdrawChr()&(~15);					
+						int ct =(((mx-((gs.cw.x+1)<<3))>>3)%(gs.cw.w-2)) + ((((my>>3)-(gs.cw.y+1))%(gs.cw.h-2))*(gs.cw.w-2));
+						if(ct<=255)
+						{
+							gs.sdrawChr(ct);
+							gs.chrBarOff = ct&(~15);
+						}					
 						break;
 					case 2:
 						gs.sdrawCol((((mx-((gs.cw.x+1)<<3))>>3)&15) | (((my-((gs.cw.y+1)<<3))<<1)&240));
