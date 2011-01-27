@@ -822,7 +822,11 @@ public class CraftrMap
 						{
 							tryPushM(x,y,xMovement[non10-1],yMovement[non10-1],d[2],(byte)(d[3]&0x0F));
 						}
-						else if (d2[(non10-1)][5]!=0) setPushable(x+xMovement[non10-1],y+yMovement[non10-1],(byte)0,(byte)0);
+						else if (d2[(non10-1)][5]!=0)
+						{
+							setPushable(x+xMovement[non10-1],y+yMovement[non10-1],(byte)0,(byte)0);
+							setPushableNet(x+xMovement[non10-1],y+yMovement[non10-1],(byte)0,(byte)0);
+						}
 					}
 				}
 				break;
@@ -932,7 +936,7 @@ public class CraftrMap
 			int px = x&63;
 			int py = y&63;
 			//findCachedChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,(byte)0);
-			se.out.writeByte(0x31);
+			se.out.writeByte(0x33);
 			se.out.writeByte((byte)255);
 			se.out.writeInt(x);
 			se.out.writeInt(y);

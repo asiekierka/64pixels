@@ -65,6 +65,10 @@ public class CraftrNet implements Runnable
 		sendPacket(getPacket());
 	}
 	
+	public int abs(int v)
+	{
+		return v<0?-v:v;
+	}
 	public void sendPacket(byte[] t)
 	{
 		try
@@ -340,7 +344,7 @@ public class CraftrNet implements Runnable
 					writeString("i think _we'd_ be more concerned if more people were reverse-engineering - a sign of gm2 fork integration");
 					out.writeByte(0x00);
 					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE
-					out.writeInt(0x0D); // protocol version 13
+					out.writeInt(0x0E); // protocol version 14
 					out.writeByte(game.players[255].pchr);
 					out.writeByte(game.players[255].pcol);
 					sendPacket();
@@ -507,7 +511,8 @@ public class CraftrNet implements Runnable
 								}
 								break;
 							case 0x31:
-								in.readByte();
+							case 0x33:
+								in.readUnsignedByte();
 								int bx1 = in.readInt();
 								int by1 = in.readInt();
 								byte t3 = in.readByte();
@@ -523,7 +528,7 @@ public class CraftrNet implements Runnable
  									synchronized(game.map)
  									{
  										game.map.setBlock(bx1,by1,t3,ch1,co1);
- 										game.map.setPushable(bx1,by1,(byte)0,(byte)0);
+ 										if(buf[0]!=0x33) game.map.setPushable(bx1,by1,(byte)0,(byte)0);
  									}
  								}
 								game.blockChange=true;
@@ -543,6 +548,16 @@ public class CraftrNet implements Runnable
 								}
 								if(game.players[pid] != null)
 								{
+									if(pid==255 && (abs(game.players[255].px-lolx)>1 || abs(game.players[255].py-loly)>1))
+									{
+										synchronized(out)
+										{
+											out.writeByte(0x28);
+											out.writeInt(lolx);
+											out.writeInt(loly);
+											sendPacket();
+										}
+									}
 									game.players[pid].move(lolx,loly);
 								}
 								game.blockChange=true;
@@ -597,7 +612,7 @@ public class CraftrNet implements Runnable
 					}
 				}
 				frames++;
-				if(frames%1875==0)
+				if(frames%625==0) // every 10 seconds
 				{
 					synchronized(out)
 					{

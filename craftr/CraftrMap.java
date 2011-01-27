@@ -293,6 +293,7 @@ public class CraftrMap
 	{
 		try
 		{ 
+
 			byte[] data = new byte[6];
 			int px = x&63;
 			int py = y&63;
@@ -347,8 +348,13 @@ public class CraftrMap
  			int px = x&63;
  			int py = y&63;
  			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
- 			findCachedChunk((x>>6),(y>>6)).placePushable(px,py,aChr,aCol);
+ 			grabChunk((x>>6),(y>>6)).placePushable(px,py,aChr,aCol);
  		}
+		catch(NoChunkMemException e)
+		{
+			System.out.println("setPushable: exception: no chunk memory found. Odd...");
+			//System.exit(1); // someone might still use this
+		}
  		catch(NullPointerException e)
  		{
  			System.out.println("setPushable: no cached chunk near player found. ODD.");

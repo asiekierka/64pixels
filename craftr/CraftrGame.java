@@ -92,7 +92,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public String getVersion()
 	{
-		return "0.0.10";
+		return "0.0.10.2";
 	}
 	public CraftrGame()
 	{
@@ -463,7 +463,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						if(ct<=255)
 						{
 							gs.sdrawChr(ct);
-							gs.chrBarOff = ct&(~15);
+							gs.chrBarOff = ct-8;
+							if(gs.chrBarOff<0) gs.chrBarOff+=256;
 						}					
 						break;
 					case 2:
@@ -477,7 +478,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 							int ip = ix+iy*4;
 							gs.drawType = gs.cw.recBlockType[ip];
 							gs.sdrawChr(gs.cw.recBlockChr[ip]);
-							gs.chrBarOff = gs.gdrawChr()&(~15);
+							gs.chrBarOff = gs.gdrawChr()-8;
+							if(gs.chrBarOff<0) gs.chrBarOff+=256;
 							gs.sdrawCol(gs.cw.recBlockCol[ip]);
 							gs.cwOpen = false;
 							canMousePress = false;
@@ -521,7 +523,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(insideRect(mx,my,13*16,gs.BARPOS_Y,256,16))
 				{
 					gs.sdrawChr(((mx-(13*16))>>4)+gs.chrBarOff);
-					gs.chrBarOff = gs.gdrawChr()&(~15);
+					//gs.chrBarOff = gs.gdrawChr()-8;
+					//if(gs.chrBarOff<0) gs.chrBarOff+=256;
 				}
 				else if(mb==ev_3 && insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
 				{
@@ -603,7 +606,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
  						gs.sdrawChr(tmpg[4]);
  						gs.sdrawCol(tmpg[5]);
  					}
-					gs.chrBarOff = gs.gdrawChr()&(~15);
+					gs.chrBarOff = gs.gdrawChr()-8;
+					if(gs.chrBarOff<0) gs.chrBarOff+=256;
 					gs.cw.addRecBlock((byte)gs.drawType,(byte)gs.gdrawChr(),(byte)gs.gdrawCol());
 				}
 				else if(oldmb != mb || (mx>>4 != oldmx>>4 || my>>4 != oldmy>>4))
@@ -690,7 +694,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				char chr = ev.getKeyChar();
 				if(chr >= 32 && chr <= 127)
 				{
-					gs.sdrawChr(0xFF*(int)((byte)chr));
+					gs.sdrawChr(0xFF&(int)((byte)chr));
 					gs.chrBarOff = gs.gdrawChr()-8;
 					mouseChange=true;
 				}

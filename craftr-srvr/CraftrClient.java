@@ -357,9 +357,9 @@ public class CraftrClient implements Runnable
 									{
 										kick("Invalid nickname!");
 									}
-									else if(version!=13)
+									else if(version!=14)
 									{
-										kick("Invalid protocol! Needs 0.0.10 or higher.");
+										kick("Invalid protocol! Needs 0.0.10.2 or higher.");
 									}
 									else if(serv.isBanned(socket.getInetAddress().getHostAddress()))
 									{
@@ -505,6 +505,8 @@ public class CraftrClient implements Runnable
 								if(passWait) break;
 								if(abs(x29-x)<=16 || abs(y29-y)<=16)
 								{
+									x=x29;
+									y=y29;
 									synchronized(out)
 									{
 										out.writeByte(0x24);
@@ -665,9 +667,9 @@ public class CraftrClient implements Runnable
  										}
  										if(pa)
  										{
- 											serv.map.setPlayer(this.x,this.y,0);
- 											this.x = lolx+lolvx;
- 											this.y = loly+lolvy;
+ 											serv.map.setPlayer(x,y,0);
+ 											x = lolx+lolvx;
+ 											y = loly+lolvy;
  											synchronized(out)
  											{
  												out.writeByte(0x32);
