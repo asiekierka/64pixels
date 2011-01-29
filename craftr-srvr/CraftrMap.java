@@ -562,7 +562,8 @@ public class CraftrMap
 					if(pnandDir[i]==d2[i][2]) strength[i]=d2[i][1]&15;
 					break;
 				case 4:
-					if( ((d2[i][1]>>(i^1))&1)!=0 ) strength[i]=d2[i][1]>>4;
+					//if( ((d2[i][1]>>(i^1))&1)!=0 ) strength[i]=d2[i][1]>>4;
+					if( ((d2[i][1]>>(i^1))&1)!=0 && (d2[i][1]>>4)>0 ) strength[i]=15;
 					break;
 				case 5:
 				case 9:
@@ -680,6 +681,7 @@ public class CraftrMap
 					boolean t1 = ((oldparam>>i)&1)>0; // was it sending in that direction?
 					boolean t3 = ((oldparam>>(i^1))&1)>0; // was it sending opposite?
 					boolean t2 = false; // should it be sending in that direction?
+					/*
 					if(!t3 && rstr>1)
 					{
 						t2=true;
@@ -689,14 +691,32 @@ public class CraftrMap
 						if((d2[i^1][0]==2 && (d2[i^1][1]>>4)==i)) t2=false;
 						//if(t==2 && (d2[i][1]>>4)==i) t2=false;
 					}
+					*/
+					if(!t3 && rstr>1)
+					{
+						t2=true;
+						if((d2[i^1][0]==2 && (d2[i^1][1]>>4)==i)) t2=false;
+					}
 					//if((!t3 && !t1 && rstr>1 && str<=1) || (!t3 && t1 && rstr>1)) t2=true;
 					if(t2) { newParam|=1<<i; }
 					else if (str>maxSignal && str>1) { maxSignal=str; }
 				}
+				/*
+				for(int i=0;i<4;i++)
+				{
+					int t = d2[i][0];
+					int str = strength[i];
+					boolean t1 = ((newParam>>i)&1)!=0;
+					boolean t2 = ((newParam>>(i^1))&1)!=0;
+					// SIGNAL CONFIG
+					if (!t1 && (t==2 || t==3 || t==4) && str>maxSignal && str>1) { maxSignal=str; }
+				}
+				*/
 				if(maxSignal>1)
 				{
 					   newParam |= ((maxSignal-1)<<4);
 				}
+				//System.out.println("CROSSUH " + x + "," + y + ": " + newParam);
 				if(oldd1!=newParam)
 				{
 					addbs(new CraftrBlock(x,y,d[0],(byte)newParam,d[2],d[3]));

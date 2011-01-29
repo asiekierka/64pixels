@@ -294,6 +294,7 @@ public class CraftrMap
 		try
 		{ 
 
+
 			byte[] data = new byte[6];
 			int px = x&63;
 			int py = y&63;
@@ -557,7 +558,8 @@ public class CraftrMap
 					if(pnandDir[i]==d2[i][2]) strength[i]=d2[i][1]&15;
 					break;
 				case 4:
-					if( ((d2[i][1]>>(i^1))&1)!=0 ) strength[i]=d2[i][1]>>4;
+					//if( ((d2[i][1]>>(i^1))&1)!=0 ) strength[i]=d2[i][1]>>4;
+					if( ((d2[i][1]>>(i^1))&1)!=0 && (d2[i][1]>>4)>0 ) strength[i]=15;
 					break;
 				case 5:
 				case 9:
