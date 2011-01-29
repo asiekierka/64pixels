@@ -45,6 +45,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public boolean multiplayer;
 	public boolean canMousePress;
 	public boolean isShift = false;
+	public boolean isKick = false;
 	public CraftrMapThread cmt;
 	public int cmtsp=30;
 	public CraftrConfig config;
@@ -62,6 +63,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public int kim = 0;
 	public int scm = 0;
 	public int scm2 = 0;
+	public String isKickS;
 	public void playSound(int tx, int ty, int val)
 	{
 		int x=players[255].px-tx;
@@ -92,7 +94,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public String getVersion()
 	{
-		return "0.0.10.2";
+		return "0.0.10.3";
 	}
 	public CraftrGame()
 	{
@@ -153,6 +155,22 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		keyHeld = new boolean[4];
 	}
 	
+	public void kickOut(String why)
+	{
+		isKick=true;
+		isKickS = why;
+	}
+
+	public void realKickOut()
+	{
+		CraftrKickScreen cks=new CraftrKickScreen(canvas,isKickS);
+		canvas.cs=(CraftrScreen)cks;
+		while(true)
+		{
+			canvas.draw(mx,my);
+			try { Thread.sleep(100); } catch(Exception e) { }
+		}
+	}
 	public void focusLost(FocusEvent ce)
 	{
 		keyHeld[0]=false;
@@ -428,6 +446,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		ev_1 = ev.BUTTON1;
 		ev_2 = ev.BUTTON2;
 		ev_3 = ev.BUTTON3;
+		if(isKick) return;
 		    if (insideRect(mx,my,7*16+8,gs.BARPOS_Y,8,8)) // type, up
 			{
 				gs.drawType = (gs.drawType-1);
@@ -682,6 +701,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public void keyTyped(KeyEvent ev) {} // this one sucks even more
 	public void keyPressed(KeyEvent ev)
 	{
+		if(isKick) return;
 		if(is != null)
 		{
 			is.parseKey(ev);
@@ -1169,6 +1189,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		long wpso = 0;
 		while(gameOn)
 		{
+			if(isKick) realKickOut();
 			try
 			{
 			Thread.sleep(33);

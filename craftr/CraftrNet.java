@@ -605,8 +605,10 @@ public class CraftrNet implements Runnable
 								break;
 							case 0xFF:
 								String tmp4 = readString();
-								System.out.println("KICKED: " + tmp4);
-								System.exit(1);
+								// that thing was a temporary measure since 0.0.1
+								//System.out.println("KICKED: " + tmp4);
+								//System.exit(1);
+								game.kickOut(tmp4);
 								break;
 						}
 					}
