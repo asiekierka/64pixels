@@ -248,10 +248,11 @@ public class CraftrServer
 	{
 		if(al.length()<2) return "$N"; 
 		if(!al.substring(0,1).equals("/")) return "$N";
-		String[] cmd = al.substring(1).split(" ");
-		for(int i=0;i<cmd.length;i++)
+		String[] cmdz = al.substring(1).split(" ");
+		String[] cmd = new String[cmdz.length];
+		for(int i=0;i<cmdz.length;i++)
 		{
-			cmd[i]=cmd[i].toLowerCase();
+			cmd[i]=cmdz[i].toLowerCase();
 		}
 		if(cmd[0].equals("who") || cmd[0].equals("players") || cmd[0].equals("playerlist"))
 		{
@@ -269,7 +270,7 @@ public class CraftrServer
 					lol+=clients[i].nick;
 				}
 			}
-			return ap + "/255 - " + lol;
+			return "&c" + ap + "/255&f - " + lol;
 		}
 		else if((cmd[0].equals("tp") || cmd[0].equals("teleport")) && id!=255 && (tpforall>0 || clients[id].op))
 		{
@@ -297,6 +298,51 @@ public class CraftrServer
 			{
 				return "Warp not found!";
 			}
+		}
+		else if(cmd[0].equals("warps"))
+		{
+			String wt = "Warps: ";
+			for(int i=0;i<warps.warps.size();i++)
+			{
+				if(warps.warps.get(i)!=null)
+				{
+					if(i>0) wt+= " ";
+					wt += warps.warps.get(i).name;
+				}
+			}
+			return wt;
+		}
+		else if(cmd[0].equals("cmds") || cmd[0].equals("help"))
+		{
+			if(id == 255)
+			{
+				return "Commands: who warp warps kick nick deop save ban unban";
+			}
+			else if(clients[id].op)
+			{
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp";
+			}
+			else
+			{
+				return "Commands: who " + ((tpforall!=0)?"tp ":"") + "warp warps me";
+			}
+		}
+		else if(cmd[0].equals("me") && id!=255)
+		{
+			String st = "* " + clients[id].nick + " ";
+			for(int i=1;i<cmdz.length;i++)
+			{
+				if(i>1) st += " ";
+				st=st+cmdz[i];
+			}
+			while(st.length()>38)
+			{
+				String st2 = st.substring(0,38);
+				st=st.substring(38,st.length());
+				clients[id].sendChatMsgAll("&5"+st2);
+			}
+			clients[id].sendChatMsgAll("&5"+st);
+			return "";
 		}
 		else
 		{
@@ -350,6 +396,23 @@ public class CraftrServer
 				spawnX=clients[id].x;
 				spawnY=clients[id].y;
 				return "New spawn set.";
+			}
+			else if(cmd[0].equals("say") && id!=255)
+			{
+				String st = "";
+				for(int i=1;i<cmdz.length;i++)
+				{
+					if(i>1) st += " ";
+					st=st+cmdz[i];
+				}
+				while(st.length()>38)
+				{
+					String st2 = st.substring(0,38);
+					st=st.substring(38,st.length());
+					clients[id].sendChatMsgAll("&7"+st2);
+				}
+				clients[id].sendChatMsgAll("&7"+st);
+				return "";
 			}
 			else if(cmd[0].equals("nick"))
 			{
@@ -448,7 +511,7 @@ public class CraftrServer
 				}
 				return "IP not found!";
 			}
-			else if(cmd[0].equals("setwarp"))
+			else if(cmd[0].equals("setwarp") && id!=255)
 			{
 				int t = warps.findWarpID(cmd[1]);
 				if(t>=0)
