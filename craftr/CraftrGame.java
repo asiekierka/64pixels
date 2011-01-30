@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.datatransfer.*;
 import java.io.*;
 import java.util.*;
 import java.util.zip.*;
@@ -92,9 +93,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			key_right = KeyEvent.VK_D;
 		}
 	}
-	public String getVersion()
+	public static String getVersion()
 	{
-		return "0.0.10.3";
+		return "0.0.11";
 	}
 	public CraftrGame()
 	{
@@ -198,6 +199,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		is = new CraftrInScreen(canvas,1,name);
 		canvas.cs = (CraftrScreen)is;
 		is.maxLen=len;
+		is.minLen=1;
 		loopInScreen();
 		String t = is.inString;
 		canvas.cs = (CraftrScreen)gs;
@@ -824,6 +826,43 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				gs.barType = 0;
 				mouseChange = true;
 			}
+			else if(ev.isControlDown())
+			{
+				if(kc==KeyEvent.VK_V)
+				{
+					try
+					{
+						// Ctrl+V pressed, let's-a paste!
+						Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+						if(clip.isDataFlavorAvailable(DataFlavor.stringFlavor))
+						{
+							gs.chatMsg += (String)clip.getData(DataFlavor.stringFlavor);
+							mouseChange = true;
+						}
+					}
+					catch(Exception e)
+					{
+						System.out.println("Clipboard pasting failed!");
+						e.printStackTrace();
+					}
+				}
+				else if(kc==KeyEvent.VK_C)
+				{
+					try
+					{
+						Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+						if(clip.isDataFlavorAvailable(DataFlavor.stringFlavor))
+						{
+							clip.setContents(new StringSelection(gs.chatMsg),null);
+						}
+					}
+					catch(Exception e)
+					{
+						System.out.println("Clipboard copying failed!");
+						e.printStackTrace();
+					}
+				}
+			}
 			else if (gs.chatMsg.length()<120)
 			{
 				char chr = ev.getKeyChar();
@@ -1094,32 +1133,50 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			System.exit(1);
 		}
 	}
+
+	private String configure_gets1() { return "Key mode: " + ((kim>0)?"WSAD":"Arrows"); }
 	public String configure()
 	{
-		is = new CraftrInScreen(canvas,2,"Select mode");
-		String[] modes = new String[2];
+		boolean inconf = true;
+		is = new CraftrInScreen(canvas,2,"Main menu");
+		String[] modes = new String[3];
 		modes[0] = "Singleplayer";
 		modes[1] = "Multiplayer";
-		is.addStrings(modes);
-		canvas.cs = (CraftrScreen)is;
-		loopInScreen();
+		modes[2] = configure_gets1();
 		String ostr = "";
-		switch(is.inSel)
+		while(inconf)
 		{
-			case 0:
-				multiplayer = false;
-				break;
-			case 1:
-				multiplayer = true;
-				is = new CraftrInScreen(canvas,1,"Input address:");
-				canvas.cs = (CraftrScreen)is;
-				loopInScreen();
-				ostr = is.inString;
-				is = new CraftrInScreen(canvas,1,"Enter nickname:");
-				canvas.cs = (CraftrScreen)is;
-				loopInScreen();
-				net.nick = is.inString;
-				break;
+			is.isRunning=true;
+			is.addStrings(modes);
+			canvas.cs = (CraftrScreen)is;
+			loopInScreen();
+			switch(is.inSel)
+			{
+				case 0:
+					multiplayer = false;
+					inconf = false;
+					break;
+				case 1:
+					multiplayer = true;
+					is = new CraftrInScreen(canvas,1,"Input address:");
+					is.minLen=0;
+					is.maxLen=60;
+					canvas.cs = (CraftrScreen)is;
+					loopInScreen();
+					ostr = is.inString;
+					is = new CraftrInScreen(canvas,1,"Enter nickname:");
+					is.minLen=1;
+					is.maxLen=16;
+					canvas.cs = (CraftrScreen)is;
+					loopInScreen();
+					net.nick = is.inString;
+					inconf = false;
+					break;
+				case 2:
+					changeKeyMode(1-(kim%2));
+					modes[2] = configure_gets1();
+					break;
+			}
 		}
 		canvas.cs = (CraftrScreen)gs;
 		is = null;

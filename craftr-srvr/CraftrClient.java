@@ -100,6 +100,7 @@ public class CraftrClient implements Runnable
 	{
 		try
 		{
+			nick=newn;
 			synchronized(out)
 			{
 				out.writeByte(0x26);
@@ -290,6 +291,20 @@ public class CraftrClient implements Runnable
 		out2.reset();
 		return t;
 	}
+
+	public void sendOpPacket(int val)
+	{
+		try
+		{
+			synchronized(out)
+			{
+				out.writeByte(0x70);
+				out.writeByte((byte)val*42);
+				sendPacket();
+			}
+		}
+		catch(Exception e){}
+	}
 	public int abs(int a)
 	{
 		if(a<0) return -a; else return a;
@@ -357,9 +372,9 @@ public class CraftrClient implements Runnable
 									{
 										kick("Invalid nickname!");
 									}
-									else if(version!=14)
+									else if(version!=15)
 									{
-										kick("Invalid protocol! Needs 0.0.10.2 or higher.");
+										kick("Invalid protocol! Needs 0.0.11 or higher.");
 									}
 									else if(serv.isBanned(socket.getInetAddress().getHostAddress()))
 									{
@@ -430,7 +445,7 @@ public class CraftrClient implements Runnable
 							case 0x10:
 								rcX = in.readInt();
 								rcY = in.readInt();
-								System.out.println("sending chunk " + rcX + "," + rcY);
+								System.out.println("[ID " + id + "] sending chunk " + rcX + "," + rcY);
 								byte[] t = new byte[16384];
 								int z10;
 								synchronized(map.chunks)
@@ -568,6 +583,7 @@ public class CraftrClient implements Runnable
 									{
 										cc.paste(map,ax,ay);
 										sendChatMsgSelf("Pasted.");
+										System.out.println("[ID " + id + "] Pasted at " + ax + "," + ay + "!");
 										isPasting=false;
 									}
 								}
@@ -586,7 +602,7 @@ public class CraftrClient implements Runnable
 									t33[3] = aco;
 									t33[2] = ach;
 									while(serv.map.maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
-									System.out.println("BLOCK: " + at + "," + aco + "," + ach);
+									//System.out.println("BLOCK: " + at + "," + aco + "," + ach);
 									serv.map.modlock=true;
 									//while(serv.map.bslock) { Thread.sleep(1); }
 	 								synchronized(serv.map)
@@ -632,6 +648,7 @@ public class CraftrClient implements Runnable
 							case 0x40:
 								//System.out.println("Got message!");
 								String al = readString();
+								System.out.println("<" + nick + "> " + al);
 								String alt = serv.parseMessage(al,id);
 								if(alt.equals("$N") && !al.equals("")) sendChatMsgAll("<" + nick + "> " + al);
 								else if (!alt.equals("")) sendChatMsgSelf(alt);

@@ -26,7 +26,8 @@ public class CraftrServer
 	public boolean passOn = false;
 	public String pass;
 	public CraftrWarps warps;
-	
+	private int po = 25566;
+
 	public boolean isOp(String ip)
 	{
 		for(String s: op_ips)
@@ -153,6 +154,24 @@ public class CraftrServer
 				out.write(s,0,s.length());
 				out.newLine();
 			}
+			if(anonMode)
+			{
+				s = "anonymous-mode=1";
+				out.write(s,0,s.length());
+				out.newLine();
+			}
+			if(po != 25566)
+			{
+				s = "port=" + po;
+				out.write(s,0,s.length());
+				out.newLine();
+			}
+			if(map.chunks.length!=64)
+			{
+				s = "map-cache-size="+map.chunks.length;
+				out.write(s,0,s.length());
+				out.newLine();
+			}
 			s = "spawn-x=" + spawnX;
 			out.write(s,0,s.length());
 			out.newLine();
@@ -205,6 +224,18 @@ public class CraftrServer
 					passOn=true;
 					pass=val;
 				}
+				else if(key.contains("anonymous-mode"))
+				{
+					if(nf.parse(val).intValue()>0) anonMode=true;
+				}
+				else if(key.contains("port"))
+				{
+					po = nf.parse(val).intValue();
+				}
+				else if(key.contains("map-cache-size"))
+				{
+					map = new CraftrMap(nf.parse(val).intValue());
+				}
 			}
 		}
 		catch (Exception e)
@@ -222,7 +253,7 @@ public class CraftrServer
 		{
 			cmd[i]=cmd[i].toLowerCase();
 		}
-		if(cmd[0].equals("who"))
+		if(cmd[0].equals("who") || cmd[0].equals("players") || cmd[0].equals("playerlist"))
 		{
 			String lol = "";
 			int ap = 0;
@@ -240,7 +271,7 @@ public class CraftrServer
 			}
 			return ap + "/255 - " + lol;
 		}
-		else if(cmd[0].equals("tp") && id!=255 && (tpforall>0 || clients[id].op))
+		else if((cmd[0].equals("tp") || cmd[0].equals("teleport")) && id!=255 && (tpforall>0 || clients[id].op))
 		{
 			int t = findByNick(cmd[1]);
 			if(t<0 || t>255)
@@ -250,6 +281,7 @@ public class CraftrServer
 			else
 			{
 				clients[id].teleport(clients[t].x,clients[t].y);
+				return "";
 			}
 		}
 		else if(cmd[0].equals("warp"))
@@ -279,7 +311,25 @@ public class CraftrServer
 				else
 				{
 					clients[t].kick();
+					System.out.println("[KICK] user " + clients[t].nick + ", by user " + clients[id].nick);
 					return clients[t].nick + " has been kicked.";
+				}
+			}
+			else if(cmd[0].equals("fetch") && id !=255)
+			{
+				for(int i=1;i<cmd.length;i++)
+				{
+					int t = findByNick(cmd[i]);
+					if(t<0 || t>255)
+					{
+						return "No such nickname!";
+					}
+					else
+					{
+						clients[t].teleport(clients[id].x,clients[id].y);
+						clients[t].sendChatMsgSelf("Fetched by " + clients[id].nick + "!");
+						return "User fetched!";
+					}
 				}
 			}
 			else if(cmd[0].equals("copy") && id!=255)
@@ -301,45 +351,89 @@ public class CraftrServer
 				spawnY=clients[id].y;
 				return "New spawn set.";
 			}
+			else if(cmd[0].equals("nick"))
+			{
+				if(cmd.length>2)
+				{
+					int t = findByNick(cmd[1]);
+					if(t<0 || t>255)
+					{
+						return "No such nickname!";
+					}
+					else
+					{
+						String tt = clients[t].nick;
+						clients[t].changeNickname(cmd[2]);
+						clients[id].sendChatMsgAll("User " + tt + " is now known as " + cmd[2]);
+						return "Nickname of user " + tt + " changed.";
+					}
+				}
+				else if(cmd.length>1)
+				{
+					String tt = clients[id].nick;
+					clients[id].changeNickname(cmd[1]);
+					clients[id].sendChatMsgAll("User " + tt + " is now known as " + cmd[1]);
+					return "You're now known as " + cmd[1];	
+				}
+				else return "Not enough parameters!";
+			}
 			else if(cmd[0].equals("op"))
 			{
-				int t = findByNick(cmd[1]);
-				if(t<0 || t>255)
+				for(int i=1;i<cmd.length;i++)
 				{
-					return "No such nickname!";
-				}
-				else
-				{
-					addOp(clients[t].socket.getInetAddress().getHostAddress());
-					clients[t].sendChatMsgSelf("You're opped now!");
-					clients[t].op=true;
+					int t = findByNick(cmd[i]);
+					if(t<0 || t>255)
+					{
+						return "No such nickname!";
+					}
+					else
+					{
+						addOp(clients[t].socket.getInetAddress().getHostAddress());
+						clients[t].sendChatMsgSelf("You're opped now!");
+						clients[t].op=true;
+						clients[t].sendOpPacket(1);
+					}
 				}
 			}
 			else if(cmd[0].equals("deop"))
 			{
-				int t = findByNick(cmd[1]);
-				if(t<0 || t>255)
+				for(int i=1;i<cmd.length;i++)
 				{
-					return "No such nickname!";
+					int t = findByNick(cmd[i]);
+					if(t<0 || t>255)
+					{
+						return "No such nickname!";
+					}
+					else
+					{
+						removeOp(clients[t].socket.getInetAddress().getHostAddress());
+						clients[t].sendChatMsgSelf("You're not opped anymore.");
+						clients[t].op=false;
+						clients[t].sendOpPacket(0);
+					}
 				}
-				else
-				{
-					removeOp(clients[t].socket.getInetAddress().getHostAddress());
-					clients[t].sendChatMsgSelf("You're not an op anymore.");
-					clients[t].op=false;
-				}
+			}
+			else if(cmd[0].equals("save") || cmd[0].equals("savemap"))
+			{
+				saveMap();
+				System.out.println("[ID " + id + "] Map saved by user " + clients[id].nick + "!");
+				return "Map saved!";
 			}
 			else if(cmd[0].equals("ban"))
 			{
-				int t = findByNick(cmd[1]);
-				if(t<0 || t>255)
+				for(int i=1;i<cmd.length;i++)
 				{
-					return "No such nickname!";
-				}
-				else
-				{
-					ban(clients[t].socket.getInetAddress().getHostAddress());
-					clients[t].kick("Just banned!");
+					int t = findByNick(cmd[i]);
+					if(t<0 || t>255)
+					{
+						return "No such nickname!";
+					}
+					else
+					{
+						ban(clients[t].socket.getInetAddress().getHostAddress());
+						clients[t].kick("Banned!");
+						System.out.println("[BAN] user " + clients[t].nick + ", by user " + clients[id].nick);
+					}
 				}
 			}
 			else if(cmd[0].equals("unban"))
@@ -366,7 +460,7 @@ public class CraftrServer
 				else
 				{
 					warps.warps.add(new CraftrWarp(clients[id].x,clients[id].y,cmd[1]));
-					return "New warp aWiriumdded.";
+					return "New warp added.";
 				}
 			}
 			else
@@ -442,7 +536,6 @@ public class CraftrServer
 			ban_ips=readNamesFile("bans.txt");
 			System.out.println(ban_ips.length + " banned IPs!");
 			map = new CraftrMap(128);
-			int po = 25566;
 			if(args.length>0)
 			{
 				for(int i=0;i<args.length;i++)
@@ -493,7 +586,7 @@ public class CraftrServer
 	{
 		for(int i=0;i<255;i++)
 		{
-			if(clients[i] != null && clients[i].nick.toLowerCase().equals(nick) && clients[i].dc == 0)
+			if(clients[i] != null && clients[i].nick.toLowerCase().startsWith(nick) && clients[i].dc == 0)
 			{
 				return i;
 			}

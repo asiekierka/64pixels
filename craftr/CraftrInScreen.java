@@ -22,7 +22,8 @@ public class CraftrInScreen extends CraftrScreen
 	public String[] inputStrings;
 	public boolean isRunning = true;
 	public int maxLen=48;
-	
+	public int minLen=0;
+
 	public CraftrInScreen(CraftrCanvas cc, int inpMode, String nam)
 	{
 		c = cc;
@@ -101,7 +102,7 @@ public class CraftrInScreen extends CraftrScreen
 				switch(kc)
 				{
 					case KeyEvent.VK_ENTER:
-						isRunning=false;
+						if(inString.length() >= minLen && inString.length() <= maxLen) isRunning=false;
 						break;
 					case KeyEvent.VK_BACK_SPACE:
 						if(inString.length() > 0) inString = inString.substring(0,inString.length()-1);
@@ -121,6 +122,24 @@ public class CraftrInScreen extends CraftrScreen
 							catch(Exception e)
 							{
 								System.out.println("Clipboard pasting failed!");
+								e.printStackTrace();
+							}
+						}
+						break;
+					case KeyEvent.VK_C:
+						if(ev.isControlDown())
+						{
+							try
+							{
+								Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+								if(clip.isDataFlavorAvailable(DataFlavor.stringFlavor))
+								{
+									clip.setContents(new StringSelection(inString),null);
+								}
+							}
+							catch(Exception e)
+							{
+								System.out.println("Clipboard copying failed!");
 								e.printStackTrace();
 							}
 						}

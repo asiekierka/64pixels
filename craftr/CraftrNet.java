@@ -341,10 +341,10 @@ public class CraftrNet implements Runnable
 				{
 					out.writeByte(0x0F);
 					writeString(nick);
-					writeString("i think _we'd_ be more concerned if more people were reverse-engineering - a sign of gm2 fork integration");
+					writeString("i should try making the server check this and make custom server/client authors super annoyed(r).");
 					out.writeByte(0x00);
 					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE
-					out.writeInt(0x0E); // protocol version 14
+					out.writeInt(0x0F); // protocol version 15
 					out.writeByte(game.players[255].pchr);
 					out.writeByte(game.players[255].pcol);
 					sendPacket();
@@ -550,7 +550,7 @@ public class CraftrNet implements Runnable
 								}
 								if(game.players[pid] != null)
 								{
-									if(pid==255 && (abs(game.players[255].px-lolx)>1 || abs(game.players[255].py-loly)>1))
+									if(pid==255)
 									{
 										synchronized(out)
 										{
@@ -586,6 +586,10 @@ public class CraftrNet implements Runnable
 									game.audio.playSampleByNumber(ta60x,ta60y,ta60v-248,1.0);
 								}
 								break;
+							case 0x70:
+								int t70=in.readByte();
+								isOp=t70==42?true:false;
+								break;
 							case 0xE1: // push me
 								int e1x = in.readInt();
 								int e1y = in.readInt();
@@ -616,7 +620,7 @@ public class CraftrNet implements Runnable
 					}
 				}
 				frames++;
-				if(frames%62==0) // every second, twempowawy measuwe
+				if(frames%130==0) // every 2 seconds, less twempowawy measuwe
 				{
 					synchronized(out)
 					{
