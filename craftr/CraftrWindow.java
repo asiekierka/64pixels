@@ -12,18 +12,18 @@ public class CraftrWindow
 	public static int[] linechr; 
 	public int x,y;
 	public int charChosen, colorChosen, typeChosen;
-	public byte[] recBlockChr;
-	public byte[] recBlockCol;
-	public byte[] recBlockType;
+	public int[] recBlockChr;
+	public int[] recBlockCol;
+	public int[] recBlockType;
 	public static final String[] note_names={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
 	public static final String[] drum_names={"Kick","Snare","(C) HiHat","(O) HiHat","HiTom","MidTom","LoTom","Crash"};
 	
 	public CraftrWindow(int _type)
 	{
 		type = _type;
-		recBlockChr = new byte[16];
-		recBlockCol = new byte[16];
-		recBlockType = new byte[16];
+		recBlockChr = new int[16];
+		recBlockCol = new int[16];
+		recBlockType = new int[16];
 	}
 	
 	public static String getNoteName(int v)
@@ -71,8 +71,11 @@ public class CraftrWindow
 		linechr = new int[] { 218, 191, 192, 217, 196, 179 }; // border NW, NE, SW, SE, horiz, very
 	}
 	
-	public void addRecBlock(byte t, byte ch, byte co)
+	public void addRecBlock(byte at, byte ach, byte aco)
 	{
+		int t = 0xFF&(int)at;
+		int ch = 0xFF&(int)ach;
+		int co = 0xFF&(int)aco;
 		int len=15;
 		if(recBlockChr[0]==ch&&recBlockCol[0]==co&&recBlockType[0]==t)return;
 		for(int i=1;i<15;i++)
@@ -165,7 +168,7 @@ public class CraftrWindow
 				{
 					int tmx = fx+8+((i&3)<<4);
 					int tmy = fy+8+((i>>2)<<4);
-					cc.DrawChar(tmx,tmy,recBlockChr[i],recBlockCol[i],g);
+					cc.DrawChar(tmx,tmy,(byte)recBlockChr[i],(byte)recBlockCol[i],g);
 					if(insideRect(cc.mx,cc.my,tmx,tmy,16,16))
 					{
 						g.setColor(new Color(0xAAAAAA));

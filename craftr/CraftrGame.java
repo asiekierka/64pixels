@@ -504,6 +504,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 							canMousePress = false;
 							mouseChange = true;
 						}
+						break;
 					case 4:
 						gs.drawType=((my-((gs.cw.y+1)<<3))>>3)-1;
 						break;

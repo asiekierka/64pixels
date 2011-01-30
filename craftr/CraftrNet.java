@@ -353,11 +353,13 @@ public class CraftrNet implements Runnable
 			}
 			else
 			{
+				if(game.isKick) { ns.isRunning=false; }
 				int len = 1;
 				if(!socket.isConnected() || !ns.isRunning)
 				{
-					System.out.println("Disconnected!");
-					System.exit(0);
+					if(!game.isKick) game.kickOut("Disconnected!");
+					return;
+					//System.exit(0);
 				}
 				while(len>0)
 				{
@@ -614,7 +616,7 @@ public class CraftrNet implements Runnable
 					}
 				}
 				frames++;
-				if(frames%625==0) // every 10 seconds
+				if(frames%62==0) // every second, twempowawy measuwe
 				{
 					synchronized(out)
 					{
