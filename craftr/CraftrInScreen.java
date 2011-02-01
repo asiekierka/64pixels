@@ -84,10 +84,12 @@ public class CraftrInScreen extends CraftrScreen
 			case 2:
 				switch(kc)
 				{
+					case KeyEvent.VK_W:
 					case KeyEvent.VK_UP:
 						inSel--;
 						if(inSel<0) inSel=inputStrings.length-1;
 						break;
+					case KeyEvent.VK_S:
 					case KeyEvent.VK_DOWN:
 						inSel++;
 						if(inSel>=inputStrings.length) inSel=0;

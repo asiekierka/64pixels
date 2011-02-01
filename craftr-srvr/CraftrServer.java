@@ -19,6 +19,7 @@ public class CraftrServer
 	public String[] op_ips;
 	public String[] ban_ips;
 	public int spawnX=0;
+	public int privmode=0;
 	public int spawnY=0;
 	public CraftrConfig config;
 	public int nagle=0;
@@ -153,12 +154,6 @@ public class CraftrServer
 				out.write(s,0,s.length());
 				out.newLine();
 			}
-			if(tpforall!=0)
-			{
-				s = "tp-for-all=" + tpforall;
-				out.write(s,0,s.length());
-				out.newLine();
-			}
 			if(passOn)
 			{
 				s = "password=" + pass;
@@ -171,18 +166,21 @@ public class CraftrServer
 				out.write(s,0,s.length());
 				out.newLine();
 			}
-			if(po != 25566)
-			{
-				s = "port=" + po;
-				out.write(s,0,s.length());
-				out.newLine();
-			}
 			if(map.chunks.length!=128)
 			{
 				s = "map-cache-size="+map.chunks.length;
 				out.write(s,0,s.length());
 				out.newLine();
 			}
+			s = "tp-for-all=" + tpforall;
+			out.write(s,0,s.length());
+			out.newLine();
+			s = "port=" + po;
+			out.write(s,0,s.length());
+			out.newLine();
+			s = "private-mode=" + privmode;
+			out.write(s,0,s.length());
+			out.newLine();
 			s = "name=" + name;
 			out.write(s,0,s.length());
 			out.newLine();
@@ -253,6 +251,10 @@ public class CraftrServer
 				else if(key.contains("name"))
 				{
 					name=val;
+				}
+				else if(key.contains("private-mode"))
+				{
+					privmode=nf.parse(val).intValue();
 				}
 			}
 		}
@@ -744,7 +746,7 @@ public class CraftrServer
 		CraftrMapThread ti3m = new CraftrMapThread(map);
 		ti3m.speed = (1000/map_tps);
 		Thread ti4 = new Thread(new CraftrHeartThread(this));
-		ti4.start();
+		if(privmode==0) ti4.start();
 		if(ti3m.speed<10 || ti3m.speed>1000) ti3m.speed=100;
 		Thread ti3 = new Thread(ti3m);
 		if(map_tps>0) ti3.start();

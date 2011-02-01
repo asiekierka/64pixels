@@ -96,7 +96,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public static String getVersion()
 	{
-		return "0.0.11";
+		return "0.0.11.1";
 	}
 	public CraftrGame()
 	{
@@ -344,7 +344,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			for(int i=0;i<config.keys;i++)
 			{
-				String key = config.key[i];
+				String key = config.key[i].toLowerCase();
 				String val = config.value[i];
 				//System.out.println("Config key found: " + key);
 				if(key.contains("drawn-type"))
@@ -1171,6 +1171,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		String ostr = "";
 		while(inconf)
 		{
+			is = new CraftrInScreen(canvas,2,"Main menu");
 			is.isRunning=true;
 			is.addStrings(modes);
 			canvas.cs = (CraftrScreen)is;
@@ -1196,17 +1197,19 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						CraftrConfig csl = new CraftrConfig();
 						csl.load(map.saveDir + "slist.txt");
 						// by now csl stores the serverlist D:
-						String[] csll = new String[csl.keys+1];
+						String[] csll = new String[csl.keys+2];
 						csll[0]="Custom address";
 						for(int i=1;i<=csl.keys;i++)
 						{
-							csll[i]=csl.key[i-1];
+							csll[i]=csl.keyo[i-1];
 						}
+						csll[csll.length-1]="<- Back";
 						is = new CraftrInScreen(canvas,2,"Choose server");
 						is.addStrings(csll);
 						canvas.cs= (CraftrScreen) is;
 						loopInScreen();
 						if(is.inSel==0) doCustom=true;
+						else if(is.inSel==(csll.length-1)) { inconf = true; break; }
 						else ostr=csl.value[is.inSel-1];
 					}
 					else
