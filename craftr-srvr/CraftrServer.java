@@ -9,6 +9,7 @@ public class CraftrServer
 {
 	public ServerSocket servsock;
 	public CraftrClient[] clients;
+	public String name = "64pixels server";
 	public boolean run; 
 	public CraftrMap map;
 	public CraftrInput ci;
@@ -26,7 +27,17 @@ public class CraftrServer
 	public boolean passOn = false;
 	public String pass;
 	public CraftrWarps warps;
-	private int po = 25566;
+	public int po = 25566;
+
+	public int countPlayers()
+	{
+		int t = 0;
+		for(int i=0;i<255;i++)
+		{
+			if(clients[i]!=null && clients[i].dc==0) t++;
+		}
+		return t;
+	}
 
 	public boolean isOp(String ip)
 	{
@@ -725,6 +736,8 @@ public class CraftrServer
 		ti2.start();
 		CraftrMapThread ti3m = new CraftrMapThread(map);
 		ti3m.speed = (1000/map_tps);
+		Thread ti4 = new Thread(new CraftrHeartThread(this));
+		ti4.start();
 		if(ti3m.speed<10 || ti3m.speed>1000) ti3m.speed=100;
 		Thread ti3 = new Thread(ti3m);
 		if(map_tps>0) ti3.start();
@@ -775,7 +788,7 @@ public class CraftrServer
 	public void end()
 	{
 		saveMap();
-		while(mapBeSaved) { Thread.sleep(2); } // bleh
+		while(mapBeSaved) { try{Thread.sleep(2);}catch(Exception e){} } // bleh
 		saveConfig();
 	}
 }
