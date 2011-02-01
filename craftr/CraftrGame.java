@@ -7,6 +7,7 @@ import java.util.zip.*;
 import javax.swing.*;
 import java.lang.*;
 import java.text.*;
+import java.net.*;
 
 public class CraftrGame extends JComponent
 implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, FocusListener
@@ -160,6 +161,30 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	{
 		isKick=true;
 		isKickS = why;
+	}
+
+	public boolean fetchSList()
+	{
+		URL u1;
+		InputStream is = null;
+		FileOutputStream fos;
+		try
+		{
+			u1 = new URL("http://64pixels.org/serverlist.php?asie=1");
+			is = u1.openStream();
+			fos = new FileOutputStream(map.saveDir + "slist.txt");
+			int count = 1;
+			while(count>0)
+			{
+				byte[] t = new byte[64];
+				count=is.read(t,0,64);
+				System.out.println("read " + count + " bytes");
+				if(count>0) fos.write(t,0,count);
+			}
+		}
+		catch(Exception e) { e.printStackTrace(); return false;}
+		finally { try{is.close();}catch(Exception e){} }
+		return true;
 	}
 
 	public void realKickOut()
@@ -1158,12 +1183,49 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					break;
 				case 1:
 					multiplayer = true;
-					is = new CraftrInScreen(canvas,1,"Input address:");
-					is.minLen=0;
-					is.maxLen=60;
-					canvas.cs = (CraftrScreen)is;
-					loopInScreen();
-					ostr = is.inString;
+					boolean doCustom = true;
+					CraftrKickScreen cks = new CraftrKickScreen(canvas,"Loading serverlist...");
+					cks.mName="DON'T PANIC";
+					canvas.cs = (CraftrScreen) cks;
+					canvas.draw(mx,my);
+					System.out.print("fetching... ");
+					if(fetchSList())
+					{
+						System.out.println("fetched!");
+						doCustom=false; // for now
+						CraftrConfig csl = new CraftrConfig();
+						csl.load(map.saveDir + "slist.txt");
+						// by now csl stores the serverlist D:
+						String[] csll = new String[csl.keys+1];
+						csll[0]="Custom address";
+						for(int i=1;i<=csl.keys;i++)
+						{
+							csll[i]=csl.key[i-1];
+						}
+						is = new CraftrInScreen(canvas,2,"Choose server");
+						is.addStrings(csll);
+						canvas.cs= (CraftrScreen) is;
+						loopInScreen();
+						if(is.inSel==0) doCustom=true;
+						else ostr=csl.value[is.inSel-1];
+					}
+					else
+					{
+						System.out.println("not fetched (means glados)");
+						cks.mName="SERVERLIST NOT FOUND";
+						cks.name="PLEASE DON'T PANIC, ONE SECOND...";
+						canvas.draw(mx,my);
+						try{Thread.sleep(1800);}catch(Exception e){}
+					}
+					if(doCustom)
+					{
+						is = new CraftrInScreen(canvas,1,"Input address:");
+						is.minLen=0;
+						is.maxLen=60;
+						canvas.cs = (CraftrScreen)is;
+						loopInScreen();
+						ostr = is.inString;
+					}
 					is = new CraftrInScreen(canvas,1,"Enter nickname:");
 					is.minLen=1;
 					is.maxLen=16;

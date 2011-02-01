@@ -753,8 +753,13 @@ public class CraftrServer
 			}
 		}
 	}
+
+	public boolean mapBeSaved=false;
+
 	public void saveMap()
 	{
+		if(mapBeSaved) return;
+		mapBeSaved=true;
 		for(int i=0;i<map.chunks.length;i++)
 		{
 			if(map.chunks[i].isSet || map.chunks[i].isUsed)
@@ -762,13 +767,15 @@ public class CraftrServer
 				map.saveChunkFile(i);
 			}
 		}
+		saveNamesFile(op_ips,"ops.txt");
+		saveNamesFile(ban_ips,"bans.txt");
+		warps.saveFile("warps.dat");
+		mapBeSaved=false;
 	}
 	public void end()
 	{
 		saveMap();
-		saveNamesFile(op_ips,"ops.txt");
-		saveNamesFile(ban_ips,"bans.txt");
-		warps.saveFile("warps.dat");
+		while(mapBeSaved) { Thread.sleep(2); } // bleh
 		saveConfig();
 	}
 }
