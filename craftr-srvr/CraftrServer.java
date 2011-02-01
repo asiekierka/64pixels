@@ -336,11 +336,11 @@ public class CraftrServer
 		{
 			if(id == 255)
 			{
-				return "Commands: who warp warps kick nick deop save ban unban";
+				return "Commands: who warp warps kick nick deop save ban unban delwarp";
 			}
 			else if(clients[id].op)
 			{
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp";
 			}
 			else
 			{
@@ -544,6 +544,19 @@ public class CraftrServer
 				{
 					warps.warps.add(new CraftrWarp(clients[id].x,clients[id].y,cmd[1]));
 					return "New warp added.";
+				}
+			}
+			else if(cmd[0].equals("delwarp"))
+			{
+				int t = warps.findWarpID(cmd[1]);
+				if(t>=0)
+				{
+					warps.warps.remove(t);
+					return "Warp removed.";
+				}
+				else
+				{
+					return "Warp not found!";
 				}
 			}
 			else

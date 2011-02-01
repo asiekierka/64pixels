@@ -6,29 +6,35 @@ public class CraftrConfig
 {
 	public String[] key;
 	public String[] value;
-	public static final int defLen = 256;
+	public String[] keyo;
+
+	public static final int defLen = 512;
 	public int maxkeys, keys;
 	public CraftrConfig()
 	{
 		key = new String[defLen];
+		keyo = new String[defLen];
 		value = new String[defLen];
-		maxkeys = 256;
+		maxkeys = 512;
 	}
 	public CraftrConfig(int len)
 	{
+		keyo = new String[len];
 		key = new String[len];
 		value = new String[len];
 		maxkeys = len;
 	}
 	public CraftrConfig(String filename)
 	{
+		keyo = new String[defLen];
 		key = new String[defLen];
 		value = new String[defLen];
-		maxkeys = 256;
+		maxkeys = 512;
 		load(filename);
 	}
 	public CraftrConfig(String filename, int len)
 	{
+		keyo = new String[len];
 		key = new String[len];
 		value = new String[len];
 		maxkeys = len;
@@ -37,6 +43,7 @@ public class CraftrConfig
 	
 	public void load(String fn)
 	{
+		keys=0;
 		String tl = "";
 		BufferedReader in;
 		try
@@ -50,16 +57,14 @@ public class CraftrConfig
 					tl = in.readLine();
 					if(tl != null)
 					{
-						char[] ctl = tl.toCharArray();
-						int i = 0;
-						for(i=0;i<ctl.length;i++)
+						String[] t = tl.split("=");
+						if(t.length==2)
 						{
-							if(ctl[i] == '=') break;
+							keyo[keys] = t[0];
+							key[keys]=t[0].toLowerCase();
+							value[keys] = t[1];
+							keys++;
 						}
-						if(i == ctl.length-1) break;
-						key[keys] = tl.substring(0,i).toLowerCase();
-						value[keys] = tl.substring(i+1);
-						keys++;
 					}
 				}
 				in.close();
@@ -68,6 +73,7 @@ public class CraftrConfig
 		catch(Exception e)
 		{
 			System.out.println("Couldn't load config file! " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 	
@@ -77,6 +83,7 @@ public class CraftrConfig
 		for(int i=0;i<maxkeys;i++)
 		{
 			key[i]="";
+			keyo[i]="";
 			value[i]="";
 		}
 	}
