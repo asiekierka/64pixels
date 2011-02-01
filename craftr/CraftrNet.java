@@ -609,7 +609,7 @@ public class CraftrNet implements Runnable
 							case 0xF1:
 								pingsWaiting--;
 								break;
-							case 0xFF:
+							case 0xF5:
 								String tmp4 = readString();
 								// that thing was a temporary measure since 0.0.1
 								//System.out.println("KICKED: " + tmp4);

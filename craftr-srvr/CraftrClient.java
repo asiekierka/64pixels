@@ -182,7 +182,7 @@ public class CraftrClient implements Runnable
 		{
 			synchronized(out)
 			{
-				out.writeByte(0xFF);
+				out.writeByte(0xF5);
 				writeString(msg);
 				sendPacket();
 			}
@@ -668,7 +668,7 @@ public class CraftrClient implements Runnable
  									int loly = this.y;
  									int lolvx = in.readByte();
  									int lolvy = in.readByte();
-									System.out.println("push " + lolvx + " " + lolvy + " " + lolx + " " + loly);
+									//System.out.println("push " + lolvx + " " + lolvy + " " + lolx + " " + loly);
  									
  									if((lolvx != 0 && lolvy != 0) || (lolvx == 0 && lolvy == 0))
  										kick("Invalid touch distance!");

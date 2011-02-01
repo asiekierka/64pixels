@@ -177,12 +177,15 @@ public class CraftrServer
 				out.write(s,0,s.length());
 				out.newLine();
 			}
-			if(map.chunks.length!=64)
+			if(map.chunks.length!=128)
 			{
 				s = "map-cache-size="+map.chunks.length;
 				out.write(s,0,s.length());
 				out.newLine();
 			}
+			s = "name=" + name;
+			out.write(s,0,s.length());
+			out.newLine();
 			s = "spawn-x=" + spawnX;
 			out.write(s,0,s.length());
 			out.newLine();
@@ -246,6 +249,10 @@ public class CraftrServer
 				else if(key.contains("map-cache-size"))
 				{
 					map = new CraftrMap(nf.parse(val).intValue());
+				}
+				else if(key.contains("name"))
+				{
+					name=val;
 				}
 			}
 		}
