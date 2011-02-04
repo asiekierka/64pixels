@@ -24,6 +24,7 @@ public class CraftrServer
 	public CraftrConfig config;
 	public int nagle=0;
 	public int map_tps=10;
+	public int map_save_duration=10;
 	public int tpforall=0;
 	public boolean passOn = false;
 	public String pass;
@@ -172,6 +173,12 @@ public class CraftrServer
 				out.write(s,0,s.length());
 				out.newLine();
 			}
+			if(map_save_duration!=10)
+			{
+				s = "map-save-duration="+map_save_duration;
+				out.write(s,0,s.length());
+				out.newLine();
+			}
 			s = "tp-for-all=" + tpforall;
 			out.write(s,0,s.length());
 			out.newLine();
@@ -305,7 +312,7 @@ public class CraftrServer
 				return "";
 			}
 		}
-		else if(cmd[0].equals("warp"))
+		else if(cmd[0].equals("warp") && id!=255)
 		{
 			int t = warps.findWarpID(cmd[1]);
 			if(t>=0)
@@ -336,7 +343,7 @@ public class CraftrServer
 		{
 			if(id == 255)
 			{
-				return "Commands: who warp warps kick nick deop save ban unban delwarp";
+				return "Commands: who warps kick nick deop save ban unban delwarp";
 			}
 			else if(clients[id].op)
 			{
@@ -377,7 +384,7 @@ public class CraftrServer
 				else
 				{
 					clients[t].kick();
-					System.out.println("[KICK] user " + clients[t].nick + ", by user " + clients[id].nick);
+					if(id!=255) System.out.println("[KICK] user " + clients[t].nick + ", by user " + clients[id].nick);
 					return clients[t].nick + " has been kicked.";
 				}
 			}
@@ -447,11 +454,11 @@ public class CraftrServer
 					{
 						String tt = clients[t].nick;
 						clients[t].changeNickname(cmd[2]);
-						clients[id].sendChatMsgAll("User " + tt + " is now known as " + cmd[2]);
+						if(id!=255) clients[id].sendChatMsgAll("User " + tt + " is now known as " + cmd[2]);
 						return "Nickname of user " + tt + " changed.";
 					}
 				}
-				else if(cmd.length>1)
+				else if(cmd.length>1 && id!=255)
 				{
 					String tt = clients[id].nick;
 					clients[id].changeNickname(cmd[1]);
@@ -475,6 +482,7 @@ public class CraftrServer
 						clients[t].sendChatMsgSelf("You're opped now!");
 						clients[t].op=true;
 						clients[t].sendOpPacket(1);
+						saveNamesFile(op_ips,"ops.txt");
 					}
 				}
 			}
@@ -493,6 +501,7 @@ public class CraftrServer
 						clients[t].sendChatMsgSelf("You're not opped anymore.");
 						clients[t].op=false;
 						clients[t].sendOpPacket(0);
+						saveNamesFile(op_ips,"ops.txt");
 					}
 				}
 			}
@@ -514,8 +523,9 @@ public class CraftrServer
 					else
 					{
 						ban(clients[t].socket.getInetAddress().getHostAddress());
+						saveNamesFile(ban_ips,"bans.txt");
 						clients[t].kick("Banned!");
-						System.out.println("[BAN] user " + clients[t].nick + ", by user " + clients[id].nick);
+						if(id!=255) System.out.println("[BAN] user " + clients[t].nick + ", by user " + clients[id].nick);
 					}
 				}
 			}
@@ -526,6 +536,7 @@ public class CraftrServer
 					if(s.equals(cmd[1]))
 					{
 						unban(s);
+						saveNamesFile(ban_ips,"bans.txt");
 						return "Person unbanned!";
 					}
 				}
@@ -552,6 +563,7 @@ public class CraftrServer
 				if(t>=0)
 				{
 					warps.warps.remove(t);
+					warps.saveFile("warps.dat");
 					return "Warp removed.";
 				}
 				else
@@ -728,6 +740,7 @@ public class CraftrServer
 	public void sendOthers(int a, byte[] arr)
 	{
 		sendOthers(a,arr,arr.length);
+
 	}
 	public void sendAll(byte[] arr, int len)
 	{
@@ -750,21 +763,32 @@ public class CraftrServer
 	
 	public void start()
 	{
+		System.out.println("64px-srvr version 0.0.11.2");
+		System.out.println("Bonus points for Salzkorn for guessing the asdfmovie reference in #64pixels");
+		System.out.print("Initializing: #");
 		run = true;
 		ci = new CraftrInput(this);
 		Thread ti = new Thread(ci);
 		ti.start();
-		Thread ti2 = new Thread(new CraftrAutoSaver(this));
+		System.out.print("#");
+		CraftrAutoSaver cas = new CraftrAutoSaver(this);
+		cas.mapspeed=(map_save_duration*60);
+		Thread ti2 = new Thread(cas);
 		ti2.start();
+		System.out.print("#");
 		CraftrMapThread ti3m = new CraftrMapThread(map);
 		ti3m.speed = (1000/map_tps);
 		Thread ti4 = new Thread(new CraftrHeartThread(this));
 		if(privmode==0) ti4.start();
+		System.out.print("#");
 		if(ti3m.speed<10 || ti3m.speed>1000) ti3m.speed=100;
 		Thread ti3 = new Thread(ti3m);
 		if(map_tps>0) ti3.start();
+		System.out.print("#");
 		warps = new CraftrWarps();
 		warps.loadFile("warps.dat");
+		System.out.println("#");
+		System.out.println("READY!");
 		while(run)
 		{
 			try
@@ -802,9 +826,11 @@ public class CraftrServer
 				map.saveChunkFile(i);
 			}
 		}
+/*
 		saveNamesFile(op_ips,"ops.txt");
 		saveNamesFile(ban_ips,"bans.txt");
 		warps.saveFile("warps.dat");
+*/
 		mapBeSaved=false;
 	}
 	public void end()

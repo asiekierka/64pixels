@@ -1,6 +1,7 @@
 public class CraftrAutoSaver implements Runnable
 {
 	public CraftrServer serv;
+	public int mapspeed=600;
 	
 	public CraftrAutoSaver(CraftrServer s)
 	{
@@ -13,7 +14,7 @@ public class CraftrAutoSaver implements Runnable
 		{
 			try
 			{
-			Thread.sleep(10*60*1000);
+			Thread.sleep(mapspeed*1000);
 			}
 			catch(Exception e){}
 			serv.saveMap();
