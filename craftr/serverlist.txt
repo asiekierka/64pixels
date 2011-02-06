@@ -1,3 +1,0 @@
-64pixels.org=64pixels Official Server
-botb.64pixels.org=BotB server
-salz.zapto.org=Salzkorn's Wirium Server
