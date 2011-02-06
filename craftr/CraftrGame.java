@@ -346,7 +346,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			{
 				String key = config.key[i].toLowerCase();
 				String val = config.value[i];
-				//System.out.println("Config key found: " + key);
 				if(key.contains("drawn-type"))
 				{
 					gs.drawType = nf.parse(val).byteValue();
@@ -436,7 +435,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				{
 					String[] dchi = key.split("\\|");
 					/* as | is a special character here, we need to escape it with \. *
-					 *  but \ is also special so we escape THAT with another \! duhh  */
+					 *  but \ is also special so we escape THAT with another \         */
 					if(dchi.length==2)
 					{
 						gs.drawChrA[nf.parse(dchi[1]).intValue()]=nf.parse(val).intValue();
@@ -464,7 +463,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	
 	public void mouseEntered(MouseEvent ev) {}
 	public void mouseExited(MouseEvent ev) {}
-	public void mouseClicked(MouseEvent ev) {} // this one sucks
+	public void mouseClicked(MouseEvent ev) {}
 	public void mousePressed(MouseEvent ev)
 	{
 		mb = ev.getButton();
@@ -570,8 +569,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(insideRect(mx,my,13*16,gs.BARPOS_Y,256,16))
 				{
 					gs.sdrawChr(((mx-(13*16))>>4)+gs.chrBarOff);
-					//gs.chrBarOff = gs.gdrawChr()-8;
-					//if(gs.chrBarOff<0) gs.chrBarOff+=256;
 				}
 				else if(mb==ev_3 && insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
 				{
@@ -587,7 +584,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 			} else if (gs.barselMode == 2) // checkings, col
 			{
-				// insideRect!
 				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,128,16))
 				{
 					int colChoose = (mx-(12*16+8))>>3;
@@ -606,7 +602,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public void mouseReleased(MouseEvent ev) { mb = ev_no; canMousePress = true;}
 
 	public void mouseMoved(MouseEvent ev) {
-		updateMouse(ev.getX(),ev.getY());//System.out.println(mx + ", " + my);
+		updateMouse(ev.getX(),ev.getY());
 	}
 	public void mouseDragged(MouseEvent ev) { updateMouse(ev.getX(),ev.getY()); } // this can be quite handy
 	
@@ -618,8 +614,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		{
 			int tx = (players[255].px+(mx>>4))-15;
 			int ty = (players[255].py+(my>>4))-12;
-			gs.hov_type=map.getBlock(tx,ty)[0];
-			gs.hov_par=map.getBlock(tx,ty)[1];
+			gs.hov_type=map.getBlock(tx,ty).getTypeWithVirtual();
 		}
 	}	
 	public void processMouse()
@@ -642,17 +637,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 				if(mb == ev_2)
 				{
-					byte[] tmpg = map.getBlock(players[255].px-15+(mx>>4),players[255].py-12+(my>>4));
- 					if(tmpg[5] == 0)
- 					{
- 						gs.drawType = tmpg[0];
- 						gs.sdrawChr(tmpg[2]);
- 						gs.sdrawCol(tmpg[3]);
- 					} else {
- 						gs.drawType = -1;
- 						gs.sdrawChr(tmpg[4]);
- 						gs.sdrawCol(tmpg[5]);
- 					}
+					CraftrBlock capturedBlock = map.getBlock(players[255].px-15+(mx>>4),players[255].py-12+(my>>4));
+ 					gs.drawType = capturedBlock.getTypeWithVirtual();
+ 					gs.sdrawChr(capturedBlock.getChar());
+ 					gs.sdrawCol(capturedBlock.getColor());
 					gs.chrBarOff = gs.gdrawChr()-8;
 					if(gs.chrBarOff<0) gs.chrBarOff+=256;
 					gs.cw.addRecBlock((byte)gs.drawType,(byte)gs.gdrawChr(),(byte)gs.gdrawCol());
@@ -665,12 +653,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					oldmb = mb;
 					int ttx = players[255].px-15+(mx>>4);
 					int tty = players[255].py-12+(my>>4);
-					if(!multiplayer) synchronized(map.blockcheck)
+					if(!multiplayer) synchronized(map.physics)
 					{
-						map.blockcheck.add(new CraftrBlockPos(ttx,tty));
+						map.physics.addBlockToCheck(new CraftrBlockPos(ttx,tty));
 						for(int i=0;i<4;i++)
 						{
-							map.blockcheck.add(new CraftrBlockPos(ttx+map.xMovement[i],tty+map.yMovement[i]));
+							map.physics.addBlockToCheck(new CraftrBlockPos(ttx+map.xMovement[i],tty+map.yMovement[i]));
 						}
 					}
 					if(gs.drawType==2 && mb == ev_1)
@@ -688,12 +676,14 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
  						map.setBlock(ttx,tty,tmparr);
  						if(mb == ev_1 || mb == ev_3)
 						{
-							byte[] t = map.getBlock(ttx,tty);
-							map.setBlock(ttx,tty,t[0],t[1],(byte)map.updateLooks(ttx,tty,t[2]),t[3]);
+							CraftrBlock blockPlaced = map.getBlock(ttx,tty);
+							byte[] bPdata = blockPlaced.getBlockData();
+							map.setBlock(ttx,tty,bPdata[0],bPdata[1],(byte)map.updateLook(blockPlaced),bPdata[3]);
 							for(int i=0;i<4;i++)
 							{
-								t = map.getBlock(ttx+map.xMovement[i],tty+map.yMovement[i]);
-								map.setBlock(ttx+map.xMovement[i],tty+map.yMovement[i],t[0],t[1],(byte)map.updateLooks(ttx+map.xMovement[i],tty+map.yMovement[i],t[2]),t[3]);
+								blockPlaced = map.getBlock(ttx+map.xMovement[i],tty+map.yMovement[i]);
+								bPdata = blockPlaced.getBlockData();
+								map.setBlock(ttx+map.xMovement[i],tty+map.yMovement[i],bPdata[0],bPdata[1],(byte)map.updateLook(blockPlaced),bPdata[3]);
 							}
 						}
 					}
@@ -755,16 +745,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					mouseChange=true;
 				}
 			}
-/*
-			else if(ev.isShiftDown()&&kc==key_left)
-					shoot(0);
-			else if(ev.isShiftDown()&&kc==key_right)
-					shoot(1);
-			else if(ev.isShiftDown()&&kc==key_up)
-					shoot(2);
-			else if(ev.isShiftDown()&&kc==key_down)
-					shoot(3);
-*/
 			else if(kc==key_left)
 				keyHeld[1] = true;
 			else if(kc==key_right)
@@ -912,6 +892,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	{
 		int px = players[255].px+dpx;
 		int py = players[255].py+dpy;
+		CraftrBlock blockMoveTo=map.getBlock(px,py);
 		if(map.pushAttempt(px,py,dpx,dpy))
 		{
 			if(multiplayer)
@@ -928,7 +909,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 			return 3;
 		}
-		else if(map.isEmpty(px,py))
+		else if(blockMoveTo.isEmpty())
 		{
 			if(multiplayer) net.playerMove(dpx,dpy);
 			else
@@ -1102,8 +1083,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				int ty = (players[i].py-players[255].py)+12;
 				if(tx>=0 && ty>=0 && tx<32 && ty<25)
 				{
-					byte[] t = map.getBlock(players[i].px,players[i].py);
-					if(t[0]!=8) gs.drawBlock(tx,ty,(byte)players[i].pchr,(byte)players[i].pcol);
+					CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
+					if(blockAtPlayer.getType()!=8) gs.drawBlock(tx,ty,(byte)players[i].pchr,(byte)players[i].pcol);
 					gs.addPlayer(i,tx,ty,players[i].name);
 				}
 				else gs.removePlayer(i);
@@ -1118,11 +1099,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public void init()
 	{
-		// i know it's a hack but still
 		if(isApplet)
 		{
 			applet.getContentPane().add(canvas);
-			//appletwindow.pack();
 		} else
 		{
 			window.add(canvas);
@@ -1139,7 +1118,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		{
 			while(is.isRunning)
 			{
-				//keyPressedOld();
 				canvas.draw(mx,my);
 				if(waitTime>0) waitTime--;
 				if(mx != oldmx || my != oldmy || mb != oldmb)
@@ -1262,7 +1240,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public void start(String[] args)
 	{
-		ev_1=65535; // temp so weird stuff doesnt happen
+		ev_1=65535;
 		if(!isApplet)
 		{
 			window.getRootPane().addComponentListener(this);
@@ -1381,7 +1359,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 			else
 			{
-				if(map.blockcheck.size()>0) blockChange=true;
 				playerChange = players[255].posChanged;
 				players[255].posChanged = false;
 			}
@@ -1396,14 +1373,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					oldmb = mb;
 				}
 				render();
-				if(playerChange || blockChange || mouseChange || netChange)
-				{
-					netChange = false;
-					canvas.draw(mx,my);
-					playerChange = false;
-					blockChange = false;
-					mouseChange = false;
-				}
+				canvas.draw(mx,my);
 			}
 			frame++;
 		}
@@ -1427,12 +1397,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		}
 		else
 		{
-			//net.sendPackets();
 			net.sockClose();
 		}
 		saveConfig();
 		audio.kill();
-		//conf.SaveConfig(map.saveDir + "config.txt");
 		System.out.println("Done!");
 	}
 	public void finalize()

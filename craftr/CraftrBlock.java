@@ -2,10 +2,7 @@ public class CraftrBlock
 {
 	public int x = 0;
 	public int y = 0;
-	public byte type = 0;
-	public byte param = 0;
-	public byte col = 0;
-	public byte chr = 0;
+	private byte[] block = new byte[6];
 	public boolean setOnlyType = false;
 	
 	public CraftrBlock()
@@ -19,45 +16,84 @@ public class CraftrBlock
 	{
 		this(ax,ay,at,0,ach,aco);
 	}
-	public CraftrBlock(int ax, int ay, int at, int ap, int ach, int aco)
-	{
-		x=ax;
-		y=ay;
-		type=(byte)at;
-		param=(byte)ap;
-		chr=(byte)ach;
-		col=(byte)aco;
-	}
 	public CraftrBlock(int ax, int ay, int at, int ap, int ach, int aco, boolean st)
 	{
 		x=ax;
 		y=ay;
 		setOnlyType=st;
-		type=(byte)at;
-		param=(byte)ap;
-		chr=(byte)ach;
-		col=(byte)aco;
+		block[0]=(byte)at;
+		block[1]=(byte)ap;
+		if(block[0]==(byte)-1)
+		{
+			block[4]=(byte)ach;
+			block[5]=(byte)aco;
+		}
+		else
+		{
+			block[2]=(byte)ach;
+			block[3]=(byte)aco;
+		}
 	}
-	/*
-	public boolean equals(Object other)
+	public CraftrBlock(int ax, int ay, int at, int ap, int ach, int aco)
 	{
-		if(other==null) return false;
-		if(!(other instanceof CraftrBlock)) return false;
-		CraftrBlock co = (CraftrBlock)other;
-		return (co.x==x && co.y==y);
+		this(ax,ay,at,ap,ach,aco,false);	
 	}
-	public int hashCode()
+	public CraftrBlock(int ax, int ay, byte[] bd)
 	{
-		int hash = 1;
-		hash = hash * 31 + x;
-		hash = hash * 31 + y;
-		return hash;
+		x=ax;
+		y=ay;
+		block=bd;
 	}
-	*/
-	public CraftrBlock copy()
+
+	public boolean isEmpty()
 	{
-		CraftrBlock tz = new CraftrBlock(x,y,type,param,chr,col);
-		tz.setOnlyType=setOnlyType;
-		return tz;
+		if(isPushable()) return false;
+		if(block[0]==0 || block[0]==2 || block[0]==5 || (block[0]==6 && ((int)block[1]&0x80)!=0) || block[0]==8) return true;
+		return false;
+	}
+
+	public boolean isWiriumNeighbour()
+	{
+		if((block[0]>=2 && block[0]<=7) || block[0]==9 || block[0]==10) return true;
+		return false;
+	}
+
+	public boolean isPushable()
+	{
+		if(block[5]!=0) return true;
+		return false;
+	}
+
+	public int getType()
+	{
+		return 0xFF&(int)block[0];
+	}
+
+	public int getTypeWithVirtual()
+	{
+		if(isPushable()) return -1;
+		return 0xFF&(int)block[0];
+	}
+
+	public int getParam()
+	{
+		return 0xFF&(int)block[1];
+	}
+
+	public int getChar()
+	{
+		if(isPushable()) return 0xFF&(int)block[4];
+		return 0xFF&(int)block[2];
+	}
+
+	public int getColor()
+	{
+		if(isPushable()) return 0xFF&(int)block[5];
+		return 0xFF&(int)block[3];
+	}
+
+	public byte[] getBlockData()
+	{
+		return block;
 	}
 }
