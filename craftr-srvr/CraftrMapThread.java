@@ -14,10 +14,10 @@ public class CraftrMapThread implements Runnable
 		{
 			try
 			{
-			Thread.sleep(speed);
+			if(speed>0)Thread.sleep(speed);
 			}
 			catch(Exception e){}
-			map.loop();
+			map.physics.tick(map);
 		}
 	}
 }

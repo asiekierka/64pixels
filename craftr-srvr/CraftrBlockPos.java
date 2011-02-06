@@ -1,13 +1,21 @@
 public class CraftrBlockPos
 {
-	public final int x;
-	public final int y;
+	private final int x;
+	private final int y;
 	
 	public CraftrBlockPos(int tx, int ty)
 	{
 		x=tx;
 		y=ty;
 		//System.out.println("new craftrblockpos: " + x + ", " + y);
+	}
+	public int getX()
+	{
+		return x;
+	}
+	public int getY()
+	{
+		return y;
 	}
 	public boolean equals(Object other)
 	{

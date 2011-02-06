@@ -68,6 +68,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public String isKickS;
 	public void playSound(int tx, int ty, int val)
 	{
+		if(val>=256)
+		{
+			playSample(tx,ty,val-256);
+			return;
+		}		
 		int x=players[255].px-tx;
 		int y=players[255].py-ty;
 		audio.playNote(x,y,val,1.0);

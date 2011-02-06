@@ -542,7 +542,7 @@ public class CraftrClient implements Runnable
 								byte ach = in.readByte();
 								byte aco = in.readByte();
 								if(passWait) break;
-								byte[] zc = map.getBlock(ax,ay);
+								byte[] zc = map.getBlock(ax,ay).getBlockData();
 								if(op && (isCopying || isPasting))
 								{
 									out.writeByte(0x31);
@@ -615,10 +615,10 @@ public class CraftrClient implements Runnable
 	 										serv.map.setPushable(ax,ay,(byte)0,(byte)0);
 	 									}
 	 								}
-									serv.map.addbc(new CraftrBlockPos(ax,ay));
+									serv.map.physics.addBlockToCheck(new CraftrBlockPos(ax,ay));
 									for(int i=0;i<4;i++)
 									{
-										serv.map.addbc(new CraftrBlockPos(ax+serv.map.xMovement[i],ay+serv.map.yMovement[i]));
+										serv.map.physics.addBlockToCheck(new CraftrBlockPos(ax+serv.map.xMovement[i],ay+serv.map.yMovement[i]));
 									}
 									synchronized(out)
 									{
@@ -668,8 +668,7 @@ public class CraftrClient implements Runnable
  									int loly = this.y;
  									int lolvx = in.readByte();
  									int lolvy = in.readByte();
-									//System.out.println("push " + lolvx + " " + lolvy + " " + lolx + " " + loly);
- 									
+
  									if((lolvx != 0 && lolvy != 0) || (lolvx == 0 && lolvy == 0))
  										kick("Invalid touch distance!");
  									else if(lolvx < -1 || lolvx > 1 || lolvy < -1 || lolvy > 1)
@@ -679,7 +678,7 @@ public class CraftrClient implements Runnable
  										boolean pa;
  										synchronized(serv.map)
  										{
- 											dq = serv.map.getBlock(lolx+lolvx,loly+lolvy);
+ 											dq = serv.map.getBlock(lolx+lolvx,loly+lolvy).getBlockData();
  											pa = serv.map.pushAttempt(lolx+lolvx,loly+lolvy,lolvx,lolvy);
  										}
  										if(pa)

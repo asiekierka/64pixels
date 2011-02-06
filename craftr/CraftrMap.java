@@ -356,14 +356,10 @@ public class CraftrMap
  			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
  			grabChunk((x>>6),(y>>6)).placePushable(px,py,aChr,aCol);
  		}
-		catch(NoChunkMemException e)
+		catch(Exception e)
 		{
-			System.out.println("setPushable: exception: no chunk memory found. Odd...");
-			//System.exit(1); // someone might still use this
-		}
- 		catch(NullPointerException e)
- 		{
- 			System.out.println("setPushable: no cached chunk near player found. ODD.");
+ 			System.out.println("setPushable: exception!");
+			e.printStackTrace();
  			if(!multiplayer) System.exit(1);
 		}
 	}
@@ -379,9 +375,9 @@ public class CraftrMap
 				if(t15==0 && on>0)
 				{
 					d15=(d15&0x80)|4;
-					game.playSample(x,y,1);
+					playSample(x,y,1);
 				}
-				else if(t15>0 && on==0) game.playSample(x,y,0);
+				else if(t15>0 && on==0) playSample(x,y,0);
 				while(maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
 				modlock=true;
 				setBlock(x,y,block.getType(),(byte)d15,block.getChar(),block.getColor());
@@ -434,7 +430,6 @@ public class CraftrMap
 		if(getBlock(x+dx,y+dy).isEmpty()) // can we not push?
 		{
 			setPushable(x+dx,y+dy,chr,col);
-			game.blockChange=true;
 			return;
 		}
 		int posx = x+dx;
@@ -456,9 +451,17 @@ public class CraftrMap
 		int tys = y+dy;
 		if((posx-dx)<txs) txs=posx-dx;
 		if((posy-dy)<tys) tys=posy-dy;
-		game.blockChange=true;
 		pushMultiple(txs,tys,tx,ty,dx,dy);
 		setPushable(x+dx,y+dy,chr,col);
+	}
+
+	public void playSample(int x, int y, int id)
+	{
+		playSound(x,y,id+256);
+	}
+	public void playSound(int x, int y, int id)
+	{
+		game.playSound(x,y,id);
 	}
 	public static final int[] xMovement = { -1, 1, 0, 0 };
 	public static final int[] yMovement = { 0, 0, -1, 1 };
@@ -494,11 +497,12 @@ public class CraftrMap
 			if(!multiplayer) System.exit(1);
 		}
 	}
-	
+	/*
 	public void setBlock(int x, int y, byte t1, byte ch1, byte co1)
 	{
 		setBlock(x,y,t1,(byte)0,ch1,co1);
 	}
+	*/
 	public void setBlock(int x, int y, int t2, int p2, int ch2, int co2)
 	{
 		try
