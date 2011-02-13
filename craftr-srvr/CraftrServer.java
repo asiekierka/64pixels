@@ -28,6 +28,8 @@ public class CraftrServer
 	public int tpforall=0;
 	public boolean passOn = false;
 	public String pass;
+	public boolean opPassOn = false;
+	public String opPass;
 	public CraftrWarps warps;
 	public int po = 25566;
 
@@ -161,6 +163,12 @@ public class CraftrServer
 				out.write(s,0,s.length());
 				out.newLine();
 			}
+			if(opPassOn)
+			{
+				s = "op-password=" + opPass;
+				out.write(s,0,s.length());
+				out.newLine();
+			}
 			if(anonMode)
 			{
 				s = "anonymous-mode=1";
@@ -237,6 +245,11 @@ public class CraftrServer
 				else if(key.contains("tp-for-all"))
 				{
 					tpforall=nf.parse(val).intValue();
+				}
+				else if(key.contains("op-password"))
+				{
+					opPassOn=true;
+					opPass=val;
 				}
 				else if(key.contains("password"))
 				{
@@ -339,6 +352,16 @@ public class CraftrServer
 			}
 			return wt;
 		}
+		else if((cmd[0].equals("id") || cmd[0].equals("identify")) && id!=255)
+		{
+			if(!opPassOn) return "Identify disabled!";
+			if(cmdz.length>1 && cmdz[1].equals(opPass))
+			{
+				clients[id].op=true;
+				clients[id].sendOpPacket(1);
+				return "You're opped now!";
+			} else return "Incorrect op password! :(";
+		}
 		else if(cmd[0].equals("cmds") || cmd[0].equals("help"))
 		{
 			if(id == 255)
@@ -347,11 +370,11 @@ public class CraftrServer
 			}
 			else if(clients[id].op)
 			{
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id";
 			}
 			else
 			{
-				return "Commands: who " + ((tpforall!=0)?"tp ":"") + "warp warps me";
+				return "Commands: who " + ((tpforall!=0)?"tp ":"") + "warp warps me id";
 			}
 		}
 		else if(cmd[0].equals("me") && id!=255)
@@ -763,8 +786,8 @@ public class CraftrServer
 	
 	public void start()
 	{
-		System.out.println("64px-srvr version 0.0.11.2");
-		System.out.println("Bonus points for Salzkorn for guessing the asdfmovie reference in #64pixels");
+		System.out.println("64px-srvr version 0.0.11.3");
+		System.out.println("Bonus points for pushium-pushed pushium pushed into plates");
 		System.out.print("Initializing: #");
 		run = true;
 		ci = new CraftrInput(this);
