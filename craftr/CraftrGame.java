@@ -675,6 +675,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					if(tmparr[0]==-1)
 					{
 						map.setPushable(ttx,tty,tmparr[2],tmparr[3]);
+						map.setBlock(ttx,tty,(byte)0,(byte)0,(byte)0,(byte)0);
 					} else {
  						map.setPushable(ttx,tty,(byte)0,(byte)0);
  						gs.cw.addRecBlock(tmparr[0],tmparr[2],tmparr[3]);
@@ -953,132 +954,22 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	
 	public void render()
 	{
-		// oh my...
-		
-		// This code initalizes Screen Chunk X/Y, Pixel X/Y;
 		int px = players[255].px;
 		int py = players[255].py;
 		int sx = px-15;
 		int sy = py-12;
-		int scx = sx>>6;
-		int scy = sy>>6;
-		int spx = sx&63;
-		int spy = sy&63;
 		try
 		{
-			if(spx<32 && spy<39)
+			for(int iy=0;iy<gs.FULLGRID_H;iy++)
 			{
-				CraftrChunk mychunk = map.grabChunk(scx,scy);
-				// One chunk required
-				// Optimizations galore
-				for(int iy=0;iy<25;iy++)
-				{
-					System.arraycopy(mychunk.chr2,spx+((spy+iy)<<6),gs.scr_chr,iy*canvas.FULLGRID_W,32);
-					System.arraycopy(mychunk.col2,spx+((spy+iy)<<6),gs.scr_col,iy*canvas.FULLGRID_W,32);			
-					System.arraycopy(mychunk.chr,4096+spx+((spy+iy)<<6),gs.f_chr,iy*canvas.FULLGRID_W,32);
-					System.arraycopy(mychunk.col,4096+spx+((spy+iy)<<6),gs.f_col,iy*canvas.FULLGRID_W,32);
-					System.arraycopy(mychunk.type,spx+((spy+iy)<<6),gs.scr_typ,iy*canvas.FULLGRID_W,32);
-				}
-			} else {
-				// This is a mess.
-				// More than one chunk required.
-				CraftrChunk[][] surr = new CraftrChunk[2][2];
-				if(spx>=32 && spy>=39)
-				{
-					map.setUsed(scx,scy);
-					map.setUsed(scx+1,scy);
-					map.setUsed(scx,scy+1);
-					map.setUsed(scx+1,scy+1);
-					map.clearAllUsed();
-					// X and Y take 2 chunks
-					surr[0][0] = map.grabChunk(scx,scy);
-					surr[1][0] = map.grabChunk(scx+1,scy);
-					surr[0][1] = map.grabChunk(scx,scy+1);
-					surr[1][1] = map.grabChunk(scx+1,scy+1);
-				}
-				else if(spx>=32)
-				{
-					map.setUsed(scx,scy);
-					map.setUsed(scx+1,scy);
-					map.clearAllUsed();
-					surr[0][0] = map.grabChunk(scx,scy);
-					surr[1][0] = map.grabChunk(scx+1,scy);
-				}
-				else if(spy>=39)
-				{
-					map.setUsed(scx,scy);
-					map.setUsed(scx,scy+1);
-					map.clearAllUsed();
-					surr[0][0] = map.grabChunk(scx,scy);
-					surr[0][1] = map.grabChunk(scx,scy+1);
-				}
-				else
-				{
-					System.out.println("[SEVERE] render: What are you doing in ELSE if the chunk is one-chunk!? :O");
-					System.exit(1);
-				}
-				int iylen = 64-spy;
-				if(spx>=32)
-				{
-					int tspx = 64-spx;
-					int tspx2 = 32-tspx;
-					for(int iy=0; iy<25; iy++)
-					{
-						if(iy>=iylen)
-						{
-							System.arraycopy(surr[0][1].chr2,((iy-iylen)<<6)+spx,gs.scr_chr,iy*canvas.FULLGRID_W,tspx);
-							System.arraycopy(surr[0][1].col2,((iy-iylen)<<6)+spx,gs.scr_col,iy*canvas.FULLGRID_W,tspx);
-							System.arraycopy(surr[1][1].chr2,(iy-iylen)<<6,gs.scr_chr,(iy*canvas.FULLGRID_W)+tspx,tspx2);
-							System.arraycopy(surr[1][1].col2,(iy-iylen)<<6,gs.scr_col,(iy*canvas.FULLGRID_W)+tspx,tspx2);
-							System.arraycopy(surr[0][1].chr,4096+((iy-iylen)<<6)+spx,gs.f_chr,iy*canvas.FULLGRID_W,tspx);
-							System.arraycopy(surr[0][1].col,4096+((iy-iylen)<<6)+spx,gs.f_col,iy*canvas.FULLGRID_W,tspx);
-							System.arraycopy(surr[1][1].chr,4096+((iy-iylen)<<6),gs.f_chr,(iy*canvas.FULLGRID_W)+tspx,tspx2);
-							System.arraycopy(surr[1][1].col,4096+((iy-iylen)<<6),gs.f_col,(iy*canvas.FULLGRID_W)+tspx,tspx2);
-							System.arraycopy(surr[0][1].type,((iy-iylen)<<6)+spx,gs.scr_typ,iy*canvas.FULLGRID_W,tspx);
-							System.arraycopy(surr[1][1].type,((iy-iylen)<<6),gs.scr_typ,(iy*canvas.FULLGRID_W)+tspx,tspx2);
-							
-						}
-						else
-						{
-							System.arraycopy(surr[0][0].chr2,((spy+iy)<<6)+spx,gs.scr_chr,iy*canvas.FULLGRID_W,tspx);
-							System.arraycopy(surr[0][0].col2,((spy+iy)<<6)+spx,gs.scr_col,iy*canvas.FULLGRID_W,tspx);
-							System.arraycopy(surr[1][0].chr2,(spy+iy)<<6,gs.scr_chr,(iy*canvas.FULLGRID_W)+tspx,tspx2);
-							System.arraycopy(surr[1][0].col2,(spy+iy)<<6,gs.scr_col,(iy*canvas.FULLGRID_W)+tspx,tspx2);	
-							System.arraycopy(surr[0][0].chr,4096+((spy+iy)<<6)+spx,gs.f_chr,iy*canvas.FULLGRID_W,tspx);
-							System.arraycopy(surr[0][0].col,4096+((spy+iy)<<6)+spx,gs.f_col,iy*canvas.FULLGRID_W,tspx);
-							System.arraycopy(surr[1][0].chr,4096+((spy+iy)<<6),gs.f_chr,(iy*canvas.FULLGRID_W)+tspx,tspx2);
 
-							System.arraycopy(surr[1][0].col,4096+((spy+iy)<<6),gs.f_col,(iy*canvas.FULLGRID_W)+tspx,tspx2);	
-							System.arraycopy(surr[0][0].type,((spy+iy)<<6)+spx,gs.scr_typ,iy*canvas.FULLGRID_W,tspx);
-							System.arraycopy(surr[1][0].type,((spy+iy)<<6),gs.scr_typ,(iy*canvas.FULLGRID_W)+tspx,tspx2);
-						}
-					}
-				}
-				else {
-					for(int iy=0; iy<25; iy++)
-					{
-						if(iy>=iylen)
-						{
-							System.arraycopy(surr[0][1].chr2,((iy-iylen)<<6)+spx,gs.scr_chr,iy*canvas.FULLGRID_W,32);
-							System.arraycopy(surr[0][1].col2,((iy-iylen)<<6)+spx,gs.scr_col,iy*canvas.FULLGRID_W,32);
-							System.arraycopy(surr[0][1].chr,4096+((iy-iylen)<<6)+spx,gs.f_chr,iy*canvas.FULLGRID_W,32);
-							System.arraycopy(surr[0][1].col,4096+((iy-iylen)<<6)+spx,gs.f_col,iy*canvas.FULLGRID_W,32);
-							System.arraycopy(surr[0][1].type,((iy-iylen)<<6)+spx,gs.scr_typ,iy*canvas.FULLGRID_W,32);
-						}
-						else
-						{
-							System.arraycopy(surr[0][0].chr2,((spy+iy)<<6)+spx,gs.scr_chr,iy*canvas.FULLGRID_W,32);
-							System.arraycopy(surr[0][0].col2,((spy+iy)<<6)+spx,gs.scr_col,iy*canvas.FULLGRID_W,32);
-							System.arraycopy(surr[0][0].chr,4096+((spy+iy)<<6)+spx,gs.f_chr,iy*canvas.FULLGRID_W,32);
-							System.arraycopy(surr[0][0].col,4096+((spy+iy)<<6)+spx,gs.f_col,iy*canvas.FULLGRID_W,32);
-							System.arraycopy(surr[0][0].type,((spy+iy)<<6)+spx,gs.scr_typ,iy*canvas.FULLGRID_W,32);
-						}
-					}
+				for(int ix=0;ix<gs.FULLGRID_W;ix++)
+				{
+					gs.blocks[(iy*gs.FULLGRID_W)+ix] = map.getBlock(ix+sx,iy+sy);
 				}
 			}
 			for (int i=0;i<256;i++)
 			{
-				if(!multiplayer && i<255) continue;
 				if(players[i] == null)
 				{
 					gs.removePlayer(i);
@@ -1086,13 +977,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 				int tx = (players[i].px-players[255].px)+15;
 				int ty = (players[i].py-players[255].py)+12;
+				gs.removePlayer(i);
 				if(tx>=0 && ty>=0 && tx<32 && ty<25)
 				{
 					CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
-					if(blockAtPlayer.getType()!=8) gs.drawBlock(tx,ty,(byte)players[i].pchr,(byte)players[i].pcol);
-					gs.addPlayer(i,tx,ty,players[i].name);
+					if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
 				}
-				else gs.removePlayer(i);
 			}
 		}
 		catch (Exception e)

@@ -82,14 +82,25 @@ public class CraftrBlock
 
 	public int getChar()
 	{
+		if(getType()==8) return 0xFF&(int)block[2];
 		if(isPushable()) return 0xFF&(int)block[4];
 		return 0xFF&(int)block[2];
 	}
 
 	public int getColor()
 	{
+		if(getType()==8) return 0xFF&(int)block[3];
 		if(isPushable()) return 0xFF&(int)block[5];
 		return 0xFF&(int)block[3];
+	}
+
+	public int getDrawnChar()
+	{
+		return getChar();
+	}
+	public int getDrawnColor()
+	{
+		return getColor();
 	}
 
 	public byte[] getBlockData()

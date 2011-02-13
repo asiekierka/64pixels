@@ -29,11 +29,7 @@ public class CraftrGameScreen extends CraftrScreen
 	public int mx = 0;
 	public int my = 0;
 	
-	public byte[] scr_col;
-	public byte[] scr_chr;
-	public byte[] f_col;
-	public byte[] f_chr;
-	public byte[] scr_typ;
+	public CraftrBlock[] blocks;
 	public CraftrChatMsg[] chatarr;
 	public int chatlen;
 	public boolean cwOpen;
@@ -45,11 +41,7 @@ public class CraftrGameScreen extends CraftrScreen
 	public CraftrGameScreen(CraftrCanvas cc)
 	{
 		c = cc;
-		scr_col = new byte[FULLGRID_W*FULLGRID_H];
-		scr_chr = new byte[FULLGRID_W*FULLGRID_H];
-		f_col = new byte[FULLGRID_W*FULLGRID_H];
-		f_chr = new byte[FULLGRID_W*FULLGRID_H];
-		scr_typ = new byte[FULLGRID_W*FULLGRID_H];
+		blocks = new CraftrBlock[FULLGRID_W*FULLGRID_H];
 		chatarr = new CraftrChatMsg[20];
 		chatlen = 0;
 		for(int i=0;i<256;i++) drawColA[i] = 15;
@@ -87,16 +79,10 @@ public class CraftrGameScreen extends CraftrScreen
 		g.fillRect(0,0,c.sizeX,c.sizeY);
 		for(int iy=0;iy<FULLGRID_H-1;iy++)
 		{
-			//System.out.println(ix);
 			for(int ix=0;ix<FULLGRID_W;ix++)
 			{
 				int t1 = ix+(iy*FULLGRID_W);
-				if(scr_typ[t1] == 2)
-				{
-					c.DrawCharD(ix<<4,iy<<4,f_chr[t1],f_col[t1], g);
-					c.DrawChar(ix<<4,iy<<4,scr_chr[t1],(byte)(scr_col[t1]&15), g);
-				}
-				else c.DrawChar(ix<<4,iy<<4,scr_chr[t1],scr_col[t1], g);
+				if(blocks[t1] != null) c.DrawChar(ix<<4,iy<<4,(byte)blocks[t1].getDrawnChar(),(byte)blocks[t1].getDrawnColor(), g);
 				
 			}
 		}
@@ -112,41 +98,18 @@ public class CraftrGameScreen extends CraftrScreen
 		if(cwOpen) cw.render(c,g);
 		for(int i=0;i<256;i++)
 		{
-			if(players[i] != null && mx>>4 == players[i].px && my>>4 == players[i].py && (!cwOpen || (mx>>3 < cw.x && my>>3 < cw.y && mx>>3 >= cw.w+cw.x && mx>>4 >= cw.h+cw.y)))
+			if(players[i] != null)
 			{
-				writeChat((players[i].px*16+8)-((players[i].name.length()*8)>>1),players[i].py*16-10,new CraftrChatMsg(players[i].name),g);
+				if(mx>>4 == players[i].px && my>>4 == players[i].py && (!cwOpen || (mx>>3 < cw.x && my>>3 < cw.y && mx>>3 >= cw.w+cw.x && mx>>4 >= cw.h+cw.y)))
+				{
+					writeChat((players[i].px*16+8)-((players[i].name.length()*8)>>1),players[i].py*16-10,new CraftrChatMsg(players[i].name),g);
+				}
+				c.DrawChar(players[i].px<<4,players[i].py<<4,players[i].pchr,players[i].pcol,g);
 			}
 		}
 		frames++;
 	}
-	
-	
-	public boolean writeString(int x, int y, String str, int col, boolean useBar)
-	{
-		char[] ca = str.toCharArray();
-		int pos = 0;
-		if(useBar) return true;
-		pos = x+(y*FULLGRID_W);
-		if((pos+ca.length) > (FULLGRID_W*FULLGRID_H)) return false;
-		int i = 0;
-		int j = 0;
-		while(i<ca.length)
-		{
-			if((j%FULLGRID_W) < (FULLGRID_W-1))
-			{
-				scr_col[pos+j] = (byte)col;
-				scr_chr[pos+j] = (byte)ca[i];
-				i++;
-			}
-			j++;
-		}
-		return true;
-	}
-	
-	public boolean writeString(int x, int y, String str, int col)
-	{
-		return writeString(x,y,str,col,false);
-	}
+
 	
 	// chat processing
 	
@@ -347,29 +310,14 @@ public class CraftrGameScreen extends CraftrScreen
 	}
 	public CraftrPlayer players[] = new CraftrPlayer[256];
 	
-	public int addPlayer(int id, int scrx, int scry, String name)
+	public int addPlayer(int id, int scrx, int scry, String name, byte ch, byte co)
 	{
-		players[id] = new CraftrPlayer(scrx,scry,(byte)0,(byte)0,name);
+		players[id] = new CraftrPlayer(scrx,scry,ch,co,name);
 		return id;
 	}
-	
+
 	public void removePlayer(int id)
 	{
 		players[id] = null;
 	}
-	
-	public void drawBlock(int pos, byte aChar, byte aCol)
-	{
-		if(pos>=0 && pos<scr_chr.length)
-		{
-			scr_chr[pos] = aChar;
-			scr_col[pos] = aCol;
-		}
-	}
-	
-	public void drawBlock(int x, int y, byte aChar, byte aCol)
-	{
-		drawBlock(x+(y*FULLGRID_W),aChar,aCol);
-	}
-
 }
