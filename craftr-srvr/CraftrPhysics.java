@@ -43,6 +43,7 @@ public class CraftrPhysics
 			if(!cb.setOnlyType)
 			{
 				modifiedMap.setBlock(cb.x,cb.y,cb.getType(),cb.getParam(),modifiedMap.updateLook(cb),cb.getColor());
+				modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getType(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
 			}
 			else
 			{

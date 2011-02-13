@@ -1,6 +1,6 @@
 public class CraftrCopier
 {
-	byte[] paste = new byte[128*128*6];
+	CraftrBlock[] paste;
 	int xsize;
 	int ysize;
 	int used;
@@ -11,15 +11,15 @@ public class CraftrCopier
 
 	public void copy(CraftrMap map, int startx, int starty, int xs, int ys)
 	{
-		if(xs>128 || ys>128) return;
+		if(xs>160 || ys>160) return;
+		paste = new CraftrBlock[xs*ys];
 		xsize=xs;
 		ysize=ys;
-		for(int yp=0;yp<ys;yp++)
+		for(int yp=0;yp<ysize;yp++)
 		{
-			for(int xp=0;xp<xs;xp++)
+			for(int xp=0;xp<xsize;xp++)
 			{
-				byte[] t = map.getBlock(startx+xp,starty+yp);
-				System.arraycopy(t,0,paste,(((yp*128)+xp)*6),6);
+				paste[(yp*xsize)+xp] = map.getBlock(startx+xp,starty+yp);
 			}
 		}
 		used=1;
@@ -31,8 +31,7 @@ public class CraftrCopier
 		{
 			for(int xp=0;xp<xsize;xp++)
 			{
-				byte[] t = new byte[6];
-				System.arraycopy(paste,(((yp*128)+xp)*6),t,0,6);
+				byte[] t = paste[(yp*xsize)+xp].getBlockData();
 				map.setBlock(xpos+xp,ypos+yp,t);
 				map.setBlockNet(xpos+xp,ypos+yp,t[0],t[2],t[3]);
 				if(t[5]!=0)
