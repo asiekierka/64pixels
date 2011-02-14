@@ -459,6 +459,7 @@ public class CraftrMap
 		if(getBlock(x+dx,y+dy).isEmpty()) // can we not push?
 		{
 			setPushable(x+dx,y+dy,chr,col);
+			setPushableNet(x+dx,y+dy,chr,col);
 			return;
 		}
 		int posx = x+dx;

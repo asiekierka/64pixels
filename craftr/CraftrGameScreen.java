@@ -95,7 +95,6 @@ public class CraftrGameScreen extends CraftrScreen
 		DrawChatMsg(g);
 		cw.charChosen = gdrawChr();
 		cw.colorChosen = gdrawCol();
-		if(cwOpen) cw.render(c,g);
 		for(int i=0;i<256;i++)
 		{
 			if(players[i] != null)
@@ -107,6 +106,7 @@ public class CraftrGameScreen extends CraftrScreen
 				c.DrawChar(players[i].px<<4,players[i].py<<4,players[i].pchr,players[i].pcol,g);
 			}
 		}
+		if(cwOpen) cw.render(c,g);
 		frames++;
 	}
 

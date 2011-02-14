@@ -345,7 +345,11 @@ public class CraftrPhysics
 						{
 							map.tryPushM(x,y,xMovement[non10-1],yMovement[non10-1],blockData[2],(byte)(blockData[3]&0x0F));
 						}
-						else if (surrBlockData[(non10-1)][5]!=0) map.setPushable(x+xMovement[non10-1],y+yMovement[non10-1],(byte)0,(byte)0);
+						else if (surrBlockData[(non10-1)][5]!=0)
+						{
+							map.setPushable(x+xMovement[non10-1],y+yMovement[non10-1],(byte)0,(byte)0);
+							map.setPushableNet(x+xMovement[non10-1],y+yMovement[non10-1],(byte)0,(byte)0);
+						}
 					}
 				}
 				break;
