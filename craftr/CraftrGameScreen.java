@@ -86,6 +86,14 @@ public class CraftrGameScreen extends CraftrScreen
 				
 			}
 		}
+		for (int i=0;i<256;i++)
+		{
+			if(players[i]!=null)
+			{
+				g.fillRect(players[i].px<<4,players[i].py<<4,16,16);
+				c.DrawChar(players[i].px<<4,players[i].py<<4,players[i].pchr,players[i].pcol,g);
+			}
+		}
 		switch(barType)
 		{
 			case 0: DrawBar(g); break;
@@ -103,7 +111,6 @@ public class CraftrGameScreen extends CraftrScreen
 				{
 					writeChat((players[i].px*16+8)-((players[i].name.length()*8)>>1),players[i].py*16-10,new CraftrChatMsg(players[i].name),g);
 				}
-				c.DrawChar(players[i].px<<4,players[i].py<<4,players[i].pchr,players[i].pcol,g);
 			}
 		}
 		if(cwOpen) cw.render(c,g);

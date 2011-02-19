@@ -57,6 +57,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public CraftrSound audio;
 	public int chrArrowWaiter = 0;
 	public boolean[] keyHeld;
+	public boolean advMouseMode = false;
 	public int netThreadRequest = 0;
 	public int key_up = KeyEvent.VK_UP;
 	public int key_left = KeyEvent.VK_LEFT;
@@ -101,7 +102,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public static String getVersion()
 	{
-		return "0.0.11.3";
+		return "0.0.11.4";
 	}
 	public CraftrGame()
 	{
@@ -183,8 +184,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			{
 				byte[] t = new byte[64];
 				count=is.read(t,0,64);
-				System.out.println("read " + count + " bytes");
-				if(count>0) fos.write(t,0,count);
+				if(count>0)
+				{
+					System.out.println("read " + count + " bytes");
+					fos.write(t,0,count);
+				}
 			}
 		}
 		catch(Exception e) { e.printStackTrace(); return false;}
@@ -477,6 +481,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		ev_1 = ev.BUTTON1;
 		ev_2 = ev.BUTTON2;
 		ev_3 = ev.BUTTON3;
+		advMouseMode = ev.isControlDown();
 		if(isKick) return;
 		    if (insideRect(mx,my,7*16+8,gs.BARPOS_Y,8,8)) // type, up
 			{
@@ -604,12 +609,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 			processMouse();
 	}
-	public void mouseReleased(MouseEvent ev) { mb = ev_no; canMousePress = true;}
+	public void mouseReleased(MouseEvent ev) { mb = ev_no; canMousePress = true; advMouseMode = false;}
 
 	public void mouseMoved(MouseEvent ev) {
 		updateMouse(ev.getX(),ev.getY());
+		advMouseMode = ev.isControlDown();
 	}
-	public void mouseDragged(MouseEvent ev) { updateMouse(ev.getX(),ev.getY()); } // this can be quite handy
+	public void mouseDragged(MouseEvent ev) { updateMouse(ev.getX(),ev.getY()); advMouseMode = ev.isControlDown(); } // this can be quite handy
 	
 	public void updateMouse(int umx, int umy)
 	{
@@ -643,7 +649,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(mb == ev_2)
 				{
 					CraftrBlock capturedBlock = map.getBlock(players[255].px-15+(mx>>4),players[255].py-12+(my>>4));
- 					gs.drawType = capturedBlock.getTypeWithVirtual();
+ 					if(!advMouseMode) gs.drawType = capturedBlock.getTypeWithVirtual();
  					gs.sdrawChr(capturedBlock.getChar());
  					gs.sdrawCol(capturedBlock.getColor());
 					gs.chrBarOff = gs.gdrawChr()-8;
@@ -666,6 +672,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 							map.physics.addBlockToCheck(new CraftrBlockPos(ttx+map.xMovement[i],tty+map.yMovement[i]));
 						}
 					}
+					if(mb == ev_1 && advMouseMode) tmparr[0] = (byte)map.getBlock(ttx,tty).getTypeWithVirtual();
 					if(gs.drawType==2 && mb == ev_1)
 					{
 						tmparr[3]=(byte)(tmparr[3]&7);
@@ -1046,6 +1053,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		{
 			is = new CraftrInScreen(canvas,2,"Main menu");
 			is.isRunning=true;
+			this.requestFocusInWindow();
 			is.addStrings(modes);
 			canvas.cs = (CraftrScreen)is;
 			loopInScreen();
@@ -1105,6 +1113,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					is = new CraftrInScreen(canvas,1,"Enter nickname:");
 					is.minLen=1;
 					is.maxLen=16;
+					if(players[255].name != "You") is.inString = players[255].name;
 					canvas.cs = (CraftrScreen)is;
 					loopInScreen();
 					net.nick = is.inString;
