@@ -29,7 +29,7 @@ public class CraftrClient implements Runnable
 	public int pingsWaiting = 0;
 	private CraftrAuth auth;
 	public boolean passWait=false;
-	private CraftrCopier cc;
+	public CraftrCopier cc;
 	public boolean isCopying = false;
 	public boolean isPasting = false;
 	public int copyStage = 0;

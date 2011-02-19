@@ -1,3 +1,5 @@
+import java.io.*;
+
 public class CraftrCopier
 {
 	CraftrBlock[] paste;
@@ -9,6 +11,81 @@ public class CraftrCopier
 	{
 	}
 
+	public String load(String filename)
+	{
+		DataInputStream in=null;
+		FileInputStream fin=null;
+		try
+		{
+			fin = new FileInputStream(filename + ".6cf");
+			in = new DataInputStream(fin);
+			int version = in.readUnsignedByte(); // to be sure
+			xsize = in.readInt();
+			ysize = in.readInt();
+			int blockDataSize = in.readUnsignedByte();
+			paste = new CraftrBlock[xsize*ysize];
+			for(int iy=0; iy<ysize; iy++)
+			{
+				for(int ix=0;ix<xsize; ix++)
+				{
+					byte[] blockd = new byte[blockDataSize];
+					in.read(blockd,0,blockDataSize);
+					paste[(iy*xsize)+ix]=new CraftrBlock(ix,iy,blockd);
+				}
+			}
+			used=1;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			used=0;
+		}
+		finally
+		{
+			try
+			{
+				if(in!=null) in.close();
+				if(fin!=null) fin.close();
+			} catch(Exception e) {}
+		}
+		if(used == 0) return "Failed importing!";
+		return "Imported!";
+	}
+	public void save(String filename)
+	{
+		if(used!=1) return;
+		FileOutputStream fout = null;
+		DataOutputStream out = null;
+		try
+		{
+			fout = new FileOutputStream(filename + ".6cf");
+			out = new DataOutputStream(fout);
+			out.writeByte(1);
+			out.writeInt(xsize);
+			out.writeInt(ysize);
+			out.writeByte(CraftrBlock.getBDSize());
+			for(int iy=0; iy<ysize; iy++)
+			{
+				for(int ix=0;ix<xsize; ix++)
+				{
+					byte[] blockd = paste[(iy*xsize)+ix].getBlockData();
+					out.write(blockd,0,blockd.length);
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			used=0;
+		}
+		finally
+		{
+			try
+			{
+				if(out!=null) out.close();
+				if(fout!=null) fout.close();
+			} catch(Exception e) {}
+		}
+	}
 	public void copy(CraftrMap map, int startx, int starty, int xs, int ys)
 	{
 		if(xs>160 || ys>160) return;

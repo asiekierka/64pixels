@@ -91,6 +91,10 @@ public class CraftrBlock
 		if(isPushable()) return 0xFF&(int)block[5];
 		return 0xFF&(int)block[3];
 	}
+	public static int getBDSize()
+	{
+		return 6;
+	}
 
 	public byte[] getBlockData()
 	{

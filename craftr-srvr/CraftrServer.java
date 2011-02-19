@@ -370,7 +370,7 @@ public class CraftrServer
 			}
 			else if(clients[id].op)
 			{
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export";
 			}
 			else
 			{
@@ -434,6 +434,16 @@ public class CraftrServer
 				clients[id].isCopying=true;
 				clients[id].isPasting=false;
 				return "Click on the first corner.";
+			}
+			else if(cmd[0].equals("import") && id!=255)
+			{
+				return clients[id].cc.load(cmd[1]);
+				
+			}
+			else if(cmd[0].equals("export") && id!=255)
+			{
+				clients[id].cc.save(cmd[1]);
+				return "Exported! (i hope)";
 			}
 			else if(cmd[0].equals("paste") && id!=255)
 			{
