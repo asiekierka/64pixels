@@ -90,6 +90,7 @@ public class CraftrGameScreen extends CraftrScreen
 		{
 			if(players[i]!=null)
 			{
+				g.setColor(new Color(0x000000));
 				g.fillRect(players[i].px<<4,players[i].py<<4,16,16);
 				c.DrawChar(players[i].px<<4,players[i].py<<4,players[i].pchr,players[i].pcol,g);
 			}
