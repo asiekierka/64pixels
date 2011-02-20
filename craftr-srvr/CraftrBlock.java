@@ -54,7 +54,7 @@ public class CraftrBlock
 
 	public boolean isWiriumNeighbour()
 	{
-		if((block[0]>=2 && block[0]<=7) || block[0]==9 || block[0]==10) return true;
+		if((block[0]>=2 && block[0]<=7) || (block[0]>=9 && block[0]<=11)) return true;
 		return false;
 	}
 
@@ -82,18 +82,45 @@ public class CraftrBlock
 
 	public int getChar()
 	{
+		if(getType()==8) return 0xFF&(int)block[2];
 		if(isPushable()) return 0xFF&(int)block[4];
 		return 0xFF&(int)block[2];
 	}
 
 	public int getColor()
 	{
+		if(getType()==8) return 0xFF&(int)block[3];
 		if(isPushable()) return 0xFF&(int)block[5];
 		return 0xFF&(int)block[3];
 	}
-	public static int getBDSize()
+
+	public void setType(int type)
 	{
-		return 6;
+		block[0]=(byte)type;
+	}
+
+	public void setParam(int param)
+	{
+		block[1]=(byte)param;
+	}
+	public void setChar(int ch)
+	{
+		if(isPushable()) block[4]=(byte)ch;
+		else block[2]=(byte)ch;
+	}
+	public void setColor(int co)
+	{
+		if(isPushable()) block[5]=(byte)co;
+		else block[3]=(byte)co;
+	}
+
+	public int getDrawnChar()
+	{
+		return getChar();
+	}
+	public int getDrawnColor()
+	{
+		return getColor();
 	}
 
 	public byte[] getBlockData()

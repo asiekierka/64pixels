@@ -10,7 +10,7 @@ public class CraftrMap
 	public int genMode = 0;
 	public static Random rand = new Random();
 	public String saveDir;
-	public static final int maxType = 10;
+	public static final int maxType = 11;
 	public boolean multiplayer;
 	public boolean maplock;
 	public boolean modlock;

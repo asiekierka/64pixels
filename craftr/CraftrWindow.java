@@ -53,7 +53,7 @@ public class CraftrWindow
 				break;
 			case 4: // type screen
 				w = 12;
-				h = 14;
+				h = CraftrMap.maxType+4;
 				title = "Types";
 				break;
 			default:
@@ -177,7 +177,7 @@ public class CraftrWindow
 				}
 				break;
 			case 4: // types screen
-				for(int i=-1;i<11;i++)
+				for(int i=-1;i<=CraftrMap.maxType;i++)
 				{
 					int col=143;
 					if(i==typeChosen) col=248;
