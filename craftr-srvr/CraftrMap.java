@@ -412,41 +412,44 @@ public class CraftrMap
 
 	public void pushMultiple(int x, int y, int xsize, int ysize, int dx, int dy)
 	{
-		try
+		synchronized(this)
 		{
-			se.out.writeByte(0xE1);
-			se.out.writeInt(x);
-			se.out.writeInt(y);
-			se.out.writeShort(xsize);
-			se.out.writeShort(ysize);
-			se.out.writeByte(dx);
-			se.out.writeByte(dy);
-			byte[] t = se.getPacket();
-			se.sendAll(t,t.length);
-		}
-		catch(Exception e){ System.out.println("Failed to send pushMultiple packet!"); }
-		CraftrBlock[] blocks = new CraftrBlock[xsize*ysize];
-		for(int iy=0;iy<ysize;iy++)
-		{
-			for(int ix=0;ix<xsize;ix++)
+			try
 			{
-				blocks[(iy*xsize)+ix] = getBlock(x+ix,y+iy);
-				setPushable(x+ix,y+iy,(byte)0,(byte)0);
-				setPlayer(x+ix,y+iy,0);
+				se.out.writeByte(0xE1);
+				se.out.writeInt(x);
+				se.out.writeInt(y);
+				se.out.writeShort(xsize);
+				se.out.writeShort(ysize);
+				se.out.writeByte(dx);
+				se.out.writeByte(dy);
+				byte[] t = se.getPacket();
+				se.sendAll(t,t.length);
 			}
-		}
-		for(int iy=0;iy<ysize;iy++)
-		{
-			for(int ix=0;ix<xsize;ix++)
+			catch(Exception e){ System.out.println("Failed to send pushMultiple packet!"); }
+			CraftrBlock[] blocks = new CraftrBlock[xsize*ysize];
+			for(int iy=0;iy<ysize;iy++)
 			{
-				int arrayPos = (iy*xsize)+ix;
-				if(blocks[arrayPos].isPushable()) setPushable(x+ix+dx,y+iy+dy,
-                                                                  (byte)blocks[arrayPos].getChar(),
-                                                                  (byte)blocks[arrayPos].getColor());
-				setPlayer(x+ix+dx,y+iy+dy,1);
-				for(int moveDir=0;moveDir<4;moveDir++)
+				for(int ix=0;ix<xsize;ix++)
 				{
-					physics.addBlockToCheck(new CraftrBlockPos(x+ix+dx+xMovement[moveDir],y+iy+dy+yMovement[moveDir]));
+					blocks[(iy*xsize)+ix] = getBlock(x+ix,y+iy);
+					setPushable(x+ix,y+iy,(byte)0,(byte)0);
+					setPlayer(x+ix,y+iy,0);
+				}
+			}
+			for(int iy=0;iy<ysize;iy++)
+			{
+				for(int ix=0;ix<xsize;ix++)
+				{
+					int arrayPos = (iy*xsize)+ix;
+					if(blocks[arrayPos].isPushable()) setPushable(x+ix+dx,y+iy+dy,
+		                                                          (byte)blocks[arrayPos].getChar(),
+		                                                          (byte)blocks[arrayPos].getColor());
+					setPlayer(x+ix+dx,y+iy+dy,1);
+					for(int moveDir=0;moveDir<4;moveDir++)
+					{
+						physics.addBlockToCheck(new CraftrBlockPos(x+ix+dx+xMovement[moveDir],y+iy+dy+yMovement[moveDir]));
+					}
 				}
 			}
 		}

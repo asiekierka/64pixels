@@ -168,7 +168,17 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		isKick=true;
 		isKickS = why;
 	}
-
+	public String escapeSlashes(String orig)
+	{
+		char[] temp = orig.toCharArray();
+		String newS = "";
+		for(int i=0;i<temp.length;i++)
+		{
+			if(temp[i]=='\\') i++;
+			if(i<temp.length) newS+=temp[i];
+		}
+		return newS;
+	}
 	public boolean fetchSList()
 	{
 		URL u1;
@@ -1082,7 +1092,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						csll[0]="Custom address";
 						for(int i=1;i<=csl.keys;i++)
 						{
-							csll[i]=csl.keyo[i-1];
+							csll[i]=escapeSlashes(csl.keyo[i-1]);
 						}
 						csll[csll.length-1]="<- Back";
 						is = new CraftrInScreen(canvas,2,"Choose server");

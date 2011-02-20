@@ -710,6 +710,7 @@ public class CraftrServer
 		}
 		catch(Exception e)
 		{
+
 			System.out.println("Fatal CraftrServer init error!");
 			e.printStackTrace();
 			System.exit(1);
@@ -727,7 +728,7 @@ public class CraftrServer
 	{
 		for(int i=0;i<255;i++)
 		{
-			if(clients[i] != null && clients[i].nick.toLowerCase().startsWith(nick) && clients[i].dc == 0)
+			if(clients[i] != null && clients[i].nick.toLowerCase().startsWith(nick.toLowerCase()) && clients[i].dc == 0)
 			{
 				return i;
 			}

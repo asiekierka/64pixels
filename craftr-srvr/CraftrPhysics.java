@@ -38,16 +38,19 @@ public class CraftrPhysics
 			blocksToSetOld = temps;
 			blocksToSet.clear();
 		}
-		for(CraftrBlock cb:blocksToSetOld)
+		synchronized(modifiedMap)
 		{
-			if(!cb.setOnlyType)
+			for(CraftrBlock cb:blocksToSetOld)
 			{
-				modifiedMap.setBlock(cb.x,cb.y,cb.getType(),cb.getParam(),modifiedMap.updateLook(cb),cb.getColor());
-				modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getType(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
-			}
-			else
-			{
-				modifiedMap.setType(cb.x,cb.y,(byte)cb.getType());
+				if(!cb.setOnlyType)
+				{
+					modifiedMap.setBlock(cb.x,cb.y,cb.getType(),cb.getParam(),modifiedMap.updateLook(cb),cb.getColor());
+					modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getType(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
+				}
+				else
+				{
+					modifiedMap.setType(cb.x,cb.y,(byte)cb.getType());
+				}
 			}
 		}
 		blocksToSetOld.clear();
