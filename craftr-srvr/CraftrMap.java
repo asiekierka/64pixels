@@ -527,6 +527,7 @@ public class CraftrMap
 	{
 		try
 		{ 
+			if(data.length>5 && data[5]!=0) setPushable(x,y,data[4],data[5]);
 			int px = x&63;
 			int py = y&63;
 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
@@ -534,20 +535,15 @@ public class CraftrMap
 		}
 		catch(NullPointerException e)
 		{
-			//System.out.println("setBlock: no cached chunk near player found. ODD.");
 			if(!multiplayer) System.exit(1);
 		}
 	}
-	/*
-	public void setBlock(int x, int y, byte t1, byte ch1, byte co1)
-	{
-		setBlock(x,y,t1,(byte)0,ch1,co1);
-	}
-	*/
+
 	public void setBlock(int x, int y, int t2, int p2, int ch2, int co2)
 	{
 		try
 		{ 
+			if(t2==-1) setPushable(x,y,ch2,co2);
 			int px = x&63;
 			int py = y&63;
 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
@@ -563,14 +559,13 @@ public class CraftrMap
 	{
 		try
 		{ 
+			if(t1==-1) setPushable(x,y,ch1,co1);
 			int px = x&63;
 			int py = y&63;
-			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
 			findCachedChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,p1);
 		}
 		catch(NullPointerException e)
 		{
-			//System.out.println("setBlock: no cached chunk near player found. ODD.");
 			if(!multiplayer) System.exit(1);
 		}
 	}
@@ -602,21 +597,5 @@ public class CraftrMap
 	public void setPushableNet(int x, int y, byte ch1, byte co1)
 	{
 		setBlockNet(x,y,(byte)-1,ch1,co1);
-	}
-
-	public void setType(int x, int y, byte t1)
-	{
-		try
-		{ 
-			int px = x&63;
-			int py = y&63;
-			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
-			findCachedChunk((x>>6),(y>>6)).placeTypeOnly(px,py,t1);
-		}
-		catch(NullPointerException e)
-		{
-			//System.out.println("setBlock: no cached chunk near player found. ODD.");
-			if(!multiplayer) System.exit(1);
-		}
 	}
 }

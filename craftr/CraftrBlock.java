@@ -3,7 +3,6 @@ public class CraftrBlock
 	public int x = 0;
 	public int y = 0;
 	private byte[] block = new byte[6];
-	public boolean setOnlyType = false;
 	
 	public CraftrBlock()
 	{
@@ -16,11 +15,10 @@ public class CraftrBlock
 	{
 		this(ax,ay,at,0,ach,aco);
 	}
-	public CraftrBlock(int ax, int ay, int at, int ap, int ach, int aco, boolean st)
+	public CraftrBlock(int ax, int ay, int at, int ap, int ach, int aco)
 	{
 		x=ax;
 		y=ay;
-		setOnlyType=st;
 		block[0]=(byte)at;
 		block[1]=(byte)ap;
 		if(block[0]==(byte)-1)
@@ -33,10 +31,6 @@ public class CraftrBlock
 			block[2]=(byte)ach;
 			block[3]=(byte)aco;
 		}
-	}
-	public CraftrBlock(int ax, int ay, int at, int ap, int ach, int aco)
-	{
-		this(ax,ay,at,ap,ach,aco,false);	
 	}
 	public CraftrBlock(int ax, int ay, byte[] bd)
 	{
@@ -82,15 +76,23 @@ public class CraftrBlock
 
 	public int getChar()
 	{
-		if(getType()==8) return 0xFF&(int)block[2];
 		if(isPushable()) return 0xFF&(int)block[4];
 		return 0xFF&(int)block[2];
 	}
 
 	public int getColor()
 	{
-		if(getType()==8) return 0xFF&(int)block[3];
 		if(isPushable()) return 0xFF&(int)block[5];
+		return 0xFF&(int)block[3];
+	}
+
+	public int getBlockChar()
+	{
+		return 0xFF&(int)block[2];
+	}
+
+	public int getBlockColor()
+	{
 		return 0xFF&(int)block[3];
 	}
 
@@ -116,11 +118,13 @@ public class CraftrBlock
 
 	public int getDrawnChar()
 	{
-		return getChar();
+		if(getType()==8) return 0xFF&(int)block[2];
+		else return getChar();
 	}
 	public int getDrawnColor()
 	{
-		return getColor();
+		if(getType()==8) return 0xFF&(int)block[3];
+		else return getColor();
 	}
 
 	public byte[] getBlockData()

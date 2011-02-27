@@ -13,7 +13,6 @@ public class CraftrGameScreen extends CraftrScreen
 	public static final int CHATBOTTOM_X = 11;
 	public static final int CHATBOTTOM_Y = (GRID_H*16)-17;
 	public static final int BARPOS_Y = GRID_H*16;
-	//public int drawCol, drawChr, drawType;
 	public int drawType;
 	public int[] drawChrA = new int[256];
 	public int[] drawColA = new int[256];
@@ -38,6 +37,8 @@ public class CraftrGameScreen extends CraftrScreen
 	public int hov_type = 0;
 	public int hov_par = 0;
 	
+	public CraftrPlayer players[] = new CraftrPlayer[256];
+
 	public CraftrGameScreen(CraftrCanvas cc)
 	{
 		c = cc;
@@ -318,7 +319,6 @@ public class CraftrGameScreen extends CraftrScreen
 		c.DrawChar(30*16,BARPOS_Y,(byte)1,(byte)12,g);
 		c.DrawChar(31*16,BARPOS_Y,(byte)'C',(byte)9,g);
 	}
-	public CraftrPlayer players[] = new CraftrPlayer[256];
 	
 	public int addPlayer(int id, int scrx, int scry, String name, byte ch, byte co)
 	{

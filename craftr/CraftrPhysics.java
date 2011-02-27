@@ -47,7 +47,7 @@ public class CraftrPhysics
 		for(CraftrBlock cb:blocksToSetOld)
 		{
 			if(cb.isPushable()) modifiedMap.setPushable(cb.x,cb.y,cb.getChar(),cb.getColor());
-			else modifiedMap.setBlock(cb.x,cb.y,cb.getType(),cb.getParam(),modifiedMap.updateLook(cb),cb.getColor());
+			modifiedMap.setBlock(cb.x,cb.y,cb.getType(),cb.getParam(),modifiedMap.updateLook(cb),cb.getBlockColor());
 		}
 		blocksToSetOld.clear();
 	}
@@ -220,7 +220,7 @@ public class CraftrPhysics
 				}
 				if(maxSignal>1)
 				{
-					   newParam |= ((maxSignal-1)<<4);
+					newParam |= ((maxSignal-1)<<4);
 				}
 				if(oldd1!=newParam)
 				{
@@ -245,6 +245,7 @@ public class CraftrPhysics
 						int str = strength[i];
 						if(isUpdated(t)) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
 					}
+					blockData[1] = (byte)(on|(co5-1));
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],on|(co5-1),blockData[2],blockData[3]));
 				}
 				break;
@@ -324,7 +325,7 @@ public class CraftrPhysics
 					{
 						int t = surrBlockData[i][0];
 						int str = strength[i];
-						if(isUpdated(t) && t!=10 && t!=11) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+						if(isUpdated(t)) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
 					}
 				}
 				break;
@@ -333,7 +334,7 @@ public class CraftrPhysics
 				int non10 = 0;
 				for(int i=0;i<4;i++)
 				{
-					if(strength[i]>0 && surrBlockData[i][0]!=9) { non10 = (i^1)+1; break; } 
+					if(strength[i]>0) { non10 = (i^1)+1; break; } 
 				}
 				if(non10!=on10)
 				{
@@ -353,7 +354,7 @@ public class CraftrPhysics
 				int non11 = 0;
 				for(int i=0;i<4;i++)
 				{
-					if(strength[i]>0 && surrBlockData[i][0]!=9) { non11 = (i^1)+1; break; } 
+					if(strength[i]>0) { non11 = (i^1)+1; break; } 
 				}
 				if(non11!=on11)
 				{

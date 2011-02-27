@@ -1289,6 +1289,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				render();
 				canvas.draw(mx,my);
 			}
+
 			frame++;
 		}
 	}

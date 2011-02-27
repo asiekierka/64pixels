@@ -337,7 +337,7 @@ public class CraftrPhysics
 				int non10 = 0;
 				for(int i=0;i<4;i++)
 				{
-					if(strength[i]>0 && surrBlockData[i][0]!=9) { non10 = (i^1)+1; break; } 
+					if(strength[i]>0) { non10 = (i^1)+1; break; } 
 				}
 				if(non10!=on10)
 				{
@@ -361,7 +361,7 @@ public class CraftrPhysics
 				int non11 = 0;
 				for(int i=0;i<4;i++)
 				{
-					if(strength[i]>0 && surrBlockData[i][0]!=9) { non11 = (i^1)+1; break; } 
+					if(strength[i]>0) { non11 = (i^1)+1; break; } 
 				}
 				if(non11!=on11)
 				{
