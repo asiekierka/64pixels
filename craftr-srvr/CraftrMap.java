@@ -395,7 +395,7 @@ public class CraftrMap
 				else if(t15>0 && on==0) playSample(x,y,0);
 				while(maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
 				modlock=true;
-				setBlock(x,y,block.getType(),(byte)d15,block.getChar(),block.getColor());
+				setBlock(x,y,block.getType(),(byte)d15,block.getBlockChar(),block.getBlockColor());
 				physics.addBlockToCheck(new CraftrBlockPos(x,y));
 				for(int i=0;i<4;i++)
 				{

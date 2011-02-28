@@ -102,7 +102,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public static String getVersion()
 	{
-		return "0.0.11.4";
+		return "0.0.12";
 	}
 	public CraftrGame()
 	{

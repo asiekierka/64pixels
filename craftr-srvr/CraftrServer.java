@@ -797,8 +797,8 @@ public class CraftrServer
 	
 	public void start()
 	{
-		System.out.println("64px-srvr version 0.0.11.3");
-		System.out.println("Bonus points for pushium-pushed pushium pushed into plates");
+		System.out.println("64px-srvr version 0.0.12");
+		System.out.println("Bonus points for GreaseMonkey's revolution(ary) plans");
 		System.out.print("Initializing: #");
 		run = true;
 		ci = new CraftrInput(this);

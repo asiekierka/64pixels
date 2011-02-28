@@ -203,7 +203,7 @@ public class CraftrGameScreen extends CraftrScreen
 			case 10:
 				return "Pumulty";
 			case 11:
-				return "Bmodder";
+				return "Bodder";
 			case -1:
 				return "Pushium";
 		}

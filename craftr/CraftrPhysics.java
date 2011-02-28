@@ -47,7 +47,7 @@ public class CraftrPhysics
 		for(CraftrBlock cb:blocksToSetOld)
 		{
 			if(cb.isPushable()) modifiedMap.setPushable(cb.x,cb.y,cb.getChar(),cb.getColor());
-			modifiedMap.setBlock(cb.x,cb.y,cb.getType(),cb.getParam(),modifiedMap.updateLook(cb),cb.getBlockColor());
+			else modifiedMap.setBlock(cb.x,cb.y,cb.getTypeWithVirtual(),cb.getParam(),modifiedMap.updateLook(cb),cb.getBlockColor());
 		}
 		blocksToSetOld.clear();
 	}

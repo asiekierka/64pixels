@@ -341,10 +341,10 @@ public class CraftrNet implements Runnable
 				{
 					out.writeByte(0x0F);
 					writeString(nick);
-					writeString("i should try making the server check this and make custom server/client authors super annoyed(r).");
+					writeString("asiekierka is a little bit active :D");
 					out.writeByte(0x00);
 					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE
-					out.writeInt(0x0F); // protocol version 15
+					out.writeInt(0x10); // protocol version 16
 					out.writeByte(game.players[255].pchr);
 					out.writeByte(game.players[255].pcol);
 					sendPacket();
