@@ -22,6 +22,12 @@ public class CraftrPhysics
 		return false;
 	}
 
+	public boolean isSent(int type)
+	{
+		if(type==5 || type==6) return false;
+		return true;
+	}
+
 	public void tick(CraftrMap modifiedMap)
 	{
 		Set<CraftrBlockPos> tempb;
@@ -50,7 +56,7 @@ public class CraftrPhysics
 			{
 				if(cb.isPushable()) modifiedMap.setPushable(cb.x,cb.y,cb.getChar(),cb.getColor());
 				else modifiedMap.setBlock(cb.x,cb.y,cb.getType(),cb.getParam(),modifiedMap.updateLook(cb),cb.getColor());
-				modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
+				if(isSent(cb.getTypeWithVirtual())) modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
 			}
 		}
 		blocksToSetOld.clear();
@@ -263,13 +269,18 @@ public class CraftrPhysics
 				}	
 				if(signalz>0)
 				{
-					if(prevon==0) map.playSample(x,y,3);
+					if(prevon==0)
+					{
+						map.setPlayerNet(x,y,1);
+						map.playSample(x,y,3);
+					}
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(counter|0x80),blockData[2],blockData[3]));
 				}
 				else
 				{
 					if(prevon!=0) map.playSample(x,y,2);
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)counter,blockData[2],blockData[3]));
+					map.setPlayerNet(x,y,0);
 				}
 				//addBlockToCheck(new CraftrBlockPos(x,y));
 				for(int i=0;i<4;i++)

@@ -487,12 +487,20 @@ public class CraftrNet implements Runnable
 								int bx2c=in.readInt();
 								int by2c=in.readInt();
 								byte[] d2c;
-								synchronized(game.map) { d2c = game.map.getBlock(bx2c,by2c).getBlockData(); }
-								int t2c = buf[0]&0x01;
+								synchronized(game.map)
+								{
+									d2c = game.map.getBlock(bx2c,by2c).getBlockData();
+								}
+								int t2c = buf[0]&0x01;	
 								int t22c = 0x80&(int)d2c[1];
 								int t32c = -1;
 								if(t22c!=0 && t2c==0) t32c=0;
 								if(t22c==0 && t2c!=0) t32c=1;
+								d2c[1] = (byte)((d2c[1]&0x7f) | (t2c<<7));
+								synchronized(game.map)
+								{
+									game.map.setBlock(bx2c,by2c,d2c);
+								}
 								if(t32c>=0)
 								{
 									switch(d2c[0])
@@ -507,10 +515,6 @@ public class CraftrNet implements Runnable
 											break;
 									}
 								}  
-								synchronized(game.map)
-								{
-									game.map.setBlock(bx2c,by2c,d2c[0],(byte)((d2c[1]&0x7f)|((buf[0]&0x01)<<7)),d2c[2],d2c[3]);
-								}
 								break;
 							case 0x31:
 							case 0x33:

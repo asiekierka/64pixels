@@ -36,18 +36,21 @@ public class CraftrPhysics
 		{
 			runPhysics(cbp,modifiedMap);
 		}
-		Set<CraftrBlock> temps;
-		synchronized(blocksToSet)
+		synchronized(modifiedMap)
 		{
-			temps = blocksToSet;
-			blocksToSet = blocksToSetOld;
-			blocksToSetOld = temps;
-			blocksToSet.clear();
-		}
-		for(CraftrBlock cb:blocksToSetOld)
-		{
-			if(cb.isPushable()) modifiedMap.setPushable(cb.x,cb.y,cb.getChar(),cb.getColor());
-			else modifiedMap.setBlock(cb.x,cb.y,cb.getTypeWithVirtual(),cb.getParam(),modifiedMap.updateLook(cb),cb.getBlockColor());
+			Set<CraftrBlock> temps;
+			synchronized(blocksToSet)
+			{
+				temps = blocksToSet;
+				blocksToSet = blocksToSetOld;
+				blocksToSetOld = temps;
+				blocksToSet.clear();
+			}
+			for(CraftrBlock cb:blocksToSetOld)
+			{
+				if(cb.isPushable()) modifiedMap.setPushable(cb.x,cb.y,cb.getChar(),cb.getColor());
+				else modifiedMap.setBlock(cb.x,cb.y,cb.getTypeWithVirtual(),cb.getParam(),modifiedMap.updateLook(cb),cb.getBlockColor());
+			}
 		}
 		blocksToSetOld.clear();
 	}

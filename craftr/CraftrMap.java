@@ -496,7 +496,7 @@ public class CraftrMap
 	{
 		try
 		{ 
-			if(t2==-1) setPushable(x,y,ch2,co2);
+			if((t2==-1) || (t2==255)) setPushable(x,y,ch2,co2);
 			int px = x&63;
 			int py = y&63;
 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);

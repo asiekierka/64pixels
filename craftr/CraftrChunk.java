@@ -207,13 +207,6 @@ public class CraftrChunk {
 		if(type[x+(y<<6)] == 0) param[4096+x+(y<<6)]=val;
 		else param[x+(y<<6)]=val;
 	}
-/*
-	public int getBlockFullType(int x, int y)
-	{
-		if(type[x+(y<<6)] == 0) return (param[4096+x+(y<<6)]<<8)|type[4096+x+(y<<6)];
-		else return (param[x+(y<<6)]<<8)|type[x+(y<<6)];
-	}
-*/ 
 	public byte getPushableChar(int x, int y)
  	{
  		return chrp[x+(y<<6)];

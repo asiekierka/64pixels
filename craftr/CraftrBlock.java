@@ -42,7 +42,7 @@ public class CraftrBlock
 	public boolean isEmpty()
 	{
 		if(isPushable()) return false;
-		if(block[0]==0 || block[0]==2 || block[0]==5 || (block[0]==6 && ((int)block[1]&0x80)!=0) || block[0]==8) return true;
+		if(block[0]==0 || block[0]==2 || block[0]==5 || (block[0]==6 && (0x80&(int)block[1])!=0) || block[0]==8) return true;
 		return false;
 	}
 

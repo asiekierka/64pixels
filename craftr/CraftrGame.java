@@ -333,6 +333,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 			if(scm!=0)
 			{
+
 				s = "char-scaler="+ scm;
 				out.write(s,0,s.length());
 				out.newLine();
@@ -1289,6 +1290,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				render();
 				canvas.draw(mx,my);
 			}
+
 
 			frame++;
 		}
