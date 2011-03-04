@@ -1,3 +1,5 @@
+package common;
+
 public class CraftrBlock
 {
 	public int x = 0;
@@ -127,13 +129,13 @@ public class CraftrBlock
 		else return getColor();
 	}
 
+	public static int getBDSize()
+	{
+		return 6;
+	}
+
 	public byte[] getBlockData()
 	{
 		return block;
-	}
-
- 	public static int getBDSize()
- 	{
- 		return 6;
 	}
 }

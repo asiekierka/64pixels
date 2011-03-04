@@ -1,3 +1,5 @@
+package common;
+
 public final class CraftrConvert
 {
 	public CraftrConvert()

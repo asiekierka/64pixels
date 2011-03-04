@@ -1,3 +1,5 @@
+package common;
+
 import java.util.*;
 public class CraftrAuth
 {
@@ -5,6 +7,7 @@ public class CraftrAuth
 	private String clientKey;
 	private byte[] cka;
 	private byte[] msg;
+	private String msgs;
 	
 	public CraftrAuth(String ck)
 	{
@@ -22,6 +25,7 @@ public class CraftrAuth
 	public void setMessage(String mg)
 	{
 		msg=mg.getBytes();
+		msgs= mg;
 	}
 	
 	public void genMessage()
@@ -55,7 +59,7 @@ public class CraftrAuth
 		{
 			while(serverKey[i]==0 || serverKey[i]==cka[i%cka.length])
 			{
-					serverKey[i]=(byte)rand.nextInt(256);
+				serverKey[i]=(byte)rand.nextInt(256);
 			}
 		}
 	}

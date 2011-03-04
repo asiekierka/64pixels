@@ -1,4 +1,6 @@
-class NoChunkMemException extends Exception
+package common;
+
+public class NoChunkMemException extends Exception
 {
 	public NoChunkMemException() {}
 	public NoChunkMemException(int x, int y)
