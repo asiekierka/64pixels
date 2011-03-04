@@ -100,17 +100,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			key_right = KeyEvent.VK_D;
 		}
 	}
-	public static String getVersion()
-	{
-		return "0.0.12.1";
-	}
 	public CraftrGame()
 	{
 		audio = new CraftrSound();
 		isApplet = false;
 		File sdchk = new File(System.getProperty("user.home") + "/.64pixels");
 		if(!sdchk.exists()) sdchk.mkdir();
-		window = new JFrame("64pixels " + getVersion());
+		window = new JFrame("64pixels " + CraftrVersion.getVersionName());
 		gameOn = true;
 		map = new CraftrMap(64);
 		map.game = this;
@@ -1173,7 +1169,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		String thost = configure();
 		if(!multiplayer)
 		{
-			gs.addChatMsg("you're running 64pixels " + getVersion(),0);
+			gs.addChatMsg("you're running 64pixels " + CraftrVersion.getVersionName(),0);
 			gs.addChatMsg("created by asiekierka.",0);
 			Thread tmap = new Thread(cmt);
 			tmap.start();

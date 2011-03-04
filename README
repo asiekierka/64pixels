@@ -1,5 +1,8 @@
 64pixels source code
 asiekierka, 2010-2011
 
-Read the LICENSE file before publishing your forks, please.
-Also i know it's ugly. Don't tell me about it. You'd only be the 34834th person to do so.
+Read the LICENSE file before publishing your forks, please. (i should change it)
+Some tips:
+
+1. use compile.sh to compile source files from craftr/ and craftr-srvr/ or else!!! (common/ doesnt need it)
+2. use make_jars.sh to make the JARs (all of them)

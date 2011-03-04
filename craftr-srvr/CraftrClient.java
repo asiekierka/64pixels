@@ -372,9 +372,9 @@ public class CraftrClient implements Runnable
 									{
 										kick("Invalid nickname!");
 									}
-									else if(version!=16)
+									else if(version!=CraftrVersion.getProtocolVersion())
 									{
-										kick("Invalid protocol! Needs 0.0.12 or higher.");
+										kick("Old version! Get the latest one from 64pixels.org");
 									}
 									else if(serv.isBanned(socket.getInetAddress().getHostAddress()))
 									{
