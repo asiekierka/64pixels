@@ -1,0 +1,583 @@
+Architecture Overhaul Proposal
+by Ben "GreaseMonkey" Russell
+
+"Stains? Head over to *AJ's While-U-Wait Dry Cleaning* on Main Street!"
+
+Note: this may be subject to change.
+
+To pave the way for 0.1, the client/server common code needs to be merged.
+So yeah, I should probably do that.
+
+I've had this idea for a while and I attempted to implement it in my LD Mini 23
+entry but I basically ran out of steam. Here's the basic idea.
+
+There's a timestamp on each packet (one byte should be sufficient) which
+indicates what happened at a certain point of time. The idea is that the
+clients can maintain perfect sync with the server. On top of that, the client
+and the server are running the same map, doing the same calculations, and
+because of that, they need the same CraftrMap class and whatnot.
+
+If a packet comes in and there are contradictions, the clients and the server
+have to recalculate the state. The client who sent the packet should
+theoretically see it all unfold in real time.
+
+THIS REQUIRES A CONCRETE DEFINITION OF WHAT DOES WHAT.
+
+So, here we go.
+
+A quick note before we start.
+	byte == 8 bits signed
+	short == 16 bits signed
+	int == 32 bits signed
+	ubyte == 8 bits unsigned
+	ushort == 16 bits unsigned
+	String == "pascal" string preceeded by 8-bit length
+	something[] == array
+	something[something_length] == array with given length
+There's your quick note.
+
+A game session starts with login. This does not follow the rest of the protocol.
+	// C -> S
+	byte magic; // BCD 0x64 == 100
+	String nickname;
+	String auth;
+	int version;
+	byte chr;
+	byte col;
+
+After that, one of two things can happen.
+- The server can kick the client due to invalid auth.
+- Or, it can spawn the player, give information about the other players,
+  and send the map chunks required.
+
+In both cases, a valid timestamp is sent.
+This is the timestamp that the user takes as the current time.
+
+This is the general packet format:
+	byte timestamp;
+	byte pkt_id;
+	byte[] data;
+
+Timestamps are a single byte, absolute, and wrap around.
+They refer to ticks on a 30Hz timer.
+
+On each tick, if a player's last ping is not responded to after 120 ticks
+(4 seconds), that player is kicked due to protocol reasons.
+
+A PLAYER CANNOT SEND PACKETS FAR INTO THE FUTURE.
+This would send them at most 8 seconds into the past instead.
+We have to limit the valid region to 192 ticks, and if a message is sent
+outside of this region, the client is kicked due to latency issues.
+(In other words, do NOT attempt this over IPoP (IP-over-Pidgeon).)
+
+This C code should hopefully clear it up.
+
+void do_ping(struct player *plr)
+{
+	send_ping(plr);
+	plr->lastping = current_time;
+}
+
+void pkt_pong(struct player *plr)
+{
+	plr->pingvalid = TRUE;
+}
+
+void update_player(struct player *plr)
+{
+	// yes, i know that C uses char instead of byte.
+	// it's just a typedef away.
+	if((byte)(current_time - plr->lastping + 8) < 0) // signed byte!
+	{
+		if(plr->pingvalid)
+		{
+			plr->pingvalid = FALSE;
+			do_ping(plr);
+		} else {
+			kick_player(plr, "Dude, you lag too much, you must live in New Zealand");
+			return;
+		}
+	}
+	// ...
+}
+
+void get_packet(struct player *plr, union packet *pkt)
+{
+	if((byte)(current_time - pkt->all.timestamp - 64) < -64) // signed byte!
+	{
+		kick_player(plr, "Dude, you lag too much, you must live in New Zealand");
+		return;
+	}
+}
+
+Note that it is not compulsory to send a ping every 4 seconds;
+this is just a simple way to implement it.
+
+So, there are two cases where someone can be kicked for lag.
+- The player does not respond to a pong within 4 seconds.
+- The player sends a packet in the "shadow range" of -128 <= x < -64
+  (current time minus timestamp is within 0x80 through 0xBF).
+
+Packets are sorted by timestamp first and arrival second.
+
+Now for some packets. We will start with connection-related packets.
+These have the Fx range.
+
+0xF0: Ping (both ways)
+	No data.
+	
+	Used to check if stuff is up.
+
+0xF1: Pong (both ways)
+	No data.
+	
+	Used to confirm that stuff is up.
+
+0xF3: Time sync (S->C)
+	No data.
+	
+	This sends the "current time" to the client.
+	Just in case someone's clock is broken.
+
+0xF5: Kick From Server (S->C)
+	String reason;
+	
+	Kicks the client from the server.
+	
+	If a client receives this, it MUST be axed IMMEDIATELY.
+	The "Despawn Object" message should be broadcast to all other clients.
+
+Then we have the chunk-related packets.
+These have the 1x range.
+
+0x10: Request chunk (C->S)
+	int chunkX;
+	int chunkY;
+	
+	Requests that the chunk be sent.
+
+0x11: Chunk data start (S->C)
+	int gzipLength;
+	
+	Indicates that the server is sending a chunk.
+	The client should allocate a buffer here.
+	
+	Note that timestamps are ignored for this packet.
+
+0x12: Chunk data (S->C)
+	ushort dataLength;
+	byte[dataLength+1] gzippedData;
+	
+	More delicious chunk data.
+	The maximum data length from here is 65536 bytes.
+	WARNING! The length of data here is dataLength PLUS 1!
+
+	Note that timestamps are ignored for this packet.
+
+0x13: Chunk data end (S->C)
+	int chunkX;
+	int chunkY;
+	
+	ONLY HERE DO YOU ACTUALLY USE THE TIMESTAMP.
+	
+	This allocates the downloaded chunk to the chunk indicated.
+
+After that, object-related stuff.
+While 64pixels 0.0.x used 8-bit object IDs (and they were explicitly for
+players), 64pixels 0.1.x uses 16-bit IDs.
+
+In this case, object 0xFFFF is always the current client.
+
+0x20: Spawn Object (S->C)
+	ushort objectID;
+	ubyte objectType;
+	ubyte objectTeam;
+	ushort objectFlags;
+	String name;
+	int objectX;
+	int objectY;
+	
+	Current object types:
+		0x00 = INVALID
+		0x01 = Player
+		0x02 = Dead Player
+		0x03 = RESERVED for Smalltalk physical objects
+		0x04 = Bullet
+	
+	Current flags:
+		0x0001 / bit  0: Is Visible
+		0x0002 / bit  1: Is Listed
+		0x0004 / bit  2: Is Solid
+		0x0008 / bit  3: Prepend Name In Chat
+		0x0010 / bit  4: Is Admin
+		0x0020 / bit  5: No Clipping
+		0x0040 / bit  6: Allow Push
+		0x0080 / bit  7: Allow Chainpush
+		0x0100 / bit  8: Allow Plate Input
+	
+	Spawns an object on the server.
+	
+	Objects that are not assigned a team need an objectTeam of 0x00.
+	Teams depend on server game mode and may possibly have no meaning.
+	
+	If object is 0xFFFF, current player is spawned.
+	
+	If object already exists, it is replaced.
+
+0x21: Despawn Object (S->C)
+	ushort objectID;
+	
+	Despawns an object from the server.
+	
+	Unlike Spawn Object, this cannot take 0xFFFF as an argument.
+
+0x22: Respawn Request (C->S)
+	No data.
+	
+	This indicates to the server that the object wants to respawn.
+
+0x23: Object Move Absolute (S->C)
+	ushort objectID;
+	int objectX;
+	int objectY;
+	
+	Announces an object's new absolute position.
+	
+	If object is 0xFFFF, current player is moved.
+
+0x24: Resync Position (C->S)
+	int objectX;
+	int objectY;
+	
+	Informs the server of the client's current position.
+	Note that if this strays too much, the server should kick the client.
+	
+	More than 4 in either coordinate should warrant a kick,
+	though this is not a mandatory requirement.
+	
+	If successful, this should broadcast Object Move Absolute to all others.
+
+0x25: Set Cosmetics (C->S)
+	byte chr;
+	byte col;
+	String name;
+	
+	Changes client's appearance / nickname.
+	
+	Spawn Object should be broadcast on success,
+	and sent back with the old info on failure.
+
+0x26: Set block parameter (S->C)
+	int blockX;
+	int blockY;
+	byte param;
+	
+	Changes a block's parameter.
+	
+	Only necessary at the fringe of a chunk,
+	where the client may not be tracking the outer blocks.
+
+0x28-0x2B: Move Delta (C->S)
+	No data.
+	
+	Announces object movement / touch from client.
+	Lower two bits indicate direction.
+	The server should broadcast Object Move Delta to all others.
+
+0x2C-0x2F: Object Move Delta (S->C)
+	ushort objectID;
+	
+	Announces object movement / touch to other clients.
+	Lower two bits indicate direction.
+	
+	If objectID is 0xFFFF, then this forces movement for the client.
+
+Once we have our object-related stuff, we can then move onto block related
+stuff, located in the 3x range.
+
+0x30: Block Place Attempt (C->S)
+	int blockX;
+	int blockY;
+	ubyte type;
+	ubyte chr;
+	ubyte col;
+	
+	Places a block on the map.
+	If successful, this should send Block Place Announce to all others.
+	If not, this should send Block Place Announce back to the client.
+	
+	If type is -1, then we place on the Pushium layer.
+
+0x31: Block Place Announce (S->C)
+	ushort objectID;
+	int blockX;
+	int blockY;
+	ubyte type;
+	ubyte chr;
+	ubyte col;
+	
+	Announces a map block placement.
+	
+	Note that wirium will be handled both server- AND client-side.
+
+Now for the chat-related stuff in the 4x range.
+
+0x40: Send Chat Message (C->S)
+	String message;
+	
+	Sends a chat message.
+
+0x41: Chat Message (S->C)
+	ushort objectID;
+	String message;
+	
+	Announces a chat message.
+	
+	A client's own messages should come from 0xFFFF.
+	System messages should come from 0xFFFE.
+
+Then there's the authentication stuff in the 5x range.
+
+0x50: Random Data For Password (S->C)
+	byte[32] data;
+	
+	Gives some data to be used in password authentication.
+	This should be random.
+
+0x51: Transformed Password Data (C->S)
+	byte[32] data;
+	
+	Gives the data back with a valid transform using a password.
+	If the transform is incorrect, the client is kicked.
+	
+	Here's the authentication scheme.
+	
+	There is a scheme to swap the bytes in the data.
+	This pseudocode uses 0-based indices because 1-based indices suck.
+	The password is repeated 5 times.
+	
+	si = 0.
+	fi = 1.
+	For each byte B, index b, in the password:
+		For each bit Q, index q (LSB q = 0):
+			If Q is set:
+				Swap data[si] with data[(si+b+1)&31].
+			Else:
+				data[si] += data[(si+b+1)&31].
+			
+			si = (si + (b+2)) & 31.
+		
+		si = (si + 1) & 31.
+		data = data + (data rotateRight fi).
+		fi += b + 1.
+	
+	As you can see, it's a tad complicated.
+	I decided on avoiding tables, though, so it should be memorisable.
+	
+	Note that rotateRight is little-endian.
+
+And there's what's defined of the protocol.
+More may need to be done, but this should do for now.
+
+Onto block types.
+
+I'm not sure if Smalltalk scripting should be permitted with regards to block
+types. It should be fine for objects, though, as those act like zero-lag
+clients and are executed server-side; on the other hand, a block is handled
+client-side as well as server-side.
+
+I suspect this would be worth trying, though. If it can sync properly,
+it should work well. If this approach is taken, then bytecode should be sent
+instead of source, not to make the closed-source crowd happy, but to make it
+simple to deal with.
+
+So, these are the types.
+Note that -1 is purely a pseudotype used to access the pushium layer.
+
+0: Floor
+	Objects can walk on this.
+
+1: Wall (solid)
+	Objects cannot walk on this.
+
+2: Wirium (logical)
+	This is where stuff starts to get interesting.
+	
+	These have a charge to them, ranging from 15 to 0.
+	0 indicates that the wirium is uncharged.
+	Anything above that indicates that it is charged.
+	
+	For simplicity and efficiency, asiekierka's original algorithm will be
+	used, rather than the algorithm I (GreaseMonkey) used in ButtServr.
+	Minus the bugs, of course.
+	
+	Basically...
+	
+	charge = max(max(charge_n,charge_s,charge_w,charge_e)-1, 0).
+	
+	I hope that is clear enough.
+	
+	Charge uses the lower 4 bits of the parameter.
+
+3: P-NAND (solid, logical)
+	These are the fundamental logic gate in 64pixels.
+	
+	They are an on/off thing.
+	
+	Direction depends on the lower 2 bits of the character.
+	The character should have a mask like:
+		001001dd (or 0x24 + d)
+	
+	charge = (inputs == 1 || inputs == 2 ? 15 : 0).
+	
+	Ison uses bit 7 of the parameter.
+
+4: Crossuh (solid, logical)
+	These have to track two charges; horizontal, and vertical.
+	
+	charge_h = max(max(charge_w,charge_e)-1, 0).
+	charge_v = max(max(charge_n,charge_s)-1, 0).
+	
+	Charge_h uses the upper 4 bits while Charge_v uses the lower 4 bits of
+	the parameter.
+
+5: Door (solid unless charged, logical, output)
+	The first physical output ever added to 64pixels.
+	
+	Ison takes bit 7 of the parameter.
+
+6: Plate (logical, input)
+	The first physical input ever added to 64pixels.
+	
+	We will use a different timing to that which has been used in later
+	versions of 64pixels v0.0.x. Instead of a minimum-4-pulse, we will
+	ensure that each pulse is even.
+	
+	Ideally, two flags should be used: turnon and turnoff.
+	Turnon will be set when a player walks onto the plate.
+	Turnoff will be set when a player leaves the plate.
+	
+	We XOR the lower bit of the timestamp, x, and y together, and if they
+	calculate to 0, then we update the state.
+	
+	If turnon:
+		Charge = 15.
+		Clear turnon.
+	Else if turnoff:
+		Charge = 0.
+		Clear turnoff.
+	
+	Or something like that.
+	
+	Turnon takes bit 7 of the parameter while turnoff takes bit 6.
+
+7: Meloder (solid, logical, output)
+	The reason why we have CraftrSound.
+	
+	Character indicates note or drum.
+	0 through 239 inclusive are
+	240 through 255 inclusive are drums.
+	
+	Each increment by 1 increases the pitch by a *half* sharp.
+	
+	Ison takes bit 7 of the parameter.
+	
+	Here's the comment in a version of CraftrSound.java which should
+	explain most of it (though not the waveforms used, they're just
+	noise and squares):
+	
+	ok, this might be helpful to know (yes, you can do half sharps/flats!)
+	
+	0: C
+	2: C#
+	4: D
+	6: D#
+	8: E
+	10: F
+	12: F#
+	14: G
+	16: G#
+	18: A
+	20: A#
+	22: B
+	24: C, but higher
+	
+	C-4 (96) is middle C.
+	A-4 (114) is concert pitch A (440Hz).
+	240+ is for drums.
+	
+	240: kick
+	241: snare
+	242: closed hihat
+	243: open hihat
+	244: hi tom (upper-left)
+	245: mid tom (upper-right)
+	246: low/floor tom (lower-very-right)
+	247: crash
+	
+	-GM
+
+8: Roofy (drawn above objects)
+	Just a nice thing to have, really.
+	
+	Just remember to make sure that Roofy is above Pushium.
+	It's an easy enough mistake to make.
+
+9: Pensor (solid, pushium-related, logical, input)
+	Like the plates, these emit a synchronised 2-pulse rather than the
+	4-pulse used in 64pixels 0.0.x. Because, let's face it, we're breaking
+	just about everything here.
+	
+	A bit like Plate but without a turnoff flag. We just do this:
+	
+	If turnon:
+		Charge = 15.
+		Clear turnon.
+	Else:
+		Charge = 0.
+	
+	Turnon is set when a pushium block of the same foreground colour hits
+	the pensor; that is, when it's pushed next to the pensor.
+	
+	Turnon takes bit 7 of the parameter.
+
+10: Pumulty (solid, pushium-related, logical, output)
+	When a direction's charge goes from zero to nonzero, a pushium is
+	created in the opposite direction of where the charge came from.
+	This pushium inherits the foreground colour and the character of the
+	pumulty.
+	
+	This should hopefully explain what the parameter contains:
+	
+	Def getcharge(dir):
+		If Bit dir Of param Is Set:
+			Return 15.
+		Else:
+			Return 0.
+	
+	The dir is relative to the caller, not the called.
+	
+11: Bodder (solid, pushium-related, logical, output)
+	When a direction's charge goes from zero to nonzero, the block on the
+	opposite side of where the charge came from inherits the character and
+	the colour of the bodder.
+	
+	This affects pumulty as well as the main layer.
+	
+	This uses the same parameter scheme as Pumulty.
+
+xx: Pushium (solid, pushable, pushium-layer):
+	This is a pushable block, just in case you were wondering.
+	It has its own layer.
+	If the colour is 0 (black-on-black), there is no pushium in the cell;
+	hence, a bodder/pumulty with colour 0 will clear the pushium cell.
+	
+	This layer has no type or parameter.
+	
+	If an object's "Allow Push" flag is set, that object can push pushium.
+	If the "Allow Chainpush" flag is set, the object can push as many as it
+	can in a row; otherwise, it can only push one at a time.
+
+With the block types out of the way...
+
+Not sure what else.

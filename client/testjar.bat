@@ -1,0 +1,1 @@
+"C:\Program Files\Java\jdk1.6.0_22\bin\jar.exe" cvfm craftrtest.jar MANIFEST.MF *.class rawcga.bin
