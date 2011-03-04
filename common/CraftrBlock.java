@@ -131,4 +131,9 @@ public class CraftrBlock
 	{
 		return block;
 	}
+
+ 	public static int getBDSize()
+ 	{
+ 		return 6;
+	}
 }
