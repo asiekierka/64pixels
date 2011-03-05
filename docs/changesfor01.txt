@@ -1,0 +1,43 @@
+Changes for 0.1.x so far:
+- a 2-pulse for pensors
+- synchronized 2-pulses and not minimum-of-4 pulses for plates
+
+TODO:
+- make floor param be pushium param
+- one-byte move deltas
+- re-merge CraftrVersion
+
+TO DO IF I FEEL LIKE IT:
+- player flags
+
+archoverhaul response:
+
+BLOCKS
+--------
+Wirium: no changes, I guess
+P-NAND: the same
+Crossuh: I'm keeping my old version and also made it always output maxcharge (15) (in 0.0.x somewhere) because according to Salzkorn it got confusing without that. No changes.
+Plate: Added the even-pulse thing
+Door: No changes?
+Pensor: Here, now it does a 2-pulse.
+Pushium: Nice idea, but I don't want to add more flags. I AM adding "pushable layer param" (former floor param), though.
+
+PROTOCOL
+---------
+Password algorithm: Nice idea!
+
+16-bit player/block IDs: Nope. Nada. I know it's useful for Smalltalk but it's the client/server which will internally keep the IDs of each block, not common code. And 255 players on a server is enough.
+Players are using id 255 for their own messages. (C->S)
+Server is using id 255 for its own messages. (S->C)
+I am considering giving Smalltalk objects id 254 in (S->C).
+
+One-byte move delta: Nice idea! Will save a tiny bit of bandwidth and all
+
+Player flags: I'm TOTALLY adding this. TOTALLY. (if i feel like it)
+
+65536-byte chunk data packets: The maximum size is around 1000/packet (TCP limitations?)
+
+kick_player(plr, "Dude, you lag too much, you must live in New Zealand"); <- correct that to "you must be Demki". He lags on virtually EVERY server in existence, except his own and... my home server!? :o
+
+@GM: The rest is probably not coming, or at least not yet. Maybe in 0.2.x...
+

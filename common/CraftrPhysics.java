@@ -252,19 +252,19 @@ public class CraftrPhysics
 			} break;
 			case 5:
 			{
-				int co = blockData[1]&0x7F;
+				int co = blockData[1]&0x01;
 				int on = (int)blockData[1]&0x80;
-				if(co>0)
+				if((on!=0) || (co!=0))
 				{
-					if(co>1) addBlockToCheck(new CraftrBlockPos(x,y));
+					addBlockToCheck(new CraftrBlockPos(x,y));
 					for(int i=0;i<4;i++)
 					{
 						int t = surrBlockData[i][0];
 						int str = strength[i];
 						if(isUpdated(t)) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
 					}
-					blockData[1] = (byte)(on|(co-1));
-					addBlockToSet(new CraftrBlock(x,y,blockData[0],on|(co-1),blockData[2],blockData[3]));
+					blockData[1] = (byte)(on|(co^1));
+					addBlockToSet(new CraftrBlock(x,y,blockData[0],blockData[1],blockData[2],blockData[3]));
 				}
 			} break;
 			case 6:
@@ -340,7 +340,7 @@ public class CraftrPhysics
 				{
 					dc=true;
 					on=0x80;
-					addBlockToSet(new CraftrBlock(x,y,blockData[0],0x84,blockData[2],blockData[3]));
+					addBlockToSet(new CraftrBlock(x,y,blockData[0],0x82,blockData[2],blockData[3]));
 					addBlockToCheck(new CraftrBlockPos(x,y));
 				}
 				else if(on>0 && si==0)

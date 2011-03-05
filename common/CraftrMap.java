@@ -408,7 +408,7 @@ public class CraftrMap
 				int t15 = block.getParam()&0x80;
 				if(t15==0 && on>0)
 				{
-					d15=(d15&0x80)|4;
+					d15=d15&0x80;
 					playSample(x,y,1);
 				}
 				else if(t15>0 && on==0) playSample(x,y,0);
