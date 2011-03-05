@@ -1,6 +1,6 @@
 tp-for-all=0
 port=25566
-private-mode=0
-name=64pixels server
+private-mode=1
+name=TEST SERVER!!!111ONE
 spawn-x=0
 spawn-y=0

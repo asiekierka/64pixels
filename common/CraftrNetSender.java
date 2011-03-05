@@ -48,13 +48,6 @@ public class CraftrNetSender implements Runnable
 								tmp = packets.poll();
 							}
 							int i = 0;
-							/*
-							while(tmp.length-i>=1024-arrp)
-							{
-								out.write(tmp,i,1024-arrp);
-								i+=1024-arrp;
-							}
-							*/
 							if(tmp.length+arrp>=1024)
 							{
 								out.write(arr,0,arrp);
@@ -67,8 +60,7 @@ public class CraftrNetSender implements Runnable
 						if(arrp>0) out.write(arr,0,arrp);
 						break;
 				}
-				if(alg != -1)
-				Thread.sleep(33);
+				if(alg != -1) Thread.sleep(10);
 			}
 		}
 		catch(Exception e)

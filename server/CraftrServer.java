@@ -818,7 +818,7 @@ public class CraftrServer extends CraftrServerShim
 	
 	public void start()
 	{
-		System.out.println("64px-srvr version 0.0.12.1");
+		System.out.println("64px-srvr version " + CraftrVersion.getVersionName());
 		System.out.println("Bonus points for GreaseMonkey's revolution(ary) plans");
 		System.out.print("Initializing: #");
 		run = true;

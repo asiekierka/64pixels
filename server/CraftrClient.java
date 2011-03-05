@@ -503,7 +503,6 @@ public class CraftrClient implements Runnable
 								{
 									kick("Invalid movement!");
 								}
-								//if(map.getBlock(x+ta[2],y+ta[3])[0] == 1) break;
 								serv.sendOthers(id,ta,4);
 								serv.map.setPlayer(x,y,0);
 								x+=ta[2];
@@ -535,8 +534,27 @@ public class CraftrClient implements Runnable
 									}
 								}
 								break;
-							case 0x2F:
+							case 0x2A:
 								disconnect();
+								break;
+							case 0x2C:
+							case 0x2D:
+							case 0x2E:
+							case 0x2F:
+								int dir2f = buf[0]&0x03;
+								int dx2f = map.xMovement[dir2f];
+								int dy2f = map.yMovement[dir2f];
+								byte[] ta2f = new byte[4];
+								ta2f[0] = 0x21;
+								ta2f[1] = (byte)id;
+								ta2f[2] = (byte)dx2f;
+								ta2f[3] = (byte)dy2f;
+								if(passWait) break;
+								serv.sendOthers(id,ta2f,4);
+								serv.map.setPlayer(x,y,0);
+								x+=dx2f;
+								y+=dy2f;
+								serv.map.setPlayer(x,y,1);
 								break;
 							case 0x30:
 								int ax = in.readInt();

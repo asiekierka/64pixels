@@ -96,7 +96,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 			{
 				synchronized(out)
 				{
-					out.writeByte(0x2F);
+					out.writeByte(0x2A);
 				}
 				sendPacket();
 			}
@@ -263,11 +263,24 @@ public class CraftrNet implements Runnable, CraftrNetShim
 	{
 		try
 		{
+			int i = 0;
+			for(i=0;i<4;i++)
+			{
+				if(CraftrMap.xMovement[i]==dx && CraftrMap.yMovement[i]==dy)
+				{
+					i+=0x2C;
+					break;
+				}
+			}
 			synchronized(out)
 			{
-				out.writeByte(0x23);
-				out.writeByte((byte)dx);
-				out.writeByte((byte)dy);
+				if(i>=0x2C) out.writeByte((byte)i);
+				else
+				{
+					out.writeByte(0x23);
+					out.writeByte((byte)dx);
+					out.writeByte((byte)dy);
+				}
 				sendPacket();
 			}
 		}
