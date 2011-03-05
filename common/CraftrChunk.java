@@ -155,13 +155,11 @@ public class CraftrChunk {
 	}
 	public byte getBlockParam(int x, int y)
 	{
-		if(type[x+(y<<6)] == 0) return param[4096+x+(y<<6)];
-		else return param[x+(y<<6)];
+		return param[x+(y<<6)];
 	}
 	public void setBlockParam(int x, int y, byte val)
 	{
-		if(type[x+(y<<6)] == 0) param[4096+x+(y<<6)]=val;
-		else param[x+(y<<6)]=val;
+		param[x+(y<<6)]=val;
 	}
 	public byte getPushableChar(int x, int y)
  	{
@@ -171,19 +169,22 @@ public class CraftrChunk {
  	{
  		return colp[x+(y<<6)];
  	}
+	public byte getPushableFlags(int x, int y)
+	{
+		return param[4096+x+(y<<6)];
+	}	
 	public void place(int x, int y, byte aType, byte aChr, byte aCol, byte aPar)
 	{
 		int tmp = x+(y<<6);
 		type[tmp]=aType;
+		param[tmp] = aPar;
 		if(aType!=0)
 		{
 			chr[tmp]=aChr;
 			col[tmp]=aCol;
-			param[tmp] = aPar;
 		} else {
 			chr[4096+tmp]=aChr;
 			col[4096+tmp]=aCol;
-			param[4096+tmp] = aPar;
 		}
  		if(colp[tmp] == 0)
  		{
@@ -192,8 +193,13 @@ public class CraftrChunk {
 		}
 	}
  	public void placePushable(int x, int y, byte aChr, byte aCol)
+	{
+		placePushable(x,y,(byte)0,aChr,aCol);
+	}
+ 	public void placePushable(int x, int y, byte aPar, byte aChr, byte aCol)
  	{
  		int tmp = x+(y<<6);
+		param[4096+tmp] = aPar;
  		chrp[tmp] = aChr;
  		colp[tmp] = aCol;
  		if(aCol == 0)
@@ -210,11 +216,6 @@ public class CraftrChunk {
  			chr2[tmp] = aChr;
  			col2[tmp] = aCol;
  		}
-	}
-	
-	public void placeTypeOnly(int x, int y, byte val)
-	{
-		type[x+(y<<6)]=val;
 	}
 	
 	public void place(int x, int y, byte aType, byte aChr, byte aCol)
