@@ -344,10 +344,10 @@ public class CraftrNet implements Runnable, CraftrNetShim
 				{
 					out.writeByte(0x0F);
 					writeString(nick);
-					writeString("asiekierka is a little bit active :D");
+					writeString("Dude, you lag too much, you must live in New Zealand");
 					out.writeByte(0x00);
 					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE
-					out.writeInt(0x10); // protocol version 16
+					out.writeInt(CraftrVersion.getProtocolVersion());
 					out.writeByte(game.players[255].pchr);
 					out.writeByte(game.players[255].pcol);
 					sendPacket();

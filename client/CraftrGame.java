@@ -105,7 +105,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public static String getVersion()
 	{
-		return "0.0.12.1";
+		return CraftrVersion.getVersionName();
 	}
 	public CraftrGame()
 	{
@@ -638,6 +638,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		if(mx >= 0 && mx < gs.WIDTH && my >= 0 && my < (gs.GRID_H<<4))
 		{
 			int tx = (players[255].px+(mx>>4))-15;
+
 			int ty = (players[255].py+(my>>4))-12;
 			gs.hov_type=map.getBlock(tx,ty).getTypeWithVirtual();
 		}
