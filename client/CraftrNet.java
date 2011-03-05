@@ -449,14 +449,6 @@ public class CraftrNet implements Runnable, CraftrNetShim
 									}
 									game.netChange=true;
 								}
-								/*
-								else if(isLoadingChunk && chunkPacketsLeft>0)
-								{
-									System.out.println("Chunk not loaded, retrying...");
-									isLoadingChunk=false;
-									chunkRequest(lcX,lcY);
-								}
-								*/
 								break;
 							case 0x20:
 								int t1 = in.readUnsignedByte();
@@ -498,8 +490,8 @@ public class CraftrNet implements Runnable, CraftrNetShim
 							case 0x27:
 								game.netThreadRequest = 1;
 								break;
-							case 0x2C:
-							case 0x2D:
+							case 0x2A:
+							case 0x2B:
 								int bx2c=in.readInt();
 								int by2c=in.readInt();
 								byte[] d2c;
@@ -531,6 +523,20 @@ public class CraftrNet implements Runnable, CraftrNetShim
 											break;
 									}
 								}  
+								break;
+							case 0x2C:
+							case 0x2D:
+							case 0x2E:
+							case 0x2F:
+								System.out.println("COMPACT DELTA!");
+								int id2f = in.readUnsignedByte();
+								int dir2f = buf[0]&0x03;
+								int dx2f = CraftrMap.xMovement[dir2f];
+								int dy2f = CraftrMap.yMovement[dir2f];
+								if(game.players[id2f] != null)
+								{
+									game.players[id2f].moveDelta(dx2f,dy2f);
+								}
 								break;
 							case 0x31:
 							case 0x33:

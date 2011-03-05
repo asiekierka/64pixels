@@ -390,7 +390,7 @@ public class CraftrMap
 	{
 		try
 		{
-			se.out.writeByte(0x2C|on);
+			se.out.writeByte(0x2A|on);
 			se.out.writeInt(x);
 			se.out.writeInt(y);
 			byte[] t = se.getPacket();

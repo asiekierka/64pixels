@@ -3,9 +3,9 @@ Changes for 0.1.x so far:
 - synchronized 2-pulses and not minimum-of-4 pulses for plates
 - re-merge CraftrVersion
 - make floor param be pushium param
+- one-byte move deltas
 
 TODO:
-- one-byte move deltas
 
 TO DO IF I FEEL LIKE IT:
 - player flags

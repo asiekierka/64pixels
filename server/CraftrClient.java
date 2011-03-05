@@ -545,12 +545,10 @@ public class CraftrClient implements Runnable
 								int dx2f = map.xMovement[dir2f];
 								int dy2f = map.yMovement[dir2f];
 								byte[] ta2f = new byte[4];
-								ta2f[0] = 0x21;
+								ta2f[0] = buf[0];
 								ta2f[1] = (byte)id;
-								ta2f[2] = (byte)dx2f;
-								ta2f[3] = (byte)dy2f;
 								if(passWait) break;
-								serv.sendOthers(id,ta2f,4);
+								serv.sendOthers(id,ta2f,2);
 								serv.map.setPlayer(x,y,0);
 								x+=dx2f;
 								y+=dy2f;
