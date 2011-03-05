@@ -441,12 +441,7 @@ Note that -1 is purely a pseudotype used to access the pushium layer.
 	Charge_h uses the upper 4 bits while Charge_v uses the lower 4 bits of
 	the parameter.
 
-5: Door (solid unless charged, logical, output)
-	The first physical output ever added to 64pixels.
-	
-	Ison takes bit 7 of the parameter.
-
-6: Plate (logical, input)
+5: Plate (logical, input)
 	The first physical input ever added to 64pixels.
 	
 	We will use a different timing to that which has been used in later
@@ -470,6 +465,11 @@ Note that -1 is purely a pseudotype used to access the pushium layer.
 	Or something like that.
 	
 	Turnon takes bit 7 of the parameter while turnoff takes bit 6.
+
+6: Door (solid unless charged, logical, output)
+	The first physical output ever added to 64pixels.
+	
+	Ison takes bit 7 of the parameter.
 
 7: Meloder (solid, logical, output)
 	The reason why we have CraftrSound.
@@ -577,6 +577,8 @@ xx: Pushium (solid, pushable, pushium-layer):
 	If an object's "Allow Push" flag is set, that object can push pushium.
 	If the "Allow Chainpush" flag is set, the object can push as many as it
 	can in a row; otherwise, it can only push one at a time.
+
+	>>asie: Pushium's block type is 255 (or -1) if you use CraftrBlock's getTypeWithVirtual();
 
 With the block types out of the way...
 

@@ -7,8 +7,7 @@ public class CraftrAuth
 	private String clientKey;
 	private byte[] cka;
 	private byte[] msg;
-	private String msgs;
-	
+
 	public CraftrAuth(String ck)
 	{
 		setClientKey(ck);
@@ -25,7 +24,6 @@ public class CraftrAuth
 	public void setMessage(String mg)
 	{
 		msg=mg.getBytes();
-		msgs= mg;
 	}
 	
 	public void genMessage()

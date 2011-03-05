@@ -9,7 +9,6 @@ public class CraftrBlockPos
 	{
 		x=tx;
 		y=ty;
-		//System.out.println("new craftrblockpos: " + x + ", " + y);
 	}
 	public int getX()
 	{

@@ -25,8 +25,7 @@ public class CraftrChunk {
 	public int mapinfo_len;
 	public int mapinfo_type;
 	public static final int hdrsize = 5;
-	public static final int[] mg1_chars = { 178, 178, 177, 177, 176, 176, 178, 178, 219, 219, 178, 178, 178, 177, 177, 176 };
-	public static final int[] mg1_colors = { 42, 42, 42, 42, 42, 42, 2, 110, 1, 1, 1, 1, 1, 1, 1, 1 }; 
+
 	public CraftrChunk(int xp, int yp, boolean used)
 	{
 		type = new byte[64*64];
@@ -116,56 +115,11 @@ public class CraftrChunk {
 		}
 	}
 
-	public int noise3(int x, int y, int seed)
-	{
-		Random rand = new Random();
-		rand.setSeed(x);
-		int r1 = rand.nextInt();
-		rand.setSeed(y);
-		int r2 = rand.nextInt();
-		rand.setSeed(seed);
-		int r3 = rand.nextInt();
-		return ((r1*r3)+(r2*r3))%65536;
-	}
-
-	public int snoise3(int x, int y, int seed)
-	{
-		return (noise3(x,y,seed)+noise3(x+1,y,seed)+noise3(x,y+1,seed)+noise3(x-1,y,seed)+noise3(x,y-1,seed))/5;
-	}
-	
-	public int inoise3(int x, int y, int seed, int level)
-	{
-		int i = 1;
-		int iLevel=1;
-		int tempOut = 0;
-		for(int j=0;j<level;j++)
-		{
-			tempOut+=snoise3(x*i*2,y*i*2,seed*i*2)/(2*i);
-			i=i<<1;
-			iLevel|=i;
-		}
-		return tempOut/level;
-	}
 	public void generate(int mode)
 	{
 		Random rand = new Random();
 		switch(mode)
 		{
-			// my failed attempt at noise. if anyone wants to fix it go ahead
-			case 1:
-				for(int iy=0;iy<64;iy++)
-				{
-					for(int ix=0;ix<64;ix++)
-					{
-						int perlinVal = inoise3(xpos+ix,ypos+iy,13123,16)%256;
-						int cTPos = 15-((perlinVal&255)/16);
-						int aTPos = ix+(iy<<6);
-						type[aTPos] = (byte)0;
-						chr[aTPos+4096] = (byte)mg1_chars[cTPos];
-						col[aTPos+4096] = (byte)mg1_colors[cTPos];
-					}
-				}
-				break;
 			default:
 				for(int i=0;i<64;i++)
 				{
@@ -208,11 +162,6 @@ public class CraftrChunk {
 	{
 		if(type[x+(y<<6)] == 0) param[4096+x+(y<<6)]=val;
 		else param[x+(y<<6)]=val;
-	}
-	public int getBlockFullType(int x, int y)
-	{
-		if(type[x+(y<<6)] == 0) return (param[4096+x+(y<<6)]<<8)|type[4096+x+(y<<6)];
-		else return (param[x+(y<<6)]<<8)|type[x+(y<<6)];
 	}
 	public byte getPushableChar(int x, int y)
  	{
