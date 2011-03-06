@@ -317,7 +317,7 @@ public class CraftrMap
 	{
 		try
 		{ 
-			byte[] data = new byte[6];
+			byte[] data = new byte[7];
 			int px = x&63;
 			int py = y&63;
 			CraftrChunk cnk = grabChunk((x>>6),(y>>6));
@@ -327,6 +327,7 @@ public class CraftrMap
 			data[3] = cnk.getBlockColor(px,py);
 			data[4] = cnk.getPushableChar(px,py);
 			data[5] = cnk.getPushableColor(px,py);
+			data[6] = cnk.getBullet(px,py);
 			return data;
 		}
 		catch(NoChunkMemException e)
@@ -375,7 +376,6 @@ public class CraftrMap
  		{ 
  			int px = x&63;
  			int py = y&63;
- 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
  			grabChunk((x>>6),(y>>6)).placePushable(px,py,aChr,aCol);
  		}
 		catch(Exception e)
@@ -384,6 +384,35 @@ public class CraftrMap
 			e.printStackTrace();
  			if(!multiplayer) System.exit(1);
 		}
+	}
+
+ 	public void setBullet(int x, int y, byte aType)
+ 	{
+ 		try
+ 		{ 
+ 			int px = x&63;
+ 			int py = y&63;
+ 			grabChunk((x>>6),(y>>6)).placeBullet(px,py,aType);
+ 		}
+		catch(Exception e)
+		{
+ 			System.out.println("setBullet: exception!");
+			e.printStackTrace();
+ 			if(!multiplayer) System.exit(1);
+		}
+	}
+
+	public void setBulletNet(int x, int y, byte aType)
+	{
+		try
+		{
+			se.out.writeByte(0x78|(aType&7));
+			se.out.writeInt(x);
+			se.out.writeInt(y);
+			byte[] t = se.getPacket();
+			se.sendAll(t,t.length);
+		}
+		catch(Exception e) { System.out.println("setBulletNet sending error!"); }
 	}
 	
 	public void setPlayerNet(int x, int y, int on)

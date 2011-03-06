@@ -87,7 +87,7 @@ public class CraftrPhysics
 		int y = cbp.getY();
 		byte[] blockData = map.getBlock(x,y).getBlockData();
 		byte[][] surrBlockPre = new byte[4][];
-		int[][] surrBlockData = new int[4][6];
+		int[][] surrBlockData = new int[4][CraftrBlock.getBDSize()];
 		for(int i=0;i<4;i++)
 		{
 			surrBlockPre[i]=map.getBlock(x+xMovement[i],y+yMovement[i]).getBlockData();

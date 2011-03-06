@@ -169,10 +169,14 @@ public class CraftrChunk {
  	{
  		return colp[x+(y<<6)];
  	}
-	public byte getPushableFlags(int x, int y)
+	public byte getBullet(int x, int y)
 	{
 		return param[4096+x+(y<<6)];
 	}	
+	public void placeBullet(int x, int y, byte aType)
+	{
+		param[4096+x+(y<<6)]=aType;
+	}
 	public void place(int x, int y, byte aType, byte aChr, byte aCol, byte aPar)
 	{
 		int tmp = x+(y<<6);
@@ -193,13 +197,8 @@ public class CraftrChunk {
 		}
 	}
  	public void placePushable(int x, int y, byte aChr, byte aCol)
-	{
-		placePushable(x,y,(byte)0,aChr,aCol);
-	}
- 	public void placePushable(int x, int y, byte aPar, byte aChr, byte aCol)
  	{
  		int tmp = x+(y<<6);
-		param[4096+tmp] = aPar;
  		chrp[tmp] = aChr;
  		colp[tmp] = aCol;
  		if(aCol == 0)

@@ -4,7 +4,7 @@ public class CraftrBlock
 {
 	public int x = 0;
 	public int y = 0;
-	private byte[] block = new byte[6];
+	private byte[] block = new byte[7];
 	
 	public CraftrBlock()
 	{
@@ -131,7 +131,7 @@ public class CraftrBlock
 
 	public static int getBDSize()
 	{
-		return 6;
+		return 7;
 	}
 
 	public byte[] getBlockData()
