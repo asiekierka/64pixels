@@ -13,7 +13,6 @@ public class CraftrClient implements Runnable
 	public Socket socket;
 	public DataOutputStream out;
 	public ByteArrayOutputStream out2;
-	//public OutputStream outf;
 	private DataInputStream in;
 	public int x, y, loginStage;
 	public byte chr, col;
@@ -27,6 +26,7 @@ public class CraftrClient implements Runnable
 	public CraftrServer serv;
 	public CraftrNetSender ns;
 	public int ncol=0;
+	public int health;
 	public boolean op = false;
 	public long frames = 0;
 	public int pingsWaiting = 0;
@@ -301,7 +301,7 @@ public class CraftrClient implements Runnable
 		{
 			synchronized(out)
 			{
-				out.writeByte(0x70);
+				out.writeByte(0x28);
 				out.writeShort((short)val*42);
 				sendPacket();
 			}
@@ -395,6 +395,7 @@ public class CraftrClient implements Runnable
 											out.writeInt(y);
 											writeString(nick);
 											out.writeShort(op?42:0);
+
 											sendPacket();
 										}
 										if(serv.passOn)
@@ -410,6 +411,9 @@ public class CraftrClient implements Runnable
 											passWait=true;
 										}
 										sendChatMsgAll(nick + " has joined.");
+										health = 7;
+										serv.map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
+										serv.map.physics.players[id].health = health;
 										serv.map.setPlayer(x,y,1);
 										synchronized(out)
 										{

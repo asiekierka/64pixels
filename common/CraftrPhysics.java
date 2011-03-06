@@ -15,9 +15,11 @@ public class CraftrPhysics
 	private static final int[] yMovement = { 0, 0, -1, 1 };
 	private boolean isServer;
 	
+	public CraftrPlayer[] players;
 	public CraftrPhysics(boolean _isServer)
 	{
 		isServer = _isServer;
+		if(isServer) players = new CraftrPlayer[256];
 	}
 
 	public boolean isUpdated(int type)

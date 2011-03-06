@@ -222,22 +222,6 @@ public class CraftrNet implements Runnable, CraftrNetShim
 		}
 	}
 	
-	public void changeNickname(String n)
-	{
-		try
-		{
-			synchronized(out)
-			{
-				out.writeByte(0x26);
-				writeString(n);
-				sendPacket();
-			}
-		}
-		catch(Exception e)
-		{
-			System.out.println("Non-fatal craftrNet changeNickname error!");
-		}
-	}
 	public void sendBlock(int dx, int dy, byte t, byte ch, byte co)
 	{
 		try
@@ -492,6 +476,10 @@ public class CraftrNet implements Runnable, CraftrNetShim
 							case 0x27:
 								game.netThreadRequest = 1;
 								break;
+							case 0x28:
+								int t70=in.readByte();
+								isOp=t70==42?true:false;
+								break;
 							case 0x2A:
 							case 0x2B:
 								int bx2c=in.readInt();
@@ -607,10 +595,6 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								int ta60v = in.readUnsignedByte();
 								// best not to screw up meloders --GM
 								game.audio.playNote(ta60x,ta60y,ta60v,1.0);
-								break;
-							case 0x70:
-								int t70=in.readByte();
-								isOp=t70==42?true:false;
 								break;
 							case 0xE1: // push me
 								int e1x = in.readInt();
