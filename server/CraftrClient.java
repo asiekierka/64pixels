@@ -302,7 +302,7 @@ public class CraftrClient implements Runnable
 			synchronized(out)
 			{
 				out.writeByte(0x70);
-				out.writeByte((byte)val*42);
+				out.writeShort((short)val*42);
 				sendPacket();
 			}
 		}
@@ -394,7 +394,7 @@ public class CraftrClient implements Runnable
 											out.writeInt(x);
 											out.writeInt(y);
 											writeString(nick);
-											out.writeByte(op?42:0);
+											out.writeShort(op?42:0);
 											sendPacket();
 										}
 										if(serv.passOn)

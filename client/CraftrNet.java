@@ -400,7 +400,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								chunkRequest(tx,ty+1);
 								chunkRequest(tx+1,ty+1);
 								nick = readString();
-								isOp=in.readUnsignedByte()==42;
+								isOp=in.readUnsignedShort()==42;
 								game.players[255].name = nick;
 								System.out.println("Logged in!");
 								break;
