@@ -44,7 +44,7 @@ public class CraftrClient implements Runnable
 		{
 			socket = s;
 			serv = se;
-			socket.setTcpNoDelay(serv.nagle==0);
+			socket.setTcpNoDelay(true);
 			map = m;
 			id = iz;
 			dc = 0;
@@ -348,7 +348,7 @@ public class CraftrClient implements Runnable
 				{
 					byte[] buf = new byte[1];
 					if(!socket.isConnected() || !socket.isBound() || !ns.isRunning) disconnect();
-					else if(in.available() > 1) len = in.read(buf,0,1);
+					else if(in.available() > 0) len = in.read(buf,0,1);
 					else len = 0;
 					if(len > 0 && packets < 32)
 					{
@@ -358,7 +358,6 @@ public class CraftrClient implements Runnable
 							case 0x0F:
 									if(loginStage>=1) break;
 									loginStage = 1;
-									//if(socket.getInetAddress().getHostAddress().equals("78.88.180.66")) ncol=0x0A;
 									nick = readString();
 									readString();
 									in.readByte();
@@ -366,7 +365,6 @@ public class CraftrClient implements Runnable
 									version = in.readInt();
 									chr = in.readByte();
 									col = in.readByte();
-									//nick = "getting nickname...";
 									x=serv.spawnX;
 									y=serv.spawnY;
 									if(serv.anonMode) nick = "User"+id;
@@ -621,7 +619,6 @@ public class CraftrClient implements Runnable
 									t33[3] = aco;
 									t33[2] = ach;
 									while(serv.map.maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
-									//System.out.println("BLOCK: " + at + "," + aco + "," + ach);
 									serv.map.modlock=true;
 									//while(serv.map.bslock) { Thread.sleep(1); }
 	 								synchronized(serv.map)
@@ -665,7 +662,6 @@ public class CraftrClient implements Runnable
 								}
 								break;
 							case 0x40:
-								//System.out.println("Got message!");
 								String al = readString();
 								System.out.println("<" + nick + "> " + al);
 								String alt = serv.parseMessage(al,id);
@@ -747,9 +743,8 @@ public class CraftrClient implements Runnable
 								break; // Ignore.
 						}
 					}
-					//outf.flush();
 				}
-				Thread.sleep(16);
+				Thread.sleep(5);
 				frames++;
 				if(frames%625==0) // every 10 seconds
 				{

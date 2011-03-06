@@ -48,9 +48,9 @@ public class CraftrNet implements Runnable, CraftrNetShim
 			socket = new Socket(host,port);
 			while(!socket.isConnected())
 			{
-				Thread.sleep(100);
+				Thread.sleep(10);
 			}
-			socket.setTcpNoDelay(nagle==0);
+			socket.setTcpNoDelay(true);
 			in = new DataInputStream(socket.getInputStream());
 			out2 = new ByteArrayOutputStream(2048);
 			out = new DataOutputStream(out2);
@@ -274,7 +274,10 @@ public class CraftrNet implements Runnable, CraftrNetShim
 			}
 			synchronized(out)
 			{
-				if(i>=0x2C) out.writeByte((byte)i);
+				if(i>=0x2C)
+				{
+					out.writeByte((byte)i);
+				}
 				else
 				{
 					out.writeByte(0x23);
@@ -300,7 +303,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 			while(loginStage != 255 && socket.isConnected())
 			{
 				loop(gaa);
-				Thread.sleep(16);
+				Thread.sleep(5);
 			}
 		}
 		catch(Exception e)
@@ -317,7 +320,6 @@ public class CraftrNet implements Runnable, CraftrNetShim
 			synchronized(out)
 			{
 				out.writeByte(0x25);
-				out.writeByte(0xFF);
 				sendPacket();
 			}
 		}
@@ -528,7 +530,6 @@ public class CraftrNet implements Runnable, CraftrNetShim
 							case 0x2D:
 							case 0x2E:
 							case 0x2F:
-								System.out.println("COMPACT DELTA!");
 								int id2f = in.readUnsignedByte();
 								int dir2f = buf[0]&0x03;
 								int dx2f = CraftrMap.xMovement[dir2f];
@@ -632,9 +633,6 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								break;
 							case 0xF5:
 								String tmp4 = readString();
-								// that thing was a temporary measure since 0.0.1
-								//System.out.println("KICKED: " + tmp4);
-								//System.exit(1);
 								game.kickOut(tmp4);
 								break;
 						}
