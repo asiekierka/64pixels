@@ -109,11 +109,11 @@ public class CraftrPhysics
 		{
 			int dx = x+xMovement[blockData[6]];
 			int dy = y+yMovement[blockData[6]];
+			blockDataO.setBullet((byte)0);
+			addBlockToSet(blockDataO);
 			if(surrBlockO[blockData[6]].isEmpty())
 			{
-				blockDataO.setBullet((byte)0);
 				surrBlockO[blockData[6]].setBullet(blockData[6]);
-				addBlockToSet(blockDataO);
 				addBlockToSet(surrBlockO[blockData[6]]);
 			}
 		}
