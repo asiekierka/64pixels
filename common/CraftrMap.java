@@ -406,9 +406,10 @@ public class CraftrMap
 	{
 		try
 		{
-			se.out.writeByte(0x78|(aType&7));
+			se.out.writeByte(0x70);
 			se.out.writeInt(x);
 			se.out.writeInt(y);
+			se.out.writeByte(aType);
 			byte[] t = se.getPacket();
 			se.sendAll(t,t.length);
 		}

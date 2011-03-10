@@ -541,11 +541,17 @@ public class CraftrNet implements Runnable, CraftrNetShim
  									{
  										game.map.setPushable(bx1,by1,ch1,co1);
  									}
- 								} else {
+ 								} else
+								{
  									synchronized(game.map)
  									{
  										game.map.setBlock(bx1,by1,t3,(byte)0,ch1,co1);
  										if(buf[0]!=0x33) game.map.setPushable(bx1,by1,(byte)0,(byte)0);
+										for(int i=0;i<4;i++)
+										{
+											CraftrBlock t = game.map.getBlock(bx1+game.map.xMovement[i],by1+game.map.yMovement[i]);
+											game.map.setBlock(bx1+game.map.xMovement[i],by1+game.map.yMovement[i],t.getType(),t.getParam(),game.map.updateLook(t),t.getColor());
+										}
  									}
  								}
 								game.blockChange=true;
@@ -595,6 +601,15 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								int ta60v = in.readUnsignedByte();
 								// best not to screw up meloders --GM
 								game.audio.playNote(ta60x,ta60y,ta60v,1.0);
+								break;
+							case 0x70:
+								int x70 = in.readInt();
+								int y70 = in.readInt();
+								byte t70 = in.readByte();
+								synchronized(game.map)
+ 								{
+ 									game.map.setBullet(x70,y70,t70);
+ 								}
 								break;
 							case 0xE1: // push me
 								int e1x = in.readInt();

@@ -17,10 +17,12 @@ public class MainApplet extends JApplet {
 		//addMouseMotionListener(game);
 		//addKeyListener(game);
 		game.init();
+		requestFocusInWindow();
 	}
 	
 	public void start()
 	{
+		requestFocusInWindow();
 		(new Thread(new AppletGameRun())).start();
 	}
 	

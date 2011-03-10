@@ -1068,7 +1068,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		{
 			is = new CraftrInScreen(canvas,2,"Main menu");
 			is.isRunning=true;
-			this.requestFocusInWindow();
 			is.addStrings(modes);
 			canvas.cs = (CraftrScreen)is;
 			loopInScreen();
@@ -1288,6 +1287,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				{
 					mouseChange = true;
 					oldmx = mx;
+
 					oldmy = my;
 					oldmb = mb;
 				}
