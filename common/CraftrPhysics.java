@@ -61,6 +61,11 @@ public class CraftrPhysics
 			{
 				if(cb.isPushable()) modifiedMap.setPushable(cb.x,cb.y,cb.getChar(),cb.getColor());
 				else modifiedMap.setBlock(cb.x,cb.y,cb.getTypeWithVirtual(),cb.getParam(),modifiedMap.updateLook(cb),cb.getColor());
+				if(cb.isBullet())
+				{
+					modifiedMap.setBullet(cb.x,cb.y,(byte)cb.getBullet());
+					if(isServer) modifiedMap.setBulletNet(cb.x,cb.y,(byte)cb.getBullet());
+				}
 				if(isServer && isSent(cb.getTypeWithVirtual()))
 					modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
 			}
@@ -85,17 +90,34 @@ public class CraftrPhysics
 	{
 		int x = cbp.getX();
 		int y = cbp.getY();
-		byte[] blockData = map.getBlock(x,y).getBlockData();
+		CraftrBlock blockDataO = map.getBlock(x,y);
+		byte[] blockData = blockDataO.getBlockData();
+		CraftrBlock[] surrBlockO = new CraftrBlock[4];
 		byte[][] surrBlockPre = new byte[4][];
 		int[][] surrBlockData = new int[4][CraftrBlock.getBDSize()];
 		for(int i=0;i<4;i++)
 		{
-			surrBlockPre[i]=map.getBlock(x+xMovement[i],y+yMovement[i]).getBlockData();
+			surrBlockO[i]=map.getBlock(x+xMovement[i],y+yMovement[i]);
+			surrBlockPre[i] = surrBlockO[i].getBlockData();
 			for(int j=0;j<6;j++)
 			{
 				surrBlockData[i][j]=0xFF&(int)surrBlockPre[i][j];
 			}
 		}
+		// Bullet code
+		if(blockData[6]!=0)
+		{
+			int dx = x+xMovement[blockData[6]];
+			int dy = y+yMovement[blockData[6]];
+			if(surrBlockO[blockData[6]].isEmpty())
+			{
+				blockDataO.setBullet((byte)0);
+				surrBlockO[blockData[6]].setBullet(blockData[6]);
+				addBlockToSet(blockDataO);
+				addBlockToSet(surrBlockO[blockData[6]]);
+			}
+		}
+		// Strength and physics code
 		int[] strength = new int[4];
 		for(int i=0;i<4;i++)
 		{

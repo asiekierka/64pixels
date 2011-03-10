@@ -477,8 +477,8 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								game.netThreadRequest = 1;
 								break;
 							case 0x28:
-								int t70=in.readByte();
-								isOp=t70==42?true:false;
+								int t28=in.readByte();
+								isOp=t28==42?true:false;
 								break;
 							case 0x2A:
 							case 0x2B:

@@ -56,8 +56,22 @@ public class CraftrBlock
 
 	public boolean isPushable()
 	{
-		if(block[5]!=0) return true;
-		return false;
+		return block[5]!=0;
+	}
+
+	public boolean isBullet()
+	{
+		return block[6]!=0;
+	}
+
+	public int getBullet()
+	{
+		return 0xFF&(int)block[6];
+	}
+
+	public void setBullet(byte t)
+	{
+		block[6]=t;
 	}
 
 	public int getType()
