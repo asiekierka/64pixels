@@ -479,11 +479,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			System.out.println("Error reading config data! " + e.getMessage());
 		}
 	}
-	public byte randByte()
-	{
-		return (byte)rand.nextInt(256);
-	}
-	
+
 	public void mouseEntered(MouseEvent ev) {}
 	public void mouseExited(MouseEvent ev) {}
 	public void mouseClicked(MouseEvent ev) {}
@@ -734,16 +730,16 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			return false;
 		}
 	}
-	/*
+
 	public void shoot(int dir)
 	{
 		int sx=players[255].px+map.xMovement[dir];
 		int sy=players[255].py+map.yMovement[dir];
-		map.setBlock(sx,sy,(byte)7,(byte)dir,(byte)248,(byte)15);
+		map.setBullet(sx,sy,(byte)(dir+1));
 		blockChange=true;
-		map.addbc(new CraftrBlockPos(sx,sy));
+		map.physics.addBlockToCheck(new CraftrBlockPos(sx,sy));
 	}
-	*/
+
 	public void keyTyped(KeyEvent ev) {} // this one sucks even more
 	public void keyPressed(KeyEvent ev)
 	{
@@ -754,6 +750,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			return;
 		}
 		int kc = ev.getKeyCode();
+		isShift = ev.isShiftDown();
 		if(is == null && gs.barType == 0)
 		{
 			if (gs.cwOpen && gs.cw.type==1) {
@@ -921,7 +918,19 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		int px = players[255].px+dpx;
 		int py = players[255].py+dpy;
 		CraftrBlock blockMoveTo=map.getBlock(px,py);
-		if(map.pushAttempt(px,py,dpx,dpy))
+		if(isShift && blockMoveTo.isEmpty())
+		{
+			for(int i=0;i<4;i++)
+			{
+				int tx = players[255].px+map.xMovement[i];
+				int ty = players[255].py+map.yMovement[i];
+				if(tx==px && ty==py)
+				{
+					shoot(i);
+				}
+			}
+		}
+		else if(map.pushAttempt(px,py,dpx,dpy))
 		{
 			if(multiplayer)
 			{

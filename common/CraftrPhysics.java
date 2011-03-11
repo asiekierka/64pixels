@@ -61,11 +61,8 @@ public class CraftrPhysics
 			{
 				if(cb.isPushable()) modifiedMap.setPushable(cb.x,cb.y,cb.getChar(),cb.getColor());
 				else modifiedMap.setBlock(cb.x,cb.y,cb.getTypeWithVirtual(),cb.getParam(),modifiedMap.updateLook(cb),cb.getColor());
-				if(cb.isBullet())
-				{
-					modifiedMap.setBullet(cb.x,cb.y,(byte)cb.getBullet());
-					if(isServer) modifiedMap.setBulletNet(cb.x,cb.y,(byte)cb.getBullet());
-				}
+				modifiedMap.setBullet(cb.x,cb.y,(byte)cb.getBullet());
+				if(isServer) modifiedMap.setBulletNet(cb.x,cb.y,(byte)cb.getBullet());
 				if(isServer && isSent(cb.getTypeWithVirtual()))
 					modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
 			}
@@ -90,8 +87,8 @@ public class CraftrPhysics
 	{
 		int x = cbp.getX();
 		int y = cbp.getY();
-		CraftrBlock blockDataO = map.getBlock(x,y);
-		byte[] blockData = blockDataO.getBlockData();
+		CraftrBlock blockO = map.getBlock(x,y);
+		byte[] blockData = blockO.getBlockData();
 		CraftrBlock[] surrBlockO = new CraftrBlock[4];
 		byte[][] surrBlockPre = new byte[4][];
 		int[][] surrBlockData = new int[4][CraftrBlock.getBDSize()];
@@ -99,7 +96,7 @@ public class CraftrPhysics
 		{
 			surrBlockO[i]=map.getBlock(x+xMovement[i],y+yMovement[i]);
 			surrBlockPre[i] = surrBlockO[i].getBlockData();
-			for(int j=0;j<6;j++)
+			for(int j=0;j<CraftrBlock.getBDSize();j++)
 			{
 				surrBlockData[i][j]=0xFF&(int)surrBlockPre[i][j];
 			}
@@ -107,15 +104,18 @@ public class CraftrPhysics
 		// Bullet code
 		if(blockData[6]!=0)
 		{
-			int dx = x+xMovement[blockData[6]];
-			int dy = y+yMovement[blockData[6]];
-			blockDataO.setBullet((byte)0);
-			addBlockToSet(blockDataO);
-			if(surrBlockO[blockData[6]].isEmpty())
+			System.out.println("THEY SEE ME SHOOTAN', THEY HATIN'");
+			System.out.println("testing for: " + blockData[6]);
+			if(blockData[6]>0 && blockData[6]<=4 && surrBlockO[blockData[6]-1].isEmpty())
 			{
-				surrBlockO[blockData[6]].setBullet(blockData[6]);
-				addBlockToSet(surrBlockO[blockData[6]]);
+				System.out.println("herpderpderp");
+				surrBlockO[blockData[6]-1].setBullet((byte)blockO.getBullet());
+				addBlockToSet(surrBlockO[blockData[6]-1]);
+				addBlockToCheck(new CraftrBlockPos(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y));
 			}
+			blockO.setBullet((byte)0);
+			addBlockToSet(blockO);
+			addBlockToCheck(new CraftrBlockPos(blockO.x,blockO.y));
 		}
 		// Strength and physics code
 		int[] strength = new int[4];
