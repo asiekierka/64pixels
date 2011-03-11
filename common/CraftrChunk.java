@@ -175,7 +175,6 @@ public class CraftrChunk {
 	}	
 	public void placeBullet(int x, int y, byte aType)
 	{
-		System.out.println("placeBullet: " + x + " " + y + ": " + aType);
 		param[4096+x+(y<<6)]=aType;
 	}
 	public void place(int x, int y, byte aType, byte aChr, byte aCol, byte aPar)

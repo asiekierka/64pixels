@@ -71,7 +71,6 @@ public class CraftrBlock
 
 	public void setBullet(byte t)
 	{
-		System.out.println("i set your bullet and i LIKE it (" + t + ")");
 		block[6]=t;
 	}
 

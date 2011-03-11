@@ -15,6 +15,9 @@ public class CraftrPhysics
 	private static final int[] yMovement = { 0, 0, -1, 1 };
 	private boolean isServer;
 	
+	private Date lastBUpdate = new Date();
+	private boolean changeBullets = false;
+
 	public CraftrPlayer[] players;
 	public CraftrPhysics(boolean _isServer)
 	{
@@ -42,11 +45,16 @@ public class CraftrPhysics
 			blocksToCheckOld = tempb;
 			blocksToCheck.clear();
 		}
+		if((System.currentTimeMillis()-lastBUpdate.getTime())>=100)
+		{
+			changeBullets=true;
+			lastBUpdate = new Date();
+		}
 		for(CraftrBlockPos cbp:blocksToCheckOld)
 		{
 			runPhysics(cbp,modifiedMap);
 		}
-		
+		changeBullets=false;
 		synchronized(modifiedMap)
 		{
 			Set<CraftrBlock> temps;
@@ -59,10 +67,14 @@ public class CraftrPhysics
 			}
 			for(CraftrBlock cb:blocksToSetOld)
 			{
+				CraftrBlock cbo = modifiedMap.getBlock(cb.x,cb.y);
 				if(cb.isPushable()) modifiedMap.setPushable(cb.x,cb.y,cb.getChar(),cb.getColor());
 				else modifiedMap.setBlock(cb.x,cb.y,cb.getTypeWithVirtual(),cb.getParam(),modifiedMap.updateLook(cb),cb.getColor());
-				modifiedMap.setBullet(cb.x,cb.y,(byte)cb.getBullet());
-				if(isServer) modifiedMap.setBulletNet(cb.x,cb.y,(byte)cb.getBullet());
+				if(cb.getBullet()!=cbo.getBullet())
+				{
+					modifiedMap.setBullet(cb.x,cb.y,(byte)cb.getBullet());
+					if(isServer) modifiedMap.setBulletNet(cb.x,cb.y,(byte)cb.getBullet());
+				}
 				if(isServer && isSent(cb.getTypeWithVirtual()))
 					modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
 			}
@@ -102,19 +114,20 @@ public class CraftrPhysics
 			}
 		}
 		// Bullet code
-		if(blockData[6]!=0)
+		if(changeBullets && blockData[6]!=0)
 		{
-			System.out.println("THEY SEE ME SHOOTAN', THEY HATIN'");
-			System.out.println("testing for: " + blockData[6]);
 			if(blockData[6]>0 && blockData[6]<=4 && surrBlockO[blockData[6]-1].isEmpty())
 			{
-				System.out.println("herpderpderp");
 				surrBlockO[blockData[6]-1].setBullet((byte)blockO.getBullet());
 				addBlockToSet(surrBlockO[blockData[6]-1]);
 				addBlockToCheck(new CraftrBlockPos(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y));
 			}
 			blockO.setBullet((byte)0);
 			addBlockToSet(blockO);
+			addBlockToCheck(new CraftrBlockPos(blockO.x,blockO.y));
+		}
+		else if(!changeBullets && blockData[6]!=0)
+		{
 			addBlockToCheck(new CraftrBlockPos(blockO.x,blockO.y));
 		}
 		// Strength and physics code
