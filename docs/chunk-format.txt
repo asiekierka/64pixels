@@ -1,0 +1,30 @@
+CHUNK FORMAT DOCUMENTATION
+version 4
+---
+
+(This version is the first to make the client and server chunk format the same.)
+
+STORAGE:
+map/[y]/chunk[x].cnk
+
+[x] and [y] are normal numbers which denote the position of the chunk.
+
+FILE FORMAT:
+
+Filepos		Type		Data		Default		Info
+0		byte		Version		4
+1		byte		SpawnX		0		Spawn X inside of chunk. (deprecated)	
+2		byte		SpawnY		0		Spawn Y inside of chunk. (deprecated)
+3		byte		MapInfType	0		Type of the map generator used.
+4		short		MapInfLen	0		The length of the mapgen info (0..4096), in bytes.
+6		byte[64*64]	Type				Types of the blocks.
+4102		byte[64*64]	Param				Param of the blocks.
+8198		byte[64*64]	Bullets				Bullet type (if any). (pre-0.1 was floor param/unused)
+12294		byte[64*64]	CharWall			Chars (for non-floors).
+16390		byte[64*64]	CharFloor			Chars (for floors).
+20486		byte[64*64]	ColorWall
+24582		byte[64*64]	ColorFloor
+28678		byte[64*64]	CharPushable			Chars (for pushables).
+32774		byte[64*64]	ColorPushable
+36870		byte[MapInfLen]	MapInfo				Map information.
+
