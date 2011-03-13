@@ -931,6 +931,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(tx==px && ty==py)
 				{
 					shoot(i);
+					waitTime=9;
 				}
 			}
 		}
