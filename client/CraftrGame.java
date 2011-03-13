@@ -737,7 +737,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		int sy=players[255].py+map.yMovement[dir];
 		map.setBullet(sx,sy,(byte)(dir+1));
 		blockChange=true;
-		map.physics.addBlockToCheck(new CraftrBlockPos(sx,sy));
+		if(multiplayer)
+		{
+			net.shoot(sx,sy,(dir+1));
+		}
+		else map.physics.addBlockToCheck(new CraftrBlockPos(sx,sy));
 	}
 
 	public void keyTyped(KeyEvent ev) {} // this one sucks even more

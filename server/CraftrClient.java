@@ -681,6 +681,14 @@ public class CraftrClient implements Runnable
 								}
 								else passWait=false;
  								break;
+							case 0x70:
+								int xb = in.readInt();
+								int yb = in.readInt();
+								byte bt = in.readByte();
+								serv.map.setBullet(xb,yb,bt);
+								serv.map.setBulletNet(xb,yb,bt);
+								serv.map.physics.addBlockToCheck(new CraftrBlockPos(xb,yb));
+								break;
  							case 0xE0:
  								{
  									int lolx = this.x;

@@ -67,11 +67,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 	{
 		sendPacket(getPacket());
 	}
-	
-	public int abs(int v)
-	{
-		return v<0?-v:v;
-	}
+
 	public void sendPacket(byte[] t)
 	{
 		try
@@ -176,15 +172,26 @@ public class CraftrNet implements Runnable, CraftrNetShim
 			System.exit(1);
 		}
 	}
-	
-	private int min(int a1, int a2)
+	public void shoot(int x, int y, int dir)
 	{
-		if(a1>a2)
+		try
 		{
-			return a2;
-		} else return a1;
+			synchronized(out)
+			{
+				out.writeByte(0x70);
+				out.writeInt(x);
+				out.writeInt(y);
+				out.writeByte((byte)dir);
+				sendPacket();
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Fatal craftrNet shoot Error!");
+			System.exit(1);
+		}
 	}
-	
+
  	public void playerPush(int dx, int dy)
  	{
  		try
