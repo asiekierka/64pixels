@@ -50,7 +50,7 @@ public class CraftrBlock
 
 	public boolean isWiriumNeighbour()
 	{
-		if((block[0]>=2 && block[0]<=7) || (block[0]>=9 && block[0]<=11)) return true;
+		if((block[0]>=2 && block[0]<=7) || (block[0]>=9 && block[0]<=13)) return true;
 		return false;
 	}
 

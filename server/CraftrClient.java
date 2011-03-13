@@ -80,6 +80,7 @@ public class CraftrClient implements Runnable
 
 	public void kill()
 	{
+		if(!serv.pvpMode) return;
 		sendChatMsgAll("&c" + nick + "&c was killed!");
 		teleport(serv.spawnX,serv.spawnY);
 	}
