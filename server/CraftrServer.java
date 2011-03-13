@@ -35,6 +35,15 @@ public class CraftrServer extends CraftrServerShim
 	public String opPass;
 	public CraftrWarps warps;
 	public int po = 25566;
+	public boolean pvpMode = false;
+
+	public void kill(int pid)
+	{
+		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0)
+		{
+			clients[pid].kill();
+		}
+	}
 
 	public int countPlayers()
 	{
@@ -369,11 +378,11 @@ public class CraftrServer extends CraftrServerShim
 		{
 			if(id == 255)
 			{
-				return "Commands: who warps kick nick deop save ban unban delwarp";
+				return "Commands: who warps kick nick deop save ban unban delwarp pvp";
 			}
 			else if(clients[id].op)
 			{
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp";
 			}
 			else
 			{
@@ -430,6 +439,20 @@ public class CraftrServer extends CraftrServerShim
 						return "User fetched!";
 					}
 				}
+			}
+			else if(cmd[0].equals("pvp"))
+			{
+				if(pvpMode)
+				{
+					pvpMode=false;
+					clients[id].sendChatMsgAll("&ePvP mode OFF");
+				}
+				else
+				{
+					pvpMode=true;
+					clients[id].sendChatMsgAll("&ePvP mode ON!");
+				}
+				return "";
 			}
 			else if(cmd[0].equals("copy") && id!=255)
 			{

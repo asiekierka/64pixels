@@ -116,11 +116,23 @@ public class CraftrPhysics
 		// Bullet code
 		if(changeBullets && blockData[6]!=0)
 		{
+			boolean bshot = false;
 			if(blockData[6]>0 && blockData[6]<=4 && surrBlockO[blockData[6]-1].isEmpty())
 			{
-				surrBlockO[blockData[6]-1].setBullet((byte)blockO.getBullet());
-				addBlockToSet(surrBlockO[blockData[6]-1]);
-				addBlockToCheck(new CraftrBlockPos(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y));
+				for(int i=0;i<256;i++)
+				{
+					if(players[i]!=null && players[i].px==surrBlockO[blockData[6]-1].x && players[i].py==surrBlockO[blockData[6]-1].y)
+					{
+						map.se.kill(i);
+						bshot = true;
+					}
+				}
+				if(!bshot)
+				{
+					surrBlockO[blockData[6]-1].setBullet((byte)blockO.getBullet());
+					addBlockToSet(surrBlockO[blockData[6]-1]);
+					addBlockToCheck(new CraftrBlockPos(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y));
+				}
 			}
 			blockO.setBullet((byte)0);
 			addBlockToSet(blockO);

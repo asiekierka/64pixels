@@ -78,6 +78,12 @@ public class CraftrClient implements Runnable
 		} else return a1;
 	}
 
+	public void kill()
+	{
+		sendChatMsgAll("&c" + nick + "&c was killed!");
+		teleport(serv.spawnX,serv.spawnY);
+	}
+
 	public void playSound(int tx,int ty, int val)
 	{
 		int ax=x-tx;
@@ -220,6 +226,8 @@ public class CraftrClient implements Runnable
 		{
 			x=tx;
 			y=ty;
+			serv.map.physics.players[id].px=x;
+			serv.map.physics.players[id].py=y;
 			synchronized(out)
 			{
 				out.writeByte(0x24);
@@ -411,9 +419,7 @@ public class CraftrClient implements Runnable
 											passWait=true;
 										}
 										sendChatMsgAll(nick + " has joined.");
-										health = 7;
 										serv.map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
-										serv.map.physics.players[id].health = health;
 										serv.map.setPlayer(x,y,1);
 										synchronized(out)
 										{
@@ -509,6 +515,8 @@ public class CraftrClient implements Runnable
 								serv.map.setPlayer(x,y,0);
 								x+=ta[2];
 								y+=ta[3];
+								serv.map.physics.players[id].px=x;
+								serv.map.physics.players[id].py=y;
 								serv.map.setPlayer(x,y,1);
 								break;
 							case 0x25:
@@ -526,6 +534,8 @@ public class CraftrClient implements Runnable
 								{
 									x=x29;
 									y=y29;
+									serv.map.physics.players[id].px=x;
+									serv.map.physics.players[id].py=y;
 									synchronized(out)
 									{
 										out.writeByte(0x24);
@@ -554,6 +564,8 @@ public class CraftrClient implements Runnable
 								serv.map.setPlayer(x,y,0);
 								x+=dx2f;
 								y+=dy2f;
+								serv.map.physics.players[id].px=x;
+								serv.map.physics.players[id].py=y;
 								serv.map.setPlayer(x,y,1);
 								break;
 							case 0x30:
