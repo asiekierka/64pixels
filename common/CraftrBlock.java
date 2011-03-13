@@ -134,14 +134,12 @@ public class CraftrBlock
 
 	public int getDrawnChar()
 	{
-		if(getBullet()!=0) return 248;
-		else if(getType()==8) return 0xFF&(int)block[2];
+		if(getType()==8) return 0xFF&(int)block[2];
 		else return getChar();
 	}
 	public int getDrawnColor()
 	{
-		if(getBullet()!=0) return 15;
-		else if(getType()==8) return 0xFF&(int)block[3];
+		if(getType()==8) return 0xFF&(int)block[3];
 		else return getColor();
 	}
 

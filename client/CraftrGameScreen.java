@@ -87,6 +87,7 @@ public class CraftrGameScreen extends CraftrScreen
 			{
 				int t1 = ix+(iy*FULLGRID_W);
 				if(blocks[t1] != null) c.DrawChar(ix<<4,iy<<4,(byte)blocks[t1].getDrawnChar(),(byte)blocks[t1].getDrawnColor(), g);
+				if(blocks[t1].isBullet()) c.DrawChar(ix<<4,iy<<4,(byte)248,(byte)15, g);
 				
 			}
 		}
