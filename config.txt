@@ -1,6 +1,6 @@
 tp-for-all=0
 port=25566
 private-mode=0
-name=[0.1] asie's PvP server
+name=[0.1] asie's PvP test server
 spawn-x=0
 spawn-y=0

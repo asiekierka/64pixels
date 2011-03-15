@@ -36,6 +36,7 @@ public class CraftrServer extends CraftrServerShim
 	public CraftrWarps warps;
 	public int po = 25566;
 	public boolean pvpMode = false;
+	public boolean mapLock = false;
 
 	public void kill(int pid)
 	{
@@ -378,11 +379,11 @@ public class CraftrServer extends CraftrServerShim
 		{
 			if(id == 255)
 			{
-				return "Commands: who warps kick nick deop save ban unban delwarp pvp";
+				return "Commands: who warps kick nick deop save ban unban delwarp pvp lock unlock";
 			}
 			else if(clients[id].op)
 			{
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock";
 			}
 			else
 			{
@@ -452,6 +453,18 @@ public class CraftrServer extends CraftrServerShim
 					pvpMode=true;
 					clients[id].sendChatMsgAll("&ePvP mode ON!");
 				}
+				return "";
+			}
+			else if(cmd[0].equals("lock"))
+			{
+				mapLock=true;
+				clients[id].sendChatMsgAll("&cMap locked =O");
+				return "";
+			}
+			else if(cmd[0].equals("unlock"))
+			{
+				mapLock=false;
+				clients[id].sendChatMsgAll("&aMap unlocked =D");
 				return "";
 			}
 			else if(cmd[0].equals("copy") && id!=255)
