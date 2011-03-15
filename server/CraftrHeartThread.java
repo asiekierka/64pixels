@@ -21,7 +21,7 @@ public class CraftrHeartThread implements Runnable
 			InputStream is = null;
 			try
 			{
-				String tt = "http://64pixels.org/heartbeat.php?name=" + se.name + "&port=" + se.po + "&players=" + se.countPlayers() + "&maxplayers=255";
+				String tt = "http://admin.64pixels.org/heartbeat.php?name=" + se.name + "&port=" + se.po + "&players=" + se.countPlayers() + "&maxplayers=255";
 				tt = tt.replaceAll(" ","%20");
 				URL u1 = new URL(tt);
 				is = u1.openStream();
