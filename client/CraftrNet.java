@@ -21,7 +21,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 	public int loginStage = 0;
 	public boolean isLoadingChunk = false;
 	public int loadChunkID, lcX, lcY, lcP;
-	public int chunkPacketsLeft, chunkSize;
+	public int chunkPacketsLeft, chunkSize, chunkType;
 	public CraftrNetSender ns;
 	public boolean isOp=false;
 	public int frames=0;
@@ -397,6 +397,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								break;
 							case 0x11:
 								isLoadingChunk=true;
+								chunkType = in.readUnsignedByte();
 								lcX = in.readInt();
 								lcY = in.readInt();
 								lcP = 0;

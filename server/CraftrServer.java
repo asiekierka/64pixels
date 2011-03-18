@@ -447,11 +447,23 @@ public class CraftrServer extends CraftrServerShim
 				{
 					pvpMode=false;
 					clients[id].sendChatMsgAll("&ePvP mode OFF");
+					clients[id].sendChatMsgAll("&cDEATHS:");
+					for(int i=0;i<255;i++)
+					{
+						if(clients[i] != null && clients[i].dc == 0)
+						{
+							clients[id].sendChatMsgAll("&c" + clients[i].nick + "&7 - &e" + clients[i].deaths + " times");
+						}
+					}
 				}
 				else
 				{
 					pvpMode=true;
 					clients[id].sendChatMsgAll("&ePvP mode ON!");
+					for(int i=0;i<255;i++)
+					{
+						if(clients[i] != null && clients[i].dc == 0) clients[id].resetPvP();
+					}
 				}
 				return "";
 			}

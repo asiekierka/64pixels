@@ -36,7 +36,7 @@ public class CraftrClient implements Runnable
 	public boolean isCopying = false;
 	public boolean isPasting = false;
 	public int copyStage = 0;
-	public int cx,cy;
+	public int cx,cy,deaths;
 
 	public CraftrClient(Socket s, CraftrMap m, int iz, CraftrServer se)
 	{
@@ -81,8 +81,13 @@ public class CraftrClient implements Runnable
 	public void kill()
 	{
 		if(!serv.pvpMode) return;
+		deaths++;
 		sendChatMsgAll("&c" + nick + "&c was killed!");
 		teleport(serv.spawnX,serv.spawnY);
+	}
+	public void resetPvP()
+	{
+		deaths=0;
 	}
 
 	public void playSound(int tx,int ty, int val)
@@ -476,6 +481,7 @@ public class CraftrClient implements Runnable
 								synchronized(out)
 								{
 									out.writeByte(0x11);
+									out.writeByte(0x01); // type
 									out.writeInt(rcX);
 									out.writeInt(rcY);
 									out.writeInt(t2.length);
@@ -483,7 +489,7 @@ public class CraftrClient implements Runnable
 								}
 								while(pl>0)
 								{
-									int pls = 640;
+									int pls = 768;
 									if(pl<pls) pls=pl;
 									synchronized(out)
 									{
