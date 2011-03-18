@@ -489,7 +489,7 @@ public class CraftrClient implements Runnable
 								}
 								while(pl>0)
 								{
-									int pls = 768;
+									int pls = 1000;
 									if(pl<pls) pls=pl;
 									synchronized(out)
 									{

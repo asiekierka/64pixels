@@ -396,8 +396,8 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								System.out.println("Logged in!");
 								break;
 							case 0x11:
-								isLoadingChunk=true;
 								chunkType = in.readUnsignedByte();
+								isLoadingChunk=true;
 								lcX = in.readInt();
 								lcY = in.readInt();
 								lcP = 0;
@@ -428,18 +428,21 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								if(isLoadingChunk)
 								{
 									isLoadingChunk=false;
-									GZIPInputStream gin = new GZIPInputStream(new ByteArrayInputStream(cbuffer,0,lcP));
-									byte[] tmp1 = new byte[65536];
-									int ttp = 0;
-									int rp = 0;
-									while(rp >= 0)
+									if(chunkType==1)
 									{
-										ttp+=rp;
-										rp = gin.read(tmp1,ttp,65536-ttp);
-									}
-									synchronized(game.map)
-									{
-										game.map.chunks[loadChunkID].loadByteNet(tmp1);
+										GZIPInputStream gin = new GZIPInputStream(new ByteArrayInputStream(cbuffer,0,lcP));
+										byte[] tmp1 = new byte[65536];
+										int ttp = 0;
+										int rp = 0;
+										while(rp >= 0)
+										{
+											ttp+=rp;
+											rp = gin.read(tmp1,ttp,65536-ttp);
+										}
+										synchronized(game.map)
+										{
+											game.map.chunks[loadChunkID].loadByteNet(tmp1);
+										}
 									}
 									game.netChange=true;
 								}
