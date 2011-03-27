@@ -565,6 +565,7 @@ public class CraftrMap
 
 	public int updateLook(CraftrBlock block)
 	{
+		if(block.isPushable()) return block.getChar();
 		if(block.getType()==4) return 206; // default char for Crossuh blocks
 		// NOTE: server used getChar() here.
 		// That bug has gone unnoticed because nobody bothered to put a pushium on a P-NAND. --GM

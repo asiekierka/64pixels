@@ -389,7 +389,7 @@ public class CraftrClient implements Runnable
 									}
 									else if(version!=CraftrVersion.getProtocolVersion())
 									{
-										kick("Invalid protocol! Needs 0.1 or higher.");
+										kick("Invalid protocol/game version!");
 									}
 									else if(serv.isBanned(socket.getInetAddress().getHostAddress()))
 									{
