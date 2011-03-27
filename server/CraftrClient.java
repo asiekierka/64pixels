@@ -583,7 +583,7 @@ public class CraftrClient implements Runnable
 								byte aco = in.readByte();
 								if(passWait) break;
 								byte[] zc = map.getBlock(ax,ay).getBlockData();
-								if((op && (isCopying || isPasting)) || serv.mapLock)
+								if((op && (isCopying || isPasting)) || (serv.mapLock && !op))
 								{
 									out.writeByte(0x31);
 									out.writeByte((byte)id);
