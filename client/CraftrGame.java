@@ -1096,6 +1096,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					boolean doCustom = true;
 					CraftrKickScreen cks = new CraftrKickScreen(canvas,"Loading serverlist...");
 					cks.mName="DON'T PANIC";
+					cks.bgcolor = new Color(128,128,128);
 					canvas.cs = (CraftrScreen) cks;
 					canvas.draw(mx,my);
 					System.out.print("fetching... ");
@@ -1123,7 +1124,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					}
 					else
 					{
-						System.out.println("not fetched (means glados)");
+						System.out.println("not fetched (probably means glados)");
+						cks.bgcolor = new Color(170,0,0);
 						cks.mName="SERVERLIST NOT FOUND";
 						cks.name="PLEASE DON'T PANIC, ONE SECOND...";
 						canvas.draw(mx,my);
@@ -1191,15 +1193,20 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		if(!multiplayer)
 		{
 			gs.addChatMsg("you're running 64pixels " + getVersion(),0);
-			gs.addChatMsg("created by asiekierka.",0);
+			gs.addChatMsg("created by asiekierka and GreaseMonkey.",0);
 			Thread tmap = new Thread(cmt);
 			tmap.start();
 		}
 		else
 		{
 			System.out.println("Connecting...");
+			CraftrKickScreen cks = new CraftrKickScreen(canvas,"Wait a second...");
+			cks.mName="CONNECTING...";
+			cks.bgcolor = new Color(128,128,128);
+			canvas.cs = (CraftrScreen)cks;
 			net.connect(CraftrConvert.getHost(thost),CraftrConvert.getPort(thost), nagle);
 			System.out.println("Connected! Logging in...");
+			canvas.cs = (CraftrScreen)gs;
 			map.net = net;
 			net.gaa = this;
 			map.multiplayer = true;

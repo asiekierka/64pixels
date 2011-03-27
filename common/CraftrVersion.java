@@ -5,8 +5,8 @@ public class CraftrVersion
 	private static final int protocolVer = 257;
 	private static final int releaseVer = 0;
 	private static final int majorVer = 1;
-	private static final int minorVer = 1;
-	private static final int patchVer = 1;
+	private static final int minorVer = 2;
+	private static final int patchVer = 0;
 	public CraftrVersion()
 	{
 	}

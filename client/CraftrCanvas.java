@@ -258,8 +258,11 @@ public class CraftrCanvas extends JComponent
 	{
 		int aChr = 255&(int)bChr;
 		int aCol = 255&(int)bCol;
-		g.setColor(new Color(palette[(aCol>>4)]));
-		g.fillRect(x,y,8,8);
+		if(palette[(aCol>>4)] > 0)
+		{
+			g.setColor(new Color(palette[(aCol>>4)]));
+			g.fillRect(x,y,8,8);
+		}
 		Graphics2D g2 = (Graphics2D)g;
 		g2.drawImage(charsetImage[aChr][(aCol&15)],null,x,y);
 	}
