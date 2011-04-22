@@ -99,10 +99,7 @@ public class CraftrMap
 	
 	public int findChunkID(int x, int y)
 	{
-		// Is the chunk cached?
 		for (int i=0;i<cachesize;i++) if(chunks[i].xpos == x && chunks[i].ypos == y && chunks[i].isSet == true) return i;
-
-		// No, who cares.
 		return -1;
 	}
 
@@ -183,7 +180,7 @@ public class CraftrMap
 	{
 		if(multiplayer)
 		{
-			System.out.println("request: " + x + ", " + y);
+			System.out.println("[MAP] Chunk request: " + x + ", " + y);
 			if(!isServer)
 				net.chunkRequest(x,y);
 			CraftrChunk nout = new CraftrChunk(x,y,true);
@@ -234,7 +231,7 @@ public class CraftrMap
 					}
 					return out;
 				default:
-					System.out.println("ReadChunkFile: unknown version: " + buf[0]);
+					System.out.println("[MAP] ReadChunkFile: unknown version: " + buf[0]);
 					break;
 			}
 		}
@@ -250,7 +247,7 @@ public class CraftrMap
 		catch (Exception e)
 		{
 			// Something else happened!
-			System.out.println("ReadChunkFile: exception: " + e.getMessage());
+			System.out.println("[MAP] ReadChunkFile: exception: " + e.getMessage());
 			return out;
 		}
 		finally
@@ -513,6 +510,7 @@ public class CraftrMap
 	public void tryPushM(int x, int y, int dx, int dy, byte chr, byte col)
 	{
 		if((dx!=0 && dy!=0) || (dx==0 && dy==0)) return; // don't do diagonals.
+		if(dx>1 || dx<-1 || dy>1 || dy<-1) return; // no.
 		if(col==0) return; // we do not want non-colored pushables
 		if(getBlock(x+dx,y+dy).isEmpty()) // can we not push?
 		{
@@ -635,7 +633,6 @@ public class CraftrMap
 		{ 
 			int px = x&63;
 			int py = y&63;
-			//findCachedChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,(byte)0);
 			se.out.writeByte(0x33);
 			se.out.writeByte((byte)255);
 			se.out.writeInt(x);
@@ -648,7 +645,7 @@ public class CraftrMap
 		}
 		catch(Exception e)
 		{
-			System.out.println("setBlockNet exception!");
+			System.out.println("[MAP] setBlockNet exception!");
 			e.printStackTrace();
 			//if(!multiplayer) System.exit(1);
 		}

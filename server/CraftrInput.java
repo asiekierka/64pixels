@@ -37,7 +37,7 @@ public class CraftrInput implements Runnable
 			}
 			catch(Exception e)
 			{
-				System.out.println("I bet it's a non-fatal CraftrInput error.");
+				System.out.println("Non-fatal CraftrInput error.");
 				e.printStackTrace();
 			}
 		}

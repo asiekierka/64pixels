@@ -472,7 +472,7 @@ public class CraftrPhysics
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],non,blockData[2],blockData[3]));
 					if(non>0 && non<5)
 					{
-						if(surrBlockData[(non-1)][6]==0)
+						if(surrBlockData[(non-1)][6]==0 && surrBlockO[(non-1)].isEmpty())
 						{
 							surrBlockO[(non-1)].setBullet((byte)non);
 							addBlockToSet(surrBlockO[(non-1)]);

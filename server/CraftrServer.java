@@ -38,14 +38,6 @@ public class CraftrServer extends CraftrServerShim
 	public boolean pvpMode = false;
 	public boolean mapLock = false;
 
-	public void kill(int pid)
-	{
-		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0)
-		{
-			clients[pid].kill();
-		}
-	}
-
 	public int countPlayers()
 	{
 		int t = 0;
@@ -54,6 +46,14 @@ public class CraftrServer extends CraftrServerShim
 			if(clients[i]!=null && clients[i].dc==0) t++;
 		}
 		return t;
+	}
+
+	public void kill(int pid)
+	{
+		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0)
+		{
+			clients[pid].kill();
+		}
 	}
 
 	public boolean isOp(String ip)
@@ -383,6 +383,7 @@ public class CraftrServer extends CraftrServerShim
 			}
 			else if(clients[id].op)
 			{
+
 				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock";
 			}
 			else
@@ -806,7 +807,6 @@ public class CraftrServer extends CraftrServerShim
 			{
 				if(clients[i] != null && clients[i].id != a && clients[i].dc == 0)
 				{
-				    //System.out.println("Sending packet " + arr[0] + " id " + a + ", " + i);
 					clients[i].sendPacket(arr);
 				}
 			}
@@ -867,7 +867,7 @@ public class CraftrServer extends CraftrServerShim
 	public void start()
 	{
 		System.out.println("64px-srvr version " + CraftrVersion.getVersionName());
-		System.out.println("Bonus points for GreaseMonkey's revolution(ary) plans");
+		System.out.println("Bonus points for my ISP cutting my internet off for a day");
 		System.out.print("Initializing: #");
 		run = true;
 		ci = new CraftrInput(this);
@@ -879,11 +879,11 @@ public class CraftrServer extends CraftrServerShim
 		Thread ti2 = new Thread(cas);
 		ti2.start();
 		System.out.print("#");
-		CraftrMapThread ti3m = new CraftrMapThread(map);
-		ti3m.speed = (1000/map_tps);
 		Thread ti4 = new Thread(new CraftrHeartThread(this));
 		if(privmode==0) ti4.start();
 		System.out.print("#");
+		CraftrMapThread ti3m = new CraftrMapThread(map);
+		ti3m.speed = (1000/map_tps);
 		if(ti3m.speed<10 || ti3m.speed>1000) ti3m.speed=100;
 		Thread ti3 = new Thread(ti3m);
 		if(map_tps>0) ti3.start();
@@ -929,17 +929,12 @@ public class CraftrServer extends CraftrServerShim
 				map.saveChunkFile(i);
 			}
 		}
-/*
-		saveNamesFile(op_ips,"ops.txt");
-		saveNamesFile(ban_ips,"bans.txt");
-		warps.saveFile("warps.dat");
-*/
 		mapBeSaved=false;
 	}
 	public void end()
 	{
 		saveMap();
-		while(mapBeSaved) { try{Thread.sleep(2);}catch(Exception e){} } // bleh
+		while(mapBeSaved) { try{Thread.sleep(2);}catch(Exception e){} } // you never know
 		saveConfig();
 	}
 }

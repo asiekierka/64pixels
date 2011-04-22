@@ -16,7 +16,7 @@ public class CraftrCanvas extends JComponent
 	public static final int FULLGRID_W = GRID_W+1;
 	public static final int FULLGRID_H = GRID_H+1;
 	public static final int WIDTH = ((FULLGRID_W-1)*16);
-	public static final int HEIGHT = (FULLGRID_H*16);
+	public static final int HEIGHT = (FULLGRID_H*16)+8;
 	// Constants.
 	public static Random rand = new Random();
 	public int mx, my;
@@ -75,7 +75,7 @@ public class CraftrCanvas extends JComponent
 			File tcf = new File(chome + "/palette.bin"); 
 			if(tcf != null && tcf.exists())
 			{
-				System.out.println("Custom palette found!");
+				System.out.println("[CANVAS] Custom palette found!");
 				in = new FileInputStream(chome + "/palette.bin");
 				for(int i=0;i<16;i++)
 				{
@@ -85,11 +85,11 @@ public class CraftrCanvas extends JComponent
 				}
 				in.close();
 			}
-			else System.out.println("Using default palette!");
+			else System.out.println("[CANVAS] Using default palette!");
 			tcf = new File(chome + "/charset.bin");
 			if(tcf != null && tcf.exists())
 			{
-				System.out.println("Custom charset found!");
+				System.out.println("[CANVAS] Custom charset found!");
 				in = new FileInputStream(chome + "/charset.bin");
 				for(int i=0; i<256; i++)
 				{
@@ -99,7 +99,7 @@ public class CraftrCanvas extends JComponent
 			}
 			else
 			{
-				System.out.println("Using default charset!");
+				System.out.println("[CANVAS] Using default charset!");
 				ain = CraftrCanvas.class.getResourceAsStream("rawcga.bin");
 				for(int i=0; i<256; i++)
 				{
@@ -109,7 +109,7 @@ public class CraftrCanvas extends JComponent
 			}
 		}
 		catch(Exception e) {
-			System.out.println("Couldn't load charset/palette! " + e.getMessage());
+			System.out.println("[CANVAS] Couldn't load charset/palette! " + e.getMessage());
 			System.exit(1);
 		}
 		//charsetImage = new BufferedImage[256][16];
@@ -151,7 +151,7 @@ public class CraftrCanvas extends JComponent
 			din.writeInt(endianswap(54+(WIDTH*HEIGHT*3))); // size
 			din.writeInt(0); // reserved 1 and 2 (shorts)
 			din.writeInt(endianswap(54)); // offset to bitmap data
-			// * BMPFILEHEADER *
+			// * BMPFILEHEADER * BEGIN
 			din.writeInt(endianswap(40)); // size of BMPFILEHEADER
 			din.writeInt(endianswap(WIDTH));
 			din.writeInt(endianswap(HEIGHT));
@@ -163,7 +163,7 @@ public class CraftrCanvas extends JComponent
 			din.writeInt(0);
 			din.writeInt(0); // used colours
 			din.writeInt(0); // important colours
-			// NO MORE BMPFILEHEADER!
+			// * BMPFILEHEADER * END
 			for(int y=(HEIGHT-1);y>=0;y--)
 			{
 				for(int x=0;x<WIDTH;x++)
@@ -179,7 +179,7 @@ public class CraftrCanvas extends JComponent
 		}
 		catch(Exception e)
 		{
-			System.out.println("Exception while screenshotting!");
+			System.out.println("[CANVAS] Exception while screenshotting!");
 		}
 	}
 	public static void RedrawCharset()
@@ -190,26 +190,29 @@ public class CraftrCanvas extends JComponent
 		AffineTransform scale2 = new AffineTransform();
 		scale2.scale(2, 2);
 		int cgat = 0;
-		int palcol = 0;
+		int[] palcol = new int[16];
+		for(int pt=0;pt<16;pt++)
+				palcol[pt] = (0xFF000000 | palette[pt]);
 		for(int c=0;c<256;c++)
 		{
-			if((c&31) == 0) System.out.println("Preparing charset: " + ((c*100)>>8) + "%");
+			int temp1 = (c<<3);
+			if((c&31) == 0) System.out.println("[CANVAS] Preparing charset: " + ((c*100)>>8) + "%");
 			for(int col=0;col<16;col++)
 			{
-				palcol = (0xFF000000 | palette[col]);
 				charsetImage[c][col] = new BufferedImage(8,8,BufferedImage.TYPE_INT_ARGB);
 				for(int t3=0;t3<8;t3++)
 				{
-					cgat = 255&(int)cga[(c<<3)+t3];
-					for(int t2=0;t2<8;t2++)
+					cgat = 255&(int)cga[temp1+t3];
+					for(int t2=7;t2>=0;t2--)
 					{
-						if (((cgat>>(t2^7))&1) == 1 )
+						if ((cgat&1) == 1 )
 						{
 							pixelchrn[c]++;
-							charsetImage[c][col].setRGB(t2,t3, palcol);
+							charsetImage[c][col].setRGB(t2,t3, palcol[col]);
 						} else {
 							charsetImage[c][col].setRGB(t2,t3, 0);
 						}
+						cgat>>=1;
 					}
 				}
 				switch(scm)
@@ -225,7 +228,7 @@ public class CraftrCanvas extends JComponent
 				}
 			}
 		}
-		System.out.println("Preparing charset: 100% [DONE]");
+		System.out.println("[CANVAS] Preparing charset: 100% [DONE]");
 	}
 	// DrawChar
 	
@@ -240,23 +243,9 @@ public class CraftrCanvas extends JComponent
 		Graphics2D g2 = (Graphics2D)g;
 		g2.drawImage(charsetImage2[(255&(int)bChr)][(aCol&15)],null,x,y);
 	}
-	public void DrawCharD(int x, int y, byte bChr, byte bCol, Graphics g)
-	{
-		int aCol = 255&(int)bCol;
-		if(palette[(aCol>>4)] > 0)
-		{
-			int tr = palette[(aCol>>4)];
-			g.setColor(new Color(tr));
-			//int tr2 = ((tr&0xFF)/2) | ((((tr>>8)&0xFF)/2)<<8) | ((((tr>>16)&0xFF)/2)<<16);
-			//g.setColor(new Color(tr2));
-			g.fillRect(x,y,16,16);
-		}
-		//g2.drawImage(tbi,null,x,y);
-	}
 
 	public void DrawChar1x(int x, int y, byte bChr, byte bCol, Graphics g)
 	{
-		int aChr = 255&(int)bChr;
 		int aCol = 255&(int)bCol;
 		if(palette[(aCol>>4)] > 0)
 		{
@@ -264,7 +253,7 @@ public class CraftrCanvas extends JComponent
 			g.fillRect(x,y,8,8);
 		}
 		Graphics2D g2 = (Graphics2D)g;
-		g2.drawImage(charsetImage[aChr][(aCol&15)],null,x,y);
+		g2.drawImage(charsetImage[(255&(int)bChr)][(aCol&15)],null,x,y);
 	}
 
 	public void paintComponent(Graphics g)
@@ -329,7 +318,7 @@ public class CraftrCanvas extends JComponent
 		{
 			if((x+(i<<3)-k)>=WIDTH)
 			{
-				k+=WIDTH;
+				k-=WIDTH;
 				j+=8;
 			}
 			DrawChar1x(x+(i<<3)-k,y+j,(byte)ca[i],(byte)col,g);

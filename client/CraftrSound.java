@@ -586,20 +586,6 @@ public class CraftrSound implements Runnable
 		try{Thread.sleep(250);}catch(InterruptedException ex){}
 		try
 		{
-			/*while(true)
-			{
-				double ang = 0.0;
-				// NOTE: as a Shephard scale, this doesn't work very well. -GM
-				for(int i = 0; i < 24; i++)
-				{
-					cs.playNote((int)(Math.sin(ang)*10),(int)(Math.cos(ang)*10),72+(i%24),1.0);
-					cs.playNote((int)(Math.sin(ang+Math.PI*2.0/3.0)*10),(int)(Math.cos(ang+Math.PI*2.0/3.0)*10),72+((i+8)%24),1.0);
-					cs.playNote((int)(Math.sin(ang+Math.PI*4.0/3.0)*10),(int)(Math.cos(ang+Math.PI*4.0/3.0)*10),72+((i+16)%24),1.0);
-					ang += Math.PI/12.0;
-					//try{Thread.sleep(20);}catch(InterruptedException ex){} // stress test =D =D =D -GM
-					try{Thread.sleep(150);}catch(InterruptedException ex){}
-				}
-			}*/
 			while(true)
 			{
 				int xnote = 80-24;

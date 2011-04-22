@@ -33,7 +33,7 @@ public class CraftrHeartThread implements Runnable
 				}	
 				Thread.sleep(speed);
 			}
-			catch(Exception e){e.printStackTrace();try{is.close();}catch(Exception e2){}}
+			catch(Exception e){e.printStackTrace();try{Thread.sleep(speed); is.close();}catch(Exception e2){}}
 		}
 	}
 }

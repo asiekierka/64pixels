@@ -89,6 +89,8 @@ public class CraftrAuth
 			// X is for XOR
 			tmp=tmp^(0xFF&(int)cka[i%cka.length]);
 			enc[i]=(byte)tmp;
+			// A is for Add (client time, this one)
+			tmp=(tmp+(0xFF&(int)cka[i%cka.length]))&255;
 		}
 		return enc;
 	}
@@ -98,6 +100,10 @@ public class CraftrAuth
 		for(int i=0;i<enc2.length;i++)
 		{
 			int tmp = 0xFF&(int)enc[i];
+			// un-ADD
+			int t1 = 0xFF&(int)cka[i%cka.length];
+			if(tmp<t1) tmp+=256;
+			tmp-=t1;
 			// XOR is the client part!
 			tmp=tmp^(0xFF&(int)cka[i%cka.length]);
 			enc2[i]=(byte)tmp;

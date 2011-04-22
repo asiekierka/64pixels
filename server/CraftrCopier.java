@@ -23,20 +23,23 @@ public class CraftrCopier
 			fin = new FileInputStream(filename + ".6cf");
 			in = new DataInputStream(fin);
 			int version = in.readUnsignedByte(); // to be sure
-			xsize = in.readInt();
-			ysize = in.readInt();
-			int blockDataSize = in.readUnsignedByte();
-			paste = new CraftrBlock[xsize*ysize];
-			for(int iy=0; iy<ysize; iy++)
+			if(version==1)
 			{
-				for(int ix=0;ix<xsize; ix++)
+				xsize = in.readInt();
+				ysize = in.readInt();
+				int blockDataSize = in.readUnsignedByte();
+				paste = new CraftrBlock[xsize*ysize];
+				for(int iy=0; iy<ysize; iy++)
 				{
-					byte[] blockd = new byte[blockDataSize];
-					in.read(blockd,0,blockDataSize);
-					paste[(iy*xsize)+ix]=new CraftrBlock(ix,iy,blockd);
+					for(int ix=0;ix<xsize; ix++)
+					{
+						byte[] blockd = new byte[blockDataSize];
+						in.read(blockd,0,blockDataSize);
+						paste[(iy*xsize)+ix]=new CraftrBlock(ix,iy,blockd);
+					}
 				}
+				used=1;
 			}
-			used=1;
 		}
 		catch(Exception e)
 		{

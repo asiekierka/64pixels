@@ -643,7 +643,6 @@ public class CraftrClient implements Runnable
 									t33[2] = ach;
 									while(serv.map.maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
 									serv.map.modlock=true;
-									//while(serv.map.bslock) { Thread.sleep(1); }
 	 								synchronized(serv.map)
 	 								{
 	 									if(at == -1)

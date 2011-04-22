@@ -14,7 +14,6 @@ public class CraftrNet implements Runnable, CraftrNetShim
 	public Socket socket;
 	public DataOutputStream out;
 	public ByteArrayOutputStream out2;
-	//public OutputStream outf;
 	private DataInputStream in;
 	private byte[] cbuffer;
 	public String nick;
@@ -368,7 +367,6 @@ public class CraftrNet implements Runnable, CraftrNetShim
 				{
 					if(!game.isKick) game.kickOut("Disconnected!");
 					return;
-					//System.exit(0);
 				}
 				while(len>0)
 				{
@@ -599,7 +597,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 							case 0x41:
 								int ta41 = in.readUnsignedByte();
 								String tmp3 = readString();
-								game.gs.addChatMsg(tmp3,0);
+								game.gs.addChatMsg(tmp3);
 								game.netChange = true;
 								break;
 							case 0x50:

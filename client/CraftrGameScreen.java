@@ -7,15 +7,9 @@ import java.util.*;
 
 public class CraftrGameScreen extends CraftrScreen
 {
-	public static final int GRID_W = 32;
-	public static final int GRID_H = 25;
-	public static final int FULLGRID_W = GRID_W+1;
-	public static final int FULLGRID_H = GRID_H+1;
-	public static final int WIDTH = ((FULLGRID_W-1)*16);
-	public static final int HEIGHT = (FULLGRID_H*16);
 	public static final int CHATBOTTOM_X = 11;
 	public static final int CHATBOTTOM_Y = (GRID_H*16)-17;
-	public static final int BARPOS_Y = GRID_H*16;
+	public static final int BARPOS_Y = (GRID_H*16);
 	public int drawType;
 	public int[] drawChrA = new int[256];
 	public int[] drawColA = new int[256];
@@ -24,7 +18,7 @@ public class CraftrGameScreen extends CraftrScreen
 	public int chrBarOff;
 	public String chatMsg;
 	public boolean viewFloorsMode;
-	
+	public boolean hideousPrompts=false;
 	public int camX = 0;
 	public int camY = 0;
 	public int frames = 0;
@@ -126,7 +120,7 @@ public class CraftrGameScreen extends CraftrScreen
 	
 	// chat processing
 	
-	public void addChatMsg(String msg, int ncol) // ncol was here for debug purposes... meh
+	public void addChatMsg(String msg)
 	{
 		// This fixes the case that there is TOO MUCH CHAT GOING ON BRO
 		System.arraycopy(chatarr,0,chatarr,1,19);
@@ -144,7 +138,7 @@ public class CraftrGameScreen extends CraftrScreen
 		g.fillRect(x-1,y-1,1,10);
 		for(int i=0; i<msg.msglen; i++)
 		{
-			g.setColor(new Color(0x000000)); // black.
+			g.setColor(new Color(0x000000));
 			g.fillRect(x+((i-offs)<<3),y-1,9,10);
 			String z;
 			char[] t = new char[1];
@@ -241,6 +235,7 @@ public class CraftrGameScreen extends CraftrScreen
 	{
 		g.setColor(new Color(0x000000));
 		g.fillRect(0,BARPOS_Y,WIDTH,16);
+		if(hideousPrompts) c.DrawString1x(0,BARPOS_Y+16,"      Type       ",9,g);
 		c.DrawString(0,BARPOS_Y,getName(drawType),15,g);
 		c.DrawChar1x(7*16,BARPOS_Y+8,(byte)'T',(byte)10,g);
 		c.DrawChar1x(7*16+8,BARPOS_Y,(byte)30,(byte)14,g);
@@ -262,6 +257,7 @@ public class CraftrGameScreen extends CraftrScreen
 		switch(bsmt)
 		{
 			case 1: // char
+				if(hideousPrompts) c.DrawString1x(12*16+8,BARPOS_Y+16,"               Char               ",9,g);
 				c.DrawString1x(8*16+8,BARPOS_Y,"Chr",240,g);
 				c.DrawString1x(8*16+8,BARPOS_Y+8,"Col",15,g);
 				c.DrawChar1x(12*16+8,BARPOS_Y+4,(byte)17,(byte)14,g);
@@ -279,6 +275,7 @@ public class CraftrGameScreen extends CraftrScreen
 				}
 				break;
 			case 2: // color
+				if(hideousPrompts) c.DrawString1x(12*16+8,BARPOS_Y+16,"      Color       ",9,g);
 				if(drawType==3) c.DrawString1x(8*16+8,BARPOS_Y,"Dir",15,g);
 				else if (drawType != 4) c.DrawString1x(8*16+8,BARPOS_Y,"Chr",15,g);
 				c.DrawString1x(8*16+8,BARPOS_Y+8,"Col",240,g);

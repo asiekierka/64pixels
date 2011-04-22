@@ -347,6 +347,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				out.write(s,0,s.length());
 				out.newLine();
 			}
+			if(gs.hideousPrompts)
+			{
+				s = "hideous-prompts=1";
+				out.write(s,0,s.length());
+				out.newLine();
+			}
 			s = "player-x=" + lpx;
 			out.write(s,0,s.length());
 			out.newLine();
@@ -471,6 +477,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					{
 						gs.drawColA[nf.parse(dcoi[1]).intValue()]=nf.parse(val).intValue();
 					}
+				}
+				else if(key.contains("hideous-prompts"))
+				{
+					if(nf.parse(val).intValue()>0) gs.hideousPrompts=true;
 				}
 			}
 		}
@@ -936,6 +946,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 		}
 		else if(map.pushAttempt(px,py,dpx,dpy))
+
 		{
 			if(multiplayer)
 			{
@@ -1069,14 +1080,16 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 
 	private String configure_gets1() { return "Key mode: " + ((kim>0)?"WSAD":"Arrows"); }
+	private String configure_gets2() { return "Hideous prompts: " + ((gs.hideousPrompts)?"On":"Off"); }
 	public String configure()
 	{
 		boolean inconf = true;
 		is = new CraftrInScreen(canvas,2,"Main menu");
-		String[] modes = new String[3];
+		String[] modes = new String[4];
 		modes[0] = "Singleplayer";
 		modes[1] = "Multiplayer";
 		modes[2] = configure_gets1();
+		modes[3] = configure_gets2();
 		String ostr = "";
 		while(inconf)
 		{
@@ -1153,6 +1166,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					changeKeyMode(1-(kim%2));
 					modes[2] = configure_gets1();
 					break;
+				case 3:
+					gs.hideousPrompts=!gs.hideousPrompts;
+					modes[3] = configure_gets2();
+					break;
+	
 			}
 		}
 		canvas.cs = (CraftrScreen)gs;
@@ -1192,8 +1210,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		String thost = configure();
 		if(!multiplayer)
 		{
-			gs.addChatMsg("you're running 64pixels " + getVersion(),0);
-			gs.addChatMsg("created by asiekierka and GreaseMonkey.",0);
+			gs.addChatMsg("you're running 64pixels " + getVersion());
+			gs.addChatMsg("created by asiekierka and GreaseMonkey.");
 			Thread tmap = new Thread(cmt);
 			tmap.start();
 		}
