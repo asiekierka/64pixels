@@ -16,7 +16,6 @@ public class CraftrServer extends CraftrServerShim
 	public boolean run; 
 	public CraftrMap map;
 	public CraftrInput ci;
-	//public DataOutputStream out; // SHIMMED
 	public ByteArrayOutputStream out2;
 	public boolean anonMode;
 	public String[] op_ips;
@@ -471,13 +470,13 @@ public class CraftrServer extends CraftrServerShim
 			else if(cmd[0].equals("lock"))
 			{
 				mapLock=true;
-				clients[id].sendChatMsgAll("&cMap locked =O");
+				clients[id].sendChatMsgAll("&cMap locked.");
 				return "";
 			}
 			else if(cmd[0].equals("unlock"))
 			{
 				mapLock=false;
-				clients[id].sendChatMsgAll("&aMap unlocked =D");
+				clients[id].sendChatMsgAll("&aMap unlocked!");
 				return "";
 			}
 			else if(cmd[0].equals("copy") && id!=255)
