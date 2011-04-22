@@ -544,6 +544,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								byte t3 = in.readByte();
 								byte ch1 = in.readByte();
 								byte co1 = in.readByte();
+								System.out.println("Received block packet at " + bx1 + "," + by1 + ". " + t3 + "," + ch1 + "," + co1);
  								if(t3 == -1)
  								{
  									synchronized(game.map)
@@ -559,7 +560,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 										for(int i=0;i<4;i++)
 										{
 											CraftrBlock t = game.map.getBlock(bx1+game.map.xMovement[i],by1+game.map.yMovement[i]);
-											game.map.setBlock(bx1+game.map.xMovement[i],by1+game.map.yMovement[i],t.getType(),t.getParam(),game.map.updateLook(t),t.getColor());
+											game.map.setBlock(bx1+game.map.xMovement[i],by1+game.map.yMovement[i],t.getType(),t.getParam(),game.map.updateLook(t),t.getBlockColor());
 										}
  									}
  								}
@@ -621,6 +622,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
  								}
 								break;
 							case 0xE1: // push me
+								System.out.println("MULTIPLE PUSH");
 								int e1x = in.readInt();
 								int e1y = in.readInt();
 								int e1xs = in.readShort();

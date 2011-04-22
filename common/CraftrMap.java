@@ -485,6 +485,7 @@ public class CraftrMap
 				for(int ix=0;ix<xsize;ix++)
 				{
 					blocks[(iy*xsize)+ix] = getBlock(x+ix,y+iy);
+					setBlock(x+ix,y+iy,(byte)0,(byte)0,(byte)0,(byte)0);
 					setPushable(x+ix,y+iy,(byte)0,(byte)0);
 					setPlayer(x+ix,y+iy,0);
 				}
@@ -497,6 +498,7 @@ public class CraftrMap
 					if(blocks[arrayPos].isPushable()) setPushable(x+ix+dx,y+iy+dy,
 		                                                          (byte)blocks[arrayPos].getChar(),
 		                                                          (byte)blocks[arrayPos].getColor());
+					setBlock(x+ix+dx,y+iy+dy,blocks[arrayPos].getBlockData());
 					setPlayer(x+ix+dx,y+iy+dy,1);
 					for(int moveDir=0;moveDir<4;moveDir++)
 					{
@@ -563,7 +565,7 @@ public class CraftrMap
 
 	public int updateLook(CraftrBlock block)
 	{
-		if(block.isPushable()) return block.getChar();
+		//if(block.isPushable()) return block.getBlockChar();
 		if(block.getType()==4) return 206; // default char for Crossuh blocks
 		// NOTE: server used getChar() here.
 		// That bug has gone unnoticed because nobody bothered to put a pushium on a P-NAND. --GM
@@ -589,6 +591,7 @@ public class CraftrMap
 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
 			findCachedChunk((x>>6),(y>>6)).place(px,py,data[0],data[2],data[3],data[1]);
 		}
+
 		catch(NullPointerException e)
 		{
 			if(!multiplayer) System.exit(1);

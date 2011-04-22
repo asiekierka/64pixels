@@ -132,6 +132,16 @@ public class CraftrBlock
 		else block[3]=(byte)co;
 	}
 
+	public void setPChar(int ch)
+	{
+		block[4]=(byte)ch;
+	}
+	public void setPColor(int co)
+	{
+		block[5]=(byte)co;
+	}
+
+
 	public int getDrawnChar()
 	{
 		if(getType()==8) return 0xFF&(int)block[2];
