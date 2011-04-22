@@ -162,6 +162,10 @@ public class CraftrPhysics
 					if(isUpdated(map.getBlock(tbx,tby).getType())) addBlockToCheck(new CraftrBlockPos(tbx,tby));
 				}
 			}
+			if(surrBlockO[blockData[6]-1].getType()==14)
+			{
+				addBlockToSet(new CraftrBlock(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y)); // this makes an empty block.
+			}
 			blockO.setBullet((byte)0);
 			addBlockToSet(blockO);
 			addBlockToCheck(new CraftrBlockPos(blockO.x,blockO.y));
