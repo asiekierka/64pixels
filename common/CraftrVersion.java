@@ -24,4 +24,8 @@ public class CraftrVersion
 		}
 		return temp;
 	}
+	public static String getHomeDir()
+	{
+		return System.getProperty("user.home") + "/.64pixels";
+	}
 }
