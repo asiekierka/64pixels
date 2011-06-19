@@ -284,7 +284,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 		}
 	}
 	
-	CraftrGameInterface gameInterface;
+	CraftrGame gaa;
 	
 	public void run()
 	{
@@ -292,7 +292,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 		{
 			while(loginStage != 255 && socket.isConnected())
 			{
-				loop(gameInterface);
+				loop(gaa);
 				Thread.sleep(5);
 			}
 		}
@@ -339,7 +339,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 			System.exit(1);
 		}
 	}
-	public void loop(CraftrGameInterface game)
+	public void loop(CraftrGame game)
 	{
 		try
 		{
@@ -353,19 +353,19 @@ public class CraftrNet implements Runnable, CraftrNetShim
 					out.writeByte(0x00);
 					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE
 					out.writeInt(CraftrVersion.getProtocolVersion());
-					out.writeByte(game.getPlayer(255).pchr);
-					out.writeByte(game.getPlayer(255).pcol);
+					out.writeByte(game.players[255].pchr);
+					out.writeByte(game.players[255].pcol);
 					sendPacket();
 				}
 				loginStage = 1;
 			}
 			else
 			{
-				if(game.checkKick()) { ns.isRunning=false; }
+				if(game.isKick) { ns.isRunning=false; }
 				int len = 1;
 				if(!socket.isConnected() || !ns.isRunning)
 				{
-					if(!game.checkKick()) game.kick("Disconnected!");
+					if(!game.isKick) game.kickOut("Disconnected!");
 					return;
 				}
 				while(len>0)
@@ -380,17 +380,17 @@ public class CraftrNet implements Runnable, CraftrNetShim
 							case 0x01:
 								if(loginStage>=2) break;
 								loginStage=2;
-								game.getPlayer(255).px=in.readInt();
-								game.getPlayer(255).py=in.readInt();
-								int tx = game.getPlayer(255).px>>6;
-								int ty = game.getPlayer(255).py>>6;
+								game.players[255].px=in.readInt();
+								game.players[255].py=in.readInt();
+								int tx = game.players[255].px>>6;
+								int ty = game.players[255].py>>6;
 								chunkRequest(tx,ty);
 								chunkRequest(tx+1,ty);
 								chunkRequest(tx,ty+1);
 								chunkRequest(tx+1,ty+1);
 								nick = readString();
 								isOp=in.readUnsignedShort()==42;
-								game.getPlayer(255).name = nick;
+								game.players[255].name = nick;
 								System.out.println("Logged in!");
 								break;
 							case 0x11:
@@ -442,7 +442,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 											game.map.chunks[loadChunkID].loadByteNet(tmp1);
 										}
 									}
-									game.warrantUpdate();
+									game.netChange=true;
 								}
 								break;
 							case 0x20:
@@ -452,38 +452,38 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								int py = in.readInt();
 								byte chr = in.readByte();
 								byte col = in.readByte();
-								game.setPlayer(t1,new CraftrPlayer(px,py,chr,col,tmp2));
-								game.getPlayer(t1).posChanged = true;
-								game.getPlayer(t1).ncol = in.readByte();
+								game.players[t1] = new CraftrPlayer(px,py,chr,col,tmp2);
+								game.players[t1].posChanged = true;
+								game.players[t1].ncol = in.readByte();
 								break;
 							case 0x21:
 								int t2 = in.readUnsignedByte();
 								int dx1 = in.readByte();
 								int dy1 = in.readByte();
-								if(game.getPlayer(t2) != null)
+								if(game.players[t2] != null)
 								{
-									game.getPlayer(t2).moveDelta(dx1,dy1);
+									game.players[t2].moveDelta(dx1,dy1);
 								}
 								break;
 							case 0x22:
-								game.setPlayer(in.readUnsignedByte(),null);
+								game.players[in.readUnsignedByte()] = null;
 								break;
 							case 0x24:
 								int ta1 = in.readUnsignedByte();
 								int dx2 = in.readInt();
 								int dy2 = in.readInt();
-								if(game.getPlayer(ta1) != null)
+								if(game.players[ta1] != null)
 								{
-									game.getPlayer(ta1).move(dx2,dy2);
+									game.players[ta1].move(dx2,dy2);
 								}
-								game.warrantUpdate();
+								game.netChange=true;
 								break;
 							case 0x26:
 								int ta25 = in.readUnsignedByte();
-								if(game.getPlayer(ta25)!=null) game.getPlayer(ta25).name = readString();
+								if(game.players[ta25]!=null) game.players[ta25].name = readString();
 								break;
 							case 0x27:
-								game.requestUIChange(1);
+								game.netThreadRequest = 1;
 								break;
 							case 0x28:
 								int t28=in.readByte();
@@ -531,9 +531,9 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								int dir2f = buf[0]&0x03;
 								int dx2f = CraftrMap.xMovement[dir2f];
 								int dy2f = CraftrMap.yMovement[dir2f];
-								if(game.getPlayer(id2f) != null)
+								if(game.players[id2f] != null)
 								{
-									game.getPlayer(id2f).moveDelta(dx2f,dy2f);
+									game.players[id2f].moveDelta(dx2f,dy2f);
 								}
 								break;
 							case 0x31:
@@ -563,7 +563,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 										}
  									}
  								}
-								game.warrantUpdate();
+								game.blockChange=true;
 								break;
  							case 0x32:
 								int pid = in.readUnsignedByte();
@@ -578,7 +578,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 									game.map.setPushable(lolx,loly,(byte)0,(byte)0);
 									game.map.setPushable(lolx+lolvx,loly+lolvy,nchr,ncol);
 								}
-								if(game.getPlayer(pid) != null)
+								if(game.players[pid] != null)
 								{
 									if(pid==255)
 									{
@@ -590,25 +590,26 @@ public class CraftrNet implements Runnable, CraftrNetShim
 											sendPacket();
 										}
 									}
-									game.getPlayer(pid).move(lolx,loly);
+									game.players[pid].move(lolx,loly);
 								}
-								game.warrantUpdate();
+								game.blockChange=true;
 								break;
 							case 0x41:
 								int ta41 = in.readUnsignedByte();
 								String tmp3 = readString();
-								game.sendChatMessage(tmp3);
-								game.warrantUpdate();
+								game.gs.addChatMsg(tmp3);
+								game.netChange = true;
 								break;
 							case 0x50:
 								in.read(msgenc,0,32);
-								game.requestUIChange(1);
+								game.netThreadRequest = 1;
 								break;
 							case 0x60: // sound GET
 								int ta60x = in.readByte();
 								int ta60y = in.readByte();
 								int ta60v = in.readUnsignedByte();
-								game.playSound(ta60x,ta60y,ta60v);
+								// best not to screw up meloders --GM
+								game.audio.playNote(ta60x,ta60y,ta60v,1.0);
 								break;
 							case 0x70:
 								int x70 = in.readInt();
@@ -640,7 +641,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								break;
 							case 0xF5:
 								String tmp4 = readString();
-								game.kick(tmp4);
+								game.kickOut(tmp4);
 								break;
 						}
 					}
@@ -651,8 +652,8 @@ public class CraftrNet implements Runnable, CraftrNetShim
 					synchronized(out)
 					{
 						out.writeByte(0x28);
-						out.writeInt(game.getPlayer(255).px);
-						out.writeInt(game.getPlayer(255).py);
+						out.writeInt(game.players[255].px);
+						out.writeInt(game.players[255].py);
 						sendPacket();
 					}
 				}
