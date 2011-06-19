@@ -480,21 +480,25 @@ public class CraftrMap
 				catch(Exception e){ System.out.println("Failed to send pushMultiple packet!"); }
 			}
 			CraftrBlock[] blocks = new CraftrBlock[xsize*ysize];
-			for(int iy=0;iy<ysize;iy++)
+			for(int ty=0;ty<ysize;ty++)
 			{
-				for(int ix=0;ix<xsize;ix++)
+				int iy = ty*dy;
+				for(int tx=0;tx<xsize;tx++)
 				{
-					blocks[(iy*xsize)+ix] = getBlock(x+ix,y+iy);
+					int ix = tx*dx;
+					blocks[(ty*xsize)+tx] = getBlock(x+ix,y+iy);
 					setBlock(x+ix,y+iy,(byte)0,(byte)0,(byte)0,(byte)0);
 					setPushable(x+ix,y+iy,(byte)0,(byte)0);
 					setPlayer(x+ix,y+iy,0);
 				}
 			}
-			for(int iy=0;iy<ysize;iy++)
+			for(int ty=0;ty<ysize;ty++)
 			{
-				for(int ix=0;ix<xsize;ix++)
+				int iy = ty*dy;
+				for(int tx=0;tx<xsize;tx++)
 				{
-					int arrayPos = (iy*xsize)+ix;
+					int ix = tx*dx;
+					int arrayPos = (ty*xsize)+tx;
 					if(blocks[arrayPos].isPushable()) setPushable(x+ix+dx,y+iy+dy,
 		                                                          (byte)blocks[arrayPos].getChar(),
 		                                                          (byte)blocks[arrayPos].getColor());

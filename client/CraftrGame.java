@@ -913,7 +913,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				players[255].move(px,py);
 				playerChange = true;
 			}
-			return 3;
+			return 2;
 		}
 		else if(blockMoveTo.isEmpty())
 		{
@@ -927,7 +927,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			oldmy=-1;
 			players[255].move(px,py);
 			playerChange = true;
-			return 3;
+			return 2;
  		}
 		return waitTime;
 	}
