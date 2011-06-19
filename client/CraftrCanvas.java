@@ -37,8 +37,6 @@ public class CraftrCanvas extends JComponent
 	public static BufferedImage charsetImage[][];
 	public static BufferedImage charsetImage2[][];
 	public static int pixelchrn[];
-	public static int scm = -1;
-	public static int scm2 = 0;
 	// CONSTRUCTORS
 	
 	public CraftrCanvas()
@@ -47,12 +45,8 @@ public class CraftrCanvas extends JComponent
 	}
 	public CraftrCanvas(int hq)
 	{
-		if (hq != scm)
-		{
-			scm = hq;
-			charsetImage = new BufferedImage[256][16];
-			RedrawCharset();
-		}
+		charsetImage = new BufferedImage[256][16];
+		RedrawCharset();
 		Dimension d = new Dimension(WIDTH, HEIGHT);
 		setSize(d);
 		setPreferredSize(d);
@@ -126,62 +120,7 @@ public class CraftrCanvas extends JComponent
 		setSize(size);
 		setPreferredSize(size);
 	}
-	
-	public short endianswaps(int val)
-	{
-		int t = ((val>>8)&0xFF) | ((val<<8)&0xFF00);
-		return (short)t;
-	}
-	
-	public int endianswap(int val)
-	{
-		return ((val&0xFF)<<24) | ((val&0xFF00)<<8) | ((val&0xFF00000)>>8) | ((val>>24)&0xFF);
-	}
-	
-	public void screenshot(String filename)
-	{
-		FileOutputStream fin;
-		DataOutputStream din;
-		try
-		{
-			fin=new FileOutputStream(filename);
-			din=new DataOutputStream(fin);
-			din.writeByte('B');
-			din.writeByte('M'); // header
-			din.writeInt(endianswap(54+(WIDTH*HEIGHT*3))); // size
-			din.writeInt(0); // reserved 1 and 2 (shorts)
-			din.writeInt(endianswap(54)); // offset to bitmap data
-			// * BMPFILEHEADER * BEGIN
-			din.writeInt(endianswap(40)); // size of BMPFILEHEADER
-			din.writeInt(endianswap(WIDTH));
-			din.writeInt(endianswap(HEIGHT));
-			din.writeShort(endianswaps(1)); // planes
-			din.writeShort(endianswaps(24)); // bit count
-			din.writeInt(0); // compression (none)
-			din.writeInt(endianswap((WIDTH*HEIGHT*3))); // size
-			din.writeInt(0);
-			din.writeInt(0);
-			din.writeInt(0); // used colours
-			din.writeInt(0); // important colours
-			// * BMPFILEHEADER * END
-			for(int y=(HEIGHT-1);y>=0;y--)
-			{
-				for(int x=0;x<WIDTH;x++)
-				{
-					int t = img.getRGB(x,y);
-					din.writeByte((byte)(t&255));
-					din.writeByte((byte)((t>>8)&255));
-					din.writeByte((byte)((t>>16)&255));
-				}
-			}
-			din.close();
-			fin.close();
-		}
-		catch(Exception e)
-		{
-			System.out.println("[CANVAS] Exception while screenshotting!");
-		}
-	}
+
 	public static void RedrawCharset()
 	{
 		pixelchrn = new int[256];
@@ -215,17 +154,9 @@ public class CraftrCanvas extends JComponent
 						cgat>>=1;
 					}
 				}
-				switch(scm)
-				{
-					case 1:
-						charsetImage2[c][col] = new ImageScale2x(charsetImage[c][col]).getScaledImage();
-						break;
-					default:
-						charsetImage2[c][col] = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
-						Graphics2D g2c = (Graphics2D)charsetImage2[c][col].getGraphics();
-						g2c.drawImage(charsetImage[c][col],new AffineTransformOp(scale2,AffineTransformOp.TYPE_NEAREST_NEIGHBOR),0,0);
-						break;
-				}
+				charsetImage2[c][col] = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2c = (Graphics2D)charsetImage2[c][col].getGraphics();
+				g2c.drawImage(charsetImage[c][col],new AffineTransformOp(scale2,AffineTransformOp.TYPE_NEAREST_NEIGHBOR),0,0);
 			}
 		}
 		System.out.println("[CANVAS] Preparing charset: 100% [DONE]");
@@ -266,15 +197,7 @@ public class CraftrCanvas extends JComponent
 		Graphics2D g2 = bi.createGraphics();
 		cs.paint((Graphics)g2,mx,my);
 		Graphics2D g2o = (Graphics2D)g;
-		switch(scm2)
-		{
-			case 1:
-				g2o.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-				break;
-			default:
-				g2o.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-				break;
-		}
+		g2o.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 		img=bi;
 		g2o.drawRenderedImage(bi,AffineTransform.getScaleInstance((float)sizeX/WIDTH,(float)sizeY/HEIGHT));
 	}

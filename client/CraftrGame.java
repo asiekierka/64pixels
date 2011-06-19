@@ -67,8 +67,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public int key_right = KeyEvent.VK_RIGHT;
 	public int key_down = KeyEvent.VK_DOWN;
 	public int kim = 0;
-	public int scm = 0;
-	public int scm2 = 0;
 	public String isKickS;
 	public void playSound(int tx, int ty, int val)
 	{
@@ -124,8 +122,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		cmt = new CraftrMapThread(map);
 		gs = new CraftrGameScreen(null);	
 		loadConfig();
-		canvas = new CraftrCanvas(scm);
-		canvas.scm2=scm2;
+		canvas = new CraftrCanvas();
 		gs.c=canvas;
 		canvas.cs = (CraftrScreen)gs;
 		if(cmtsp>0) cmt.speed=(1000/cmtsp);
@@ -157,8 +154,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		cmt = new CraftrMapThread(map);
 		gs = new CraftrGameScreen(null);
 		loadConfig();
-		canvas = new CraftrCanvas(scm);
-		canvas.scm2=scm2;
+		canvas = new CraftrCanvas();
 		gs.c=canvas;
 		canvas.cs = (CraftrScreen)gs;
 		if(cmtsp>0) cmt.speed=(1000/cmtsp);
@@ -334,19 +330,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				lpx = players[255].px;
 				lpy = players[255].py;
 			}
-			if(scm!=0)
-			{
-
-				s = "char-scaler="+ scm;
-				out.write(s,0,s.length());
-				out.newLine();
-			}
-			if(scm2!=0)
-			{
-				s = "bg-scaler="+ scm2;
-				out.write(s,0,s.length());
-				out.newLine();
-			}
 			if(gs.hideousPrompts)
 			{
 				s = "hideous-prompts=1";
@@ -430,34 +413,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						cmtsp = nf.parse(val).intValue();
 						if(cmtsp<0) cmtsp=30;
 						else if(cmtsp>1000) cmtsp=0;
-					}
-				}
-				else if(key.contains("char-scaler"))
-				{
-					if(val.equals("scale2x"))
-					{
-						scm=1;
-					}
-					else
-					{
-						scm = nf.parse(val).intValue();
-						if(scm<0 || scm>1) scm=0;
-					}
-				}
-				else if(key.contains("bg-scaler"))
-				{
-					if(val.equals("nearest-neighbor") || val.equals("nearest-neighbour"))
-					{
-						scm2=1;
-					}
-					else if(val.equals("bilinear"))
-					{
-						scm2=0;
-					}
-					else
-					{
-						scm2 = nf.parse(val).intValue();
-						if(scm2<0 || scm2>1) scm2=0;
 					}
 				}
 				else if(key.contains("dch|"))
@@ -795,61 +750,58 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			else
 			{
 				switch(kc)
-					{
-						case KeyEvent.VK_F4:
-							canvas.screenshot(map.saveDir + "scr" + System.currentTimeMillis() + ".bmp");
-							break;
-						case KeyEvent.VK_P:
-							System.out.println("player pos: x = " + players[255].px + ", y = " + players[255].py + ".");
-							waitTime=2;
-							break;
-						case KeyEvent.VK_T:
-							if(multiplayer)
-							{
-								gs.barType = 1;
-								gs.chatMsg="";
-								mouseChange = true;
-							}
-							break;
-						case KeyEvent.VK_R:
-							if(multiplayer && (players[255].px != 0 || players[255].py != 0))
-							{
-								net.respawnRequest();
-							}
-							break;
-						case KeyEvent.VK_ESCAPE:
-							if(gs.cwOpen)
-							{
-								gs.cwOpen = false;
-							}
+				{
+					case KeyEvent.VK_P:
+						System.out.println("player pos: x = " + players[255].px + ", y = " + players[255].py + ".");
+						waitTime=2;
+						break;
+					case KeyEvent.VK_T:
+						if(multiplayer)
+						{
+							gs.barType = 1;
+							gs.chatMsg="";
+							mouseChange = true;
+						}
+						break;
+					case KeyEvent.VK_R:
+						if(multiplayer && (players[255].px != 0 || players[255].py != 0))
+						{
+							net.respawnRequest();
+						}
+						break;
+					case KeyEvent.VK_ESCAPE:
+						if(gs.cwOpen)
+						{
+							gs.cwOpen = false;
+						}
+						mouseChange=true;
+						break;
+					case KeyEvent.VK_F:
+						if(!multiplayer||net.isOp)
+						{
 							mouseChange=true;
+							gs.viewFloorsMode=!gs.viewFloorsMode;
+						}
+						break;
+					case KeyEvent.VK_B:
+						if(!gs.cwOpen)
+						{
+							gs.cwOpen=true;
+							gs.cw.type=3;
+						}
+						else if(gs.cw.type==3)
+						{
+							gs.cwOpen=false;
+						}
+						else
+						{
+							gs.cw.type=3;
+						}
+						mouseChange=true;
+						break;
+					default:
 							break;
-						case KeyEvent.VK_F:
-							if(!multiplayer||net.isOp)
-							{
-								mouseChange=true;
-								gs.viewFloorsMode=!gs.viewFloorsMode;
-							}
-							break;
-						case KeyEvent.VK_B:
-							if(!gs.cwOpen)
-							{
-								gs.cwOpen=true;
-								gs.cw.type=3;
-							}
-							else if(gs.cw.type==3)
-							{
-								gs.cwOpen=false;
-							}
-							else
-							{
-								gs.cw.type=3;
-							}
-							mouseChange=true;
-							break;
-						default:
-							break;
-					}
+				}
 			}
 		} else if(gs.barType==1) {
 			if(kc == KeyEvent.VK_BACK_SPACE && gs.chatMsg.length() > 0)
