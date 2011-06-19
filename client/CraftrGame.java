@@ -1094,6 +1094,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						cks.bgcolor = new Color(170,0,0);
 						cks.mName="SERVERLIST NOT FOUND";
 						cks.name="PLEASE DON'T PANIC, ONE SECOND...";
+						if(isApplet) cks.name="DON'T PANIC (does the applet have proper permissions?)";
 						canvas.draw(mx,my);
 						try{Thread.sleep(1800);}catch(Exception e){}
 					}
@@ -1226,7 +1227,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					waitTime=movePlayer(0,1);
 				}
 			}
-			if(waitTime>0) waitTime--;
+			else waitTime--;
 			if(chrArrowWaiter>0) chrArrowWaiter--;
 			else if(mb == ev_1) {
 				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
@@ -1286,8 +1287,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				render();
 				canvas.draw(mx,my);
 			}
-
-
 			frame++;
 		}
 	}
@@ -1297,22 +1296,25 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public void end()
 	{
-		if(!multiplayer)
-		{
 		System.out.print("Saving... ");
-		for(int i=0;i<map.chunks.length;i++)
+		if(map.saveDir != "")
 		{
-			if(map.chunks[i].isSet || map.chunks[i].isUsed)
+			if(!multiplayer)
 			{
-				map.saveChunkFile(i);
+			for(int i=0;i<map.chunks.length;i++)
+			{
+				if(map.chunks[i].isSet || map.chunks[i].isUsed)
+				{
+					map.saveChunkFile(i);
+				}
 			}
+			}
+			else
+			{
+				net.sockClose();
+			}
+			saveConfig();
 		}
-		}
-		else
-		{
-			net.sockClose();
-		}
-		saveConfig();
 		audio.kill();
 		System.out.println("Done!");
 	}

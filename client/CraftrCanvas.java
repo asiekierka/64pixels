@@ -62,11 +62,20 @@ public class CraftrCanvas extends JComponent
 								0x555555, 0x5555FF, 0x55FF55, 0x55FFFF,
 								0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF };
 		cga = new byte[2048];
-		chome = System.getProperty("user.home") + "/.64pixels";
+		try
+		{
+			chome = System.getProperty("user.home") + "/.64pixels";
+		}
+		catch(Exception e)
+		{
+			System.out.println("Cannot use default chome due to exception stuff");
+			chome = "";
+		}
 		InputStream ain = null;
 		FileInputStream in = null;
+		File tcf = null;
 		try {
-			File tcf = new File(chome + "/palette.bin"); 
+			if(chome!="") tcf = new File(chome + "/palette.bin"); 
 			if(tcf != null && tcf.exists())
 			{
 				System.out.println("[CANVAS] Custom palette found!");
@@ -80,7 +89,7 @@ public class CraftrCanvas extends JComponent
 				in.close();
 			}
 			else System.out.println("[CANVAS] Using default palette!");
-			tcf = new File(chome + "/charset.bin");
+			if(chome!="") tcf = new File(chome + "/charset.bin");
 			if(tcf != null && tcf.exists())
 			{
 				System.out.println("[CANVAS] Custom charset found!");
