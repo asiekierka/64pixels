@@ -24,12 +24,11 @@ public class CraftrGameScreen extends CraftrScreen
 	public int frames = 0;
 	public int mx = 0;
 	public int my = 0;
+	public ArrayList<CraftrWindow> windows;
 	
 	public CraftrBlock[] blocks;
 	public CraftrChatMsg[] chatarr;
 	public int chatlen;
-	public boolean cwOpen;
-	public CraftrWindow cw;
 	public CraftrCanvas c;
 	public int hov_type = 0;
 	public int hov_par = 0;
@@ -39,6 +38,7 @@ public class CraftrGameScreen extends CraftrScreen
 	public CraftrGameScreen(CraftrCanvas cc)
 	{
 		c = cc;
+		windows = new ArrayList<CraftrWindow>();
 		blocks = new CraftrBlock[FULLGRID_W*FULLGRID_H];
 		chatarr = new CraftrChatMsg[20];
 		chatlen = 0;
@@ -46,13 +46,69 @@ public class CraftrGameScreen extends CraftrScreen
 		for(int i=0;i<256;i++) drawChrA[i] = 1;
 		drawType = 0;
 		barselMode = 1; // char
-		cw = new CraftrWindow(1);
-		cwOpen = false;
-		cw.x++;
 		chatMsg = "";
 		barType = 0;
 	}
 
+	public boolean insideRect(int mx, int my, int x, int y, int w, int h)
+	{
+		if(mx >= x && my >= y && mx < x+w && my < y+h)
+		{
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
+
+	public boolean obstructedWindow(CraftrWindow w, int mx, int my)
+	{
+		synchronized(windows)
+		{
+			for(int wi = windows.size()-1;wi>windows.indexOf(w);wi--)
+			{
+				CraftrWindow cw = windows.get(wi);
+				if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3)) return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean inWindow(int x, int y)
+	{
+		synchronized(windows)
+		{
+			for(CraftrWindow cw : windows)
+				if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3)) return true;
+		}
+		return false;
+	}
+
+	public CraftrWindow getWindow(int type)
+	{
+		synchronized(windows)
+		{
+			for(CraftrWindow cw: windows)
+			{
+				if(cw.type==type) return cw;
+			}
+		}
+		return null;
+	}
+
+	public void toggleWindow(int type)
+	{
+		synchronized(windows)
+		{
+			int app = -1;
+			for(CraftrWindow cw : windows)
+			{
+				if(cw.type == type) app = windows.indexOf(cw);
+			}
+			if(app>=0) windows.remove(app);
+			else windows.add(new CraftrWindow(type,4)); // UID chosen by fair dice roll. Guaranteed to be unique.
+		}
+	}
 	public int gdrawChr()
 	{
 		return drawChrA[drawType<0?(0xFF&(int)((byte)drawType)):drawType];
@@ -101,19 +157,28 @@ public class CraftrGameScreen extends CraftrScreen
 		}
 		DrawMouse(g);
 		DrawChatMsg(g);
-		cw.charChosen = gdrawChr();
-		cw.colorChosen = gdrawCol();
 		for(int i=0;i<256;i++)
 		{
 			if(players[i] != null)
 			{
-				if(mx>>4 == players[i].px && my>>4 == players[i].py && (!cwOpen || (mx>>3 < cw.x && my>>3 < cw.y && mx>>3 >= cw.w+cw.x && mx>>4 >= cw.h+cw.y)))
+				if(mx>>4 == players[i].px && my>>4 == players[i].py && !inWindow(mx,my))
 				{
 					writeChat((players[i].px*16+8)-((players[i].name.length()*8)>>1),players[i].py*16-10,new CraftrChatMsg(players[i].name),g);
 				}
 			}
 		}
-		if(cwOpen) cw.render(c,g);
+		synchronized(windows)
+		{
+			for(CraftrWindow cw : windows)
+			{
+				cw.typeChosen = drawType;
+				cw.charChosen = gdrawChr();
+				cw.colorChosen = gdrawCol();
+				if(drawType==7) cw.isMelodium=true;
+				else cw.isMelodium=false;
+				cw.render(c,g);
+			}
+		}
 		frames++;
 	}
 

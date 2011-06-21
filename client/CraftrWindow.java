@@ -20,9 +20,11 @@ public class CraftrWindow
 	public int[] recBlockType;
 	public static final String[] note_names={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
 	public static final String[] drum_names={"Kick","Snare","(C) HiHat","(O) HiHat","HiTom","MidTom","LoTom","Crash"};
-	
-	public CraftrWindow(int _type)
+	public int uid;
+
+	public CraftrWindow(int _type, int _uid)
 	{
+		_uid=uid;
 		type = _type;
 		recBlockChr = new int[16];
 		recBlockCol = new int[16];

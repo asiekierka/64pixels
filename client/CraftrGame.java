@@ -458,131 +458,132 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		ev_3 = ev.BUTTON3;
 		advMouseMode = ev.isControlDown();
 		if(isKick) return;
-		    if (insideRect(mx,my,7*16+8,gs.BARPOS_Y,8,8)) // type, up
+		if (insideRect(mx,my,7*16+8,gs.BARPOS_Y,8,8)) // type, up
+		{
+			gs.drawType = (gs.drawType-1);
+			if(gs.drawType < -1) gs.drawType = map.maxType;
+		} else if (insideRect(mx,my,7*16+8,gs.BARPOS_Y+8,8,8)) // type, down
+		{
+			gs.drawType = (gs.drawType+1);
+			if(gs.drawType > map.maxType) gs.drawType = -1;
+		}
+		else if (insideRect(mx,my,7*16,gs.BARPOS_Y+8,8,8)) // T
+		{
+			gs.toggleWindow(4);
+		}
+		 else if (insideRect(mx,my,8*16+8,gs.BARPOS_Y,24,8)) // mode, chr
+		{
+			gs.barselMode = 1;
+		} else if (insideRect(mx,my,8*16+8,gs.BARPOS_Y+8,24,8)) // mode, col
+		{
+			gs.barselMode = 2;
+		} else if(insideRect(mx,my,30*16,gs.BARPOS_Y,16,16))
+		{
+			gs.toggleWindow(1);
+		}
+		else if(insideRect(mx,my,31*16,gs.BARPOS_Y,16,16))
+		{
+			gs.toggleWindow(2);
+		}
+		else if (gs.drawType == 2)
+		{
+			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,128,16))
 			{
-				gs.drawType = (gs.drawType-1);
-				if(gs.drawType < -1) gs.drawType = map.maxType;
-			} else if (insideRect(mx,my,7*16+8,gs.BARPOS_Y+8,8,8)) // type, down
-			{
-				gs.drawType = (gs.drawType+1);
-				if(gs.drawType > map.maxType) gs.drawType = -1;
+				gs.sdrawCol((mx-(12*16+8))>>4);
 			}
-			else if (insideRect(mx,my,7*16,gs.BARPOS_Y+8,8,8)) // T
+		}
+		else if (gs.barselMode == 1 && gs.drawType == 3)
+		{
+			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,64,16))
 			{
-				if(gs.cw.type == 4) gs.cwOpen = !gs.cwOpen;
-				else gs.cwOpen = true;
-				gs.cw.type = 4;
+				gs.sdrawChr(24+((mx-(12*16+8))>>4));
 			}
-			 else if (insideRect(mx,my,8*16+8,gs.BARPOS_Y,24,8)) // mode, chr
+		}
+		else if (gs.barselMode == 1) // checkings, chr
+		{
+			if(insideRect(mx,my,13*16,gs.BARPOS_Y,256,16))
 			{
-				gs.barselMode = 1;
-			} else if (insideRect(mx,my,8*16+8,gs.BARPOS_Y+8,24,8)) // mode, col
+				gs.sdrawChr(((mx-(13*16))>>4)+gs.chrBarOff);
+			}
+			else if(mb==ev_3 && insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
 			{
-				gs.barselMode = 2;
-			} else if(gs.cwOpen && insideRect(mx,my,(gs.cw.x+gs.cw.w-1)<<3,gs.cw.y<<3,8,8))
+				gs.chrBarOff -= 16;
+				mouseChange=true;
+				if(gs.chrBarOff<0) gs.chrBarOff += 256;
+			}
+			else if(mb==ev_3 && insideRect(mx,my,29*16,gs.BARPOS_Y+1,8,14))
 			{
-				// close button, any window
-				gs.cwOpen = false;
-				canMousePress = false;
-			} else if(gs.cwOpen && insideRect(mx,my,(gs.cw.x+1)<<3,(gs.cw.y+1)<<3,(gs.cw.w-2)<<3,(gs.cw.h-2)<<3))
+				gs.chrBarOff += 16;
+				mouseChange=true;
+				if(gs.chrBarOff>255) gs.chrBarOff -= 256;
+			}
+		} else if (gs.barselMode == 2) // checkings, col
+		{
+			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,128,16))
 			{
-				switch(gs.cw.type)
+				int colChoose = (mx-(12*16+8))>>3;
+				int colMode = my-gs.BARPOS_Y;
+				if(colMode>7) // FG
 				{
-					case 1: // char selecting, char window only
-						int ct =(((mx-((gs.cw.x+1)<<3))>>3)%(gs.cw.w-2)) + ((((my>>3)-(gs.cw.y+1))%(gs.cw.h-2))*(gs.cw.w-2));
-						if(ct<=255)
-						{
-							gs.sdrawChr(ct);
-							gs.chrBarOff = ct-8;
-							if(gs.chrBarOff<0) gs.chrBarOff+=256;
-						}					
-						break;
-					case 2:
-						gs.sdrawCol((((mx-((gs.cw.x+1)<<3))>>3)&15) | (((my-((gs.cw.y+1)<<3))<<1)&240));
-						break;
-					case 3:
-						if(insideRect(mx,my,(gs.cw.x+2)<<3,(gs.cw.y+2)<<3,(gs.cw.w-4)<<3,(gs.cw.h-4)<<3))
-						{
-							int ix = (mx-((gs.cw.x+2)<<3))>>4;
-							int iy = (my-((gs.cw.y+2)<<3))>>4;
-							int ip = ix+iy*4;
-							gs.drawType = gs.cw.recBlockType[ip];
-							gs.sdrawChr(gs.cw.recBlockChr[ip]);
-							gs.chrBarOff = gs.gdrawChr()-8;
-							if(gs.chrBarOff<0) gs.chrBarOff+=256;
-							gs.sdrawCol(gs.cw.recBlockCol[ip]);
-							gs.cwOpen = false;
-							canMousePress = false;
-							mouseChange = true;
-						}
-						break;
-					case 4:
-						gs.drawType=((my-((gs.cw.y+1)<<3))>>3)-1;
-						break;
-					default:
-						break;
+					gs.sdrawCol((gs.gdrawCol()&240)|(colChoose&15));
+				} else // BG
+				{
+					gs.sdrawCol((gs.gdrawCol()&15)|((colChoose&15)<<4));
 				}
 			}
-			else if(insideRect(mx,my,30*16,gs.BARPOS_Y,16,16))
+		}
+		synchronized(gs.windows)
+		{
+			for(CraftrWindow cw : gs.windows)
 			{
-				if(gs.cw.type == 1) gs.cwOpen = !gs.cwOpen;
-				else gs.cwOpen = true;
-				gs.cw.type = 1;
-			}
-			else if(insideRect(mx,my,31*16,gs.BARPOS_Y,16,16))
-			{
-				if(gs.cw.type == 2) gs.cwOpen = !gs.cwOpen;
-				else gs.cwOpen = true;
-				gs.cw.type = 2;
-			}
-			else if (gs.drawType == 2)
-			{
-				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,128,16))
+				if(gs.obstructedWindow(cw,mx,my)) { }
+				else if(insideRect(mx,my,(cw.x+cw.w-1)<<3,cw.y<<3,8,8))
 				{
-					gs.sdrawCol((mx-(12*16+8))>>4);
-				}
-			}
-			else if (gs.barselMode == 1 && gs.drawType == 3)
-			{
-				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,64,16))
+					// close button, any window
+					gs.toggleWindow(cw.type);
+					canMousePress = false;
+				} else if(insideRect(mx,my,(cw.x+1)<<3,(cw.y+1)<<3,(cw.w-2)<<3,(cw.h-2)<<3))
 				{
-					gs.sdrawChr(24+((mx-(12*16+8))>>4));
-				}
-			}
-			else if (gs.barselMode == 1) // checkings, chr
-			{
-				if(insideRect(mx,my,13*16,gs.BARPOS_Y,256,16))
-				{
-					gs.sdrawChr(((mx-(13*16))>>4)+gs.chrBarOff);
-				}
-				else if(mb==ev_3 && insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
-				{
-					gs.chrBarOff -= 16;
-					mouseChange=true;
-					if(gs.chrBarOff<0) gs.chrBarOff += 256;
-				}
-				else if(mb==ev_3 && insideRect(mx,my,29*16,gs.BARPOS_Y+1,8,14))
-				{
-					gs.chrBarOff += 16;
-					mouseChange=true;
-					if(gs.chrBarOff>255) gs.chrBarOff -= 256;
-				}
-			} else if (gs.barselMode == 2) // checkings, col
-			{
-				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,128,16))
-				{
-					int colChoose = (mx-(12*16+8))>>3;
-					int colMode = my-gs.BARPOS_Y;
-					if(colMode>7) // FG
+					switch(cw.type)
 					{
-						gs.sdrawCol((gs.gdrawCol()&240)|(colChoose&15));
-					} else // BG
-					{
-						gs.sdrawCol((gs.gdrawCol()&15)|((colChoose&15)<<4));
+						case 1: // char selecting, char window only
+							int ct =(((mx-((cw.x+1)<<3))>>3)%(cw.w-2)) + ((((my>>3)-(cw.y+1))%(cw.h-2))*(cw.w-2));
+							if(ct<=255)
+							{
+								gs.sdrawChr(ct);
+								gs.chrBarOff = ct-8;
+								if(gs.chrBarOff<0) gs.chrBarOff+=256;
+							}					
+							break;
+						case 2:
+							gs.sdrawCol((((mx-((cw.x+1)<<3))>>3)&15) | (((my-((cw.y+1)<<3))<<1)&240));
+							break;
+						case 3:
+							if(insideRect(mx,my,(cw.x+2)<<3,(cw.y+2)<<3,(cw.w-4)<<3,(cw.h-4)<<3))
+							{
+								int ix = (mx-((cw.x+2)<<3))>>4;
+								int iy = (my-((cw.y+2)<<3))>>4;
+								int ip = ix+iy*4;
+								gs.drawType = cw.recBlockType[ip];
+								gs.sdrawChr(cw.recBlockChr[ip]);
+								gs.chrBarOff = gs.gdrawChr()-8;
+								if(gs.chrBarOff<0) gs.chrBarOff+=256;
+								gs.sdrawCol(cw.recBlockCol[ip]);
+								gs.toggleWindow(3);
+								canMousePress = false;
+								mouseChange = true;
+							}
+							break;
+						case 4:
+							gs.drawType=((my-((cw.y+1)<<3))>>3)-1;
+							break;
+						default:
+							break;
 					}
 				}
 			}
-			processMouse();
+		}
+		processMouse();
 	}
 	public void mouseReleased(MouseEvent ev) { mb = ev_no; canMousePress = true; advMouseMode = false;}
 
@@ -608,8 +609,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	{
 		if(mb != ev_no && canMousePress)
 		{
-			if(insideRect(mx,my,0,0,canvas.WIDTH,(canvas.GRID_H<<4)) && (!gs.cwOpen || !insideRect(mx,my,gs.cw.x<<3,gs.cw.y<<3,gs.cw.w<<3,gs.cw.h<<3)))
+			if(insideRect(mx,my,0,0,canvas.WIDTH,(canvas.GRID_H<<4)) && !gs.inWindow(mx,my))
 			{
+				CraftrWindow cw = gs.getWindow(3);
 				for(int i=0;i<256;i++)
 				{
 					if(gs.players[i] != null && gs.players[i].px == mx>>4 && gs.players[i].py == my>>4) return;
@@ -630,7 +632,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
  					gs.sdrawCol(capturedBlock.getColor());
 					gs.chrBarOff = gs.gdrawChr()-8;
 					if(gs.chrBarOff<0) gs.chrBarOff+=256;
-					gs.cw.addRecBlock((byte)gs.drawType,(byte)gs.gdrawChr(),(byte)gs.gdrawCol());
+					if(cw!=null) cw.addRecBlock((byte)gs.drawType,(byte)gs.gdrawChr(),(byte)gs.gdrawCol());
 				}
 				else if(oldmb != mb || (mx>>4 != oldmx>>4 || my>>4 != oldmy>>4))
 				{
@@ -661,7 +663,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						map.setBlock(ttx,tty,(byte)0,(byte)0,(byte)0,(byte)0);
 					} else {
  						map.setPushable(ttx,tty,(byte)0,(byte)0);
- 						gs.cw.addRecBlock(tmparr[0],tmparr[2],tmparr[3]);
+ 						if(cw!=null) cw.addRecBlock(tmparr[0],tmparr[2],tmparr[3]);
  						map.setBlock(ttx,tty,tmparr);
  						if(mb == ev_1 || mb == ev_3)
 						{
@@ -722,20 +724,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		isShift = ev.isShiftDown();
 		if(is == null && gs.barType == 0)
 		{
-			if (gs.cwOpen && gs.cw.type==1) {
+			if (gs.getWindow(1)!=null) {
 				char chr = ev.getKeyChar();
 				if(chr >= 32 && chr <= 127)
 				{
 					gs.sdrawChr(0xFF&(int)((byte)chr));
 					gs.chrBarOff = gs.gdrawChr()-8;
-					mouseChange=true;
-				}
-				else if(kc==KeyEvent.VK_ESCAPE)
-				{
-					if(gs.cwOpen)
-					{
-						gs.cwOpen = false;
-					}
 					mouseChange=true;
 				}
 			}
@@ -769,13 +763,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 							net.respawnRequest();
 						}
 						break;
-					case KeyEvent.VK_ESCAPE:
-						if(gs.cwOpen)
-						{
-							gs.cwOpen = false;
-						}
-						mouseChange=true;
-						break;
 					case KeyEvent.VK_F:
 						if(!multiplayer||net.isOp)
 						{
@@ -784,19 +771,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						}
 						break;
 					case KeyEvent.VK_B:
-						if(!gs.cwOpen)
-						{
-							gs.cwOpen=true;
-							gs.cw.type=3;
-						}
-						else if(gs.cw.type==3)
-						{
-							gs.cwOpen=false;
-						}
-						else
-						{
-							gs.cw.type=3;
-						}
+						gs.toggleWindow(3);
 						mouseChange=true;
 						break;
 					default:
@@ -1207,7 +1182,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			Thread.sleep(33);
 			}
 			catch (Exception e) { }
-			gs.cw.typeChosen=gs.drawType;
 			if(waitTime==0)
 			{
 				if(keyHeld[0]==true)
@@ -1246,8 +1220,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 			}
 			told = new Date();
-			if(gs.drawType==7) gs.cw.isMelodium=true;
-			else gs.cw.isMelodium=false;
 			if(told.compareTo(tnew) >= 0)
 			{
 				fps = (int)(frame-fold);
