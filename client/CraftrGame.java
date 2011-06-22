@@ -448,6 +448,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public void mouseEntered(MouseEvent ev) {}
 	public void mouseExited(MouseEvent ev) {}
 	public void mouseClicked(MouseEvent ev) {}
+
+	public boolean isDragging = false;
+	public int dragX = 0;
+	public int dragY = 0;
+	public int dragID = 0;
 	public void mousePressed(MouseEvent ev)
 	{
 		mb = ev.getButton();
@@ -580,6 +585,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						default:
 							break;
 					}
+				} else if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3))
+				{ // DRAGGING WINDOWS! :D
+					dragX = (mx-(cw.x<<3))>>3;
+					dragY = (my-(cw.y<<3))>>3;
+					dragID = gs.windows.indexOf(cw);
+					isDragging = true;
 				}
 			}
 		}
@@ -604,10 +615,23 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			int ty = (players[255].py+(my>>4))-12;
 			gs.hov_type=map.getBlock(tx,ty).getTypeWithVirtual();
 		}
+		if(isDragging)
+		{
+			synchronized(gs.windows)
+			{
+				CraftrWindow dcw = gs.windows.get(dragID);
+				int dragRX = (mx-((dcw.x+dragX)<<3))>>3;
+				int dragRY = (my-((dcw.y+dragY)<<3))>>3;
+				dcw.x+=dragRX;
+				dcw.y+=dragRY;
+				gs.windows.set(dragID,dcw);
+			}
+			if(mb != ev_1) isDragging = false;
+		}
 	}	
 	public void processMouse()
 	{
-		if(mb != ev_no && canMousePress)
+		if(mb != ev_no && canMousePress && !isDragging)
 		{
 			if(insideRect(mx,my,0,0,canvas.WIDTH,(canvas.GRID_H<<4)) && !gs.inWindow(mx,my))
 			{

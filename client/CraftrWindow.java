@@ -21,6 +21,7 @@ public class CraftrWindow
 	public static final String[] note_names={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
 	public static final String[] drum_names={"Kick","Snare","(C) HiHat","(O) HiHat","HiTom","MidTom","LoTom","Crash"};
 	public int uid;
+	private int oldtype;
 
 	public CraftrWindow(int _type, int _uid)
 	{
@@ -67,8 +68,12 @@ public class CraftrWindow
 				title = "ERROR!";
 				break;
 		}
-		x = 32-(w>>1);
-		y = 25-(h>>1);
+		if(oldtype!=type)
+		{
+			oldtype=type;
+			x = 32-(w>>1);
+			y = 25-(h>>1);
+		}
 	}
 	
 	static
