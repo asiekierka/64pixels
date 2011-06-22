@@ -272,42 +272,30 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					out.newLine();
 				}
 			}
-			if(players[255].pchr != (byte)2)
-			{
-				s = "player-char=" + players[255].pchr;
-				out.write(s,0,s.length());
-				out.newLine();
-			}
-			if(players[255].pcol != (byte)31)
-			{
-				s = "player-color=" + players[255].pcol;
-				out.write(s,0,s.length());
-				out.newLine();
-			}
+			s = "player-char=" + players[255].pchr;
+			out.write(s,0,s.length());
+			out.newLine();
+			s = "player-color=" + players[255].pcol;
+			out.write(s,0,s.length());
+			out.newLine();
 			if(map.cachesize != 64)
 			{
 				s = "map-cache-size=" + map.cachesize;
 				out.write(s,0,s.length());
 				out.newLine();
 			}
-			if(players[255].name != "You")
-			{
-				s = "player-name=" + players[255].name;
-				out.write(s,0,s.length());
-				out.newLine();
-			}
+			s = "player-name=" + players[255].name;
+			out.write(s,0,s.length());
+			out.newLine();
 			if(map.genMode != 0)
 			{
 				s = "mapgen-mode=" + map.genMode;
 				out.write(s,0,s.length());
 				out.newLine();
 			}
-			if(kim>0)
-			{
-				s = "wsad-mode=" + kim;
-				out.write(s,0,s.length());
-				out.newLine();
-			}
+			s = "wsad-mode=" + kim;
+			out.write(s,0,s.length());
+			out.newLine();
 			if(nagle>0)
 			{
 				s = "use-nagle=" + nagle;
@@ -537,67 +525,72 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 			}
 		}
-		synchronized(gs.windows)
-		{
-			for(CraftrWindow cw : gs.windows)
-			{
-				if(gs.obstructedWindow(cw,mx,my)) { }
-				else if(insideRect(mx,my,(cw.x+cw.w-1)<<3,cw.y<<3,8,8))
-				{
-					// close button, any window
-					gs.toggleWindow(cw.type);
-					canMousePress = false;
-				} else if(insideRect(mx,my,(cw.x+1)<<3,(cw.y+1)<<3,(cw.w-2)<<3,(cw.h-2)<<3))
-				{
-					switch(cw.type)
-					{
-						case 1: // char selecting, char window only
-							int ct =(((mx-((cw.x+1)<<3))>>3)%(cw.w-2)) + ((((my>>3)-(cw.y+1))%(cw.h-2))*(cw.w-2));
-							if(ct<=255)
-							{
-								gs.sdrawChr(ct);
-								gs.chrBarOff = ct-8;
-								if(gs.chrBarOff<0) gs.chrBarOff+=256;
-							}					
-							break;
-						case 2:
-							gs.sdrawCol((((mx-((cw.x+1)<<3))>>3)&15) | (((my-((cw.y+1)<<3))<<1)&240));
-							break;
-						case 3:
-							if(insideRect(mx,my,(cw.x+2)<<3,(cw.y+2)<<3,(cw.w-4)<<3,(cw.h-4)<<3))
-							{
-								int ix = (mx-((cw.x+2)<<3))>>4;
-								int iy = (my-((cw.y+2)<<3))>>4;
-								int ip = ix+iy*4;
-								gs.drawType = cw.recBlockType[ip];
-								gs.sdrawChr(cw.recBlockChr[ip]);
-								gs.chrBarOff = gs.gdrawChr()-8;
-								if(gs.chrBarOff<0) gs.chrBarOff+=256;
-								gs.sdrawCol(cw.recBlockCol[ip]);
-								gs.toggleWindow(3);
-								canMousePress = false;
-								mouseChange = true;
-							}
-							break;
-						case 4:
-							gs.drawType=((my-((cw.y+1)<<3))>>3)-1;
-							break;
-						default:
-							break;
-					}
-				} else if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3))
-				{ // DRAGGING WINDOWS! :D
-					dragX = (mx-(cw.x<<3))>>3;
-					dragY = (my-(cw.y<<3))>>3;
-					dragID = gs.windows.indexOf(cw);
-					isDragging = true;
-				}
-			}
-		}
+		processWindows();
 		processMouse();
 	}
 	public void mouseReleased(MouseEvent ev) { mb = ev_no; canMousePress = true; advMouseMode = false;}
 
+	public void processWindows()
+	{
+		synchronized(gs.windows)
+		{
+			if(gs.windows.size()>0)
+				for(CraftrWindow cw : gs.windows)
+				{
+					if(gs.obstructedWindow(cw,mx,my)) { }
+					else if(insideRect(mx,my,(cw.x+cw.w-1)<<3,cw.y<<3,8,8))
+					{
+						// close button, any window
+						gs.toggleWindow(cw.type);
+						canMousePress = false;
+					} else if(insideRect(mx,my,(cw.x+1)<<3,(cw.y+1)<<3,(cw.w-2)<<3,(cw.h-2)<<3))
+					{
+						switch(cw.type)
+						{
+							case 1: // char selecting, char window only
+								int ct =(((mx-((cw.x+1)<<3))>>3)%(cw.w-2)) + ((((my>>3)-(cw.y+1))%(cw.h-2))*(cw.w-2));
+								if(ct<=255)
+								{
+									gs.sdrawChr(ct);
+									gs.chrBarOff = ct-8;
+									if(gs.chrBarOff<0) gs.chrBarOff+=256;
+								}					
+								break;
+							case 2:
+								gs.sdrawCol((((mx-((cw.x+1)<<3))>>3)&15) | (((my-((cw.y+1)<<3))<<1)&240));
+								break;
+							case 3:
+								if(insideRect(mx,my,(cw.x+2)<<3,(cw.y+2)<<3,(cw.w-4)<<3,(cw.h-4)<<3))
+								{
+									int ix = (mx-((cw.x+2)<<3))>>4;
+									int iy = (my-((cw.y+2)<<3))>>4;
+									int ip = ix+iy*4;
+									gs.drawType = cw.recBlockType[ip];
+									gs.sdrawChr(cw.recBlockChr[ip]);
+									gs.chrBarOff = gs.gdrawChr()-8;
+									if(gs.chrBarOff<0) gs.chrBarOff+=256;
+									gs.sdrawCol(cw.recBlockCol[ip]);
+									gs.toggleWindow(3);
+									canMousePress = false;
+									mouseChange = true;
+								}
+								break;
+							case 4:
+								gs.drawType=((my-((cw.y+1)<<3))>>3)-1;
+								break;
+							default:
+								break;
+						}
+					} else if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3))
+					{ // DRAGGING WINDOWS! :D
+						dragX = (mx-(cw.x<<3))>>3;
+						dragY = (my-(cw.y<<3))>>3;
+						dragID = gs.windows.indexOf(cw);
+						isDragging = true;
+					}
+				}
+		}
+	}
 	public void mouseMoved(MouseEvent ev) {
 		updateMouse(ev.getX(),ev.getY());
 		advMouseMode = ev.isControlDown();
@@ -748,6 +741,14 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		isShift = ev.isShiftDown();
 		if(is == null && gs.barType == 0)
 		{
+			if(kc==key_left)
+				keyHeld[1] = true;
+			else if(kc==key_right)
+				keyHeld[2] = true;
+			else if(kc==key_up)
+				keyHeld[0] = true;
+			else if(kc==key_down)
+				keyHeld[3] = true;
 			if (gs.getWindow(1)!=null) {
 				char chr = ev.getKeyChar();
 				if(chr >= 32 && chr <= 127)
@@ -757,14 +758,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					mouseChange=true;
 				}
 			}
-			else if(kc==key_left)
-				keyHeld[1] = true;
-			else if(kc==key_right)
-				keyHeld[2] = true;
-			else if(kc==key_up)
-				keyHeld[0] = true;
-			else if(kc==key_down)
-				keyHeld[3] = true;
 			else
 			{
 				switch(kc)
