@@ -633,10 +633,6 @@ public class CraftrClient implements Runnable
 									{
 										kick("Invalid block type!");
 									}
-									//else if(abs(ax-x)>24 || abs(ay-y)>24)
-									//{
-									//	kick("Invalid block placement position!");
-									//}
 									byte[] t33 = new byte[4];
 									t33[0] = at;
 									t33[3] = aco;

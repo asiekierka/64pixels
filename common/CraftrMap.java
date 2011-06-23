@@ -525,9 +525,6 @@ public class CraftrMap
 		if(ty==0) ty=1;
 		int txs = x+dx;
 		int tys = y+dy;
-		//if((posx-dx)<txs) txs=posx-dx;
-		//if((posy-dy)<tys) tys=posy-dy;
-		System.out.println("pushing " + txs + "," + tys + ", " + tx + ", " + ty + ", " + dx + ", " + dy);
 		pushMultiple(txs,tys,tx,ty,dx,dy);
 		setPushable(x+dx,y+dy,chr,col);
 		if(isServer)
@@ -553,7 +550,6 @@ public class CraftrMap
 
 	public int updateLook(CraftrBlock block)
 	{
-		//if(block.isPushable()) return block.getBlockChar();
 		if(block.getType()==4) return 206; // default char for Crossuh blocks
 		// NOTE: server used getChar() here.
 		// That bug has gone unnoticed because nobody bothered to put a pushium on a P-NAND. --GM
@@ -638,7 +634,6 @@ public class CraftrMap
 		{
 			System.out.println("[MAP] setBlockNet exception!");
 			e.printStackTrace();
-			//if(!multiplayer) System.exit(1);
 		}
 	}
 	public void setPushableNet(int x, int y, byte ch1, byte co1)

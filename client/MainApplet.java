@@ -13,9 +13,6 @@ public class MainApplet extends JApplet {
 	public void init()
 	{
 		game = new CraftrGame(this);
-		//addMouseListener(game);
-		//addMouseMotionListener(game);
-		//addKeyListener(game);
 		game.init();
 		requestFocusInWindow();
 	}
