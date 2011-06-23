@@ -49,7 +49,7 @@ public class CraftrServer extends CraftrServerShim
 
 	public void kill(int pid)
 	{
-		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0)
+		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0 && (clients[pid].x!=spawnX || clients[pid].y!=spawnY))
 		{
 			clients[pid].kill();
 		}

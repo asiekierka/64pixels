@@ -234,7 +234,7 @@ public class CraftrCanvas extends JComponent
 		{
 			if((x+(i<<4)-k)>=WIDTH)
 			{
-				k-=WIDTH;
+				k+=WIDTH;
 				j+=16;
 			}
 			DrawChar(x+(i<<4)-k,y+j,(byte)ca[i],(byte)col,g);
@@ -250,7 +250,7 @@ public class CraftrCanvas extends JComponent
 		{
 			if((x+(i<<3)-k)>=WIDTH)
 			{
-				k-=WIDTH;
+				k+=WIDTH;
 				j+=8;
 			}
 			DrawChar1x(x+(i<<3)-k,y+j,(byte)ca[i],(byte)col,g);

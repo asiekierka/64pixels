@@ -161,6 +161,8 @@ public class CraftrWindow
 				}
 				break;
 			case 2: // color screen
+				g.setColor(new Color(0x000000));
+				g.fillRect(fx,fy,128,8); // DrawChar workaround
 				for(int i=0;i<256;i++)
 				{
 					cc.DrawChar1x(fx+((i&15)<<3),fy+((i>>4)<<3),(byte)254,(byte)i,g);
