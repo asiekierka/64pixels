@@ -13,6 +13,7 @@ public class CraftrChunk {
 	public byte[] chr2;
 	public byte[] col2;
 	public byte[] mapinfo;
+
 	public int w;
 	public int h;
 	public int xpos;
@@ -138,7 +139,19 @@ public class CraftrChunk {
 	{
 		return x+(y<<6);
 	}
-	
+	public byte[] getBlock(int x, int y)
+	{
+		byte[] data = new byte[7];
+		int p = x+(y<<6);
+		data[0] = type[p];
+		data[1] = param[p];
+		data[2] = getBlockChar(x,y);
+		data[3] = getBlockColor(x,y);
+		data[4] = chrp[p];
+		data[5] = colp[p];
+		data[6] = getBullet(x,y);
+		return data;
+	}
 	public byte getBlockType(int x, int y)
 	{
 		return type[x+(y<<6)];

@@ -20,10 +20,12 @@ public class CraftrInScreen extends CraftrScreen
 	public boolean isRunning = true;
 	public int maxLen=48;
 	public int minLen=0;
+	public ArrayList<CraftrWindow> windows;
 
 	public CraftrInScreen(CraftrCanvas cc, int inpMode, String nam)
 	{
 		c = cc;
+		windows = new ArrayList<CraftrWindow>();
 		name = nam;
 		inputMode = inpMode;
 		isRunning=true;
@@ -41,7 +43,67 @@ public class CraftrInScreen extends CraftrScreen
 	}
 	
 	public int step = 0;
-	
+
+	public boolean insideRect(int mx, int my, int x, int y, int w, int h)
+	{
+		if(mx >= x && my >= y && mx < x+w && my < y+h)
+		{
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
+
+	public boolean obstructedWindow(CraftrWindow w, int mx, int my)
+	{
+		synchronized(windows)
+		{
+			for(int wi = windows.size()-1;wi>windows.indexOf(w);wi--)
+			{
+				CraftrWindow cw = windows.get(wi);
+				if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3)) return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean inWindow(int x, int y)
+	{
+		synchronized(windows)
+		{
+			for(CraftrWindow cw : windows)
+				if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3)) return true;
+		}
+		return false;
+	}
+
+	public CraftrWindow getWindow(int type)
+	{
+		synchronized(windows)
+		{
+			for(CraftrWindow cw: windows)
+			{
+				if(cw.type==type) return cw;
+			}
+		}
+		return null;
+	}
+
+	public void toggleWindow(int type)
+	{
+		synchronized(windows)
+		{
+			int app = -1;
+			for(CraftrWindow cw : windows)
+			{
+				if(cw.type == type) app = windows.indexOf(cw);
+			}
+			if(app>=0) windows.remove(app);
+			else windows.add(new CraftrWindow(type,4)); // UID chosen by fair dice roll. Guaranteed to be unique.
+		}
+	}
+
 	public void paint(Graphics g, int mmx, int mmy)
 	{
 		mx = mmx;
@@ -70,6 +132,11 @@ public class CraftrInScreen extends CraftrScreen
 					c.DrawString1x(xPos,offset+30+(i*10),inputStrings[i],j,g);
 				}
 				break;
+		}
+		synchronized(windows)
+		{
+			for(CraftrWindow cw : windows)
+				cw.render(c,g);
 		}
 	}
 	

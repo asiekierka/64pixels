@@ -92,13 +92,13 @@ public class CraftrBlock
 
 	public int getChar()
 	{
-		if(isPushable()) return 0xFF&(int)block[4];
+		if(block[5]!=0) return 0xFF&(int)block[4];
 		return 0xFF&(int)block[2];
 	}
 
 	public int getColor()
 	{
-		if(isPushable()) return 0xFF&(int)block[5];
+		if(block[5]!=0) return 0xFF&(int)block[5];
 		return 0xFF&(int)block[3];
 	}
 
@@ -144,13 +144,15 @@ public class CraftrBlock
 
 	public int getDrawnChar()
 	{
-		if(getType()==8) return 0xFF&(int)block[2];
-		else return getChar();
+		if(block[0]==8) return 0xFF&(int)block[2];
+		else if(block[5]!=0) return 0xFF&(int)block[4];
+		else return 0xFF&(int)block[2];
 	}
 	public int getDrawnColor()
 	{
-		if(getType()==8) return 0xFF&(int)block[3];
-		else return getColor();
+		if(block[0]==8) return 0xFF&(int)block[3];
+		else if(block[5]!=0) return 0xFF&(int)block[5];
+		else return 0xFF&(int)block[3];
 	}
 
 	public static int getBDSize()

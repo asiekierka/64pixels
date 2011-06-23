@@ -53,6 +53,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public boolean isKick = false;
 	public CraftrMapThread cmt;
 	public int cmtsp=30;
+	public int overhead=0;
 	public CraftrConfig config;
 	public CraftrNet net;
 	public CraftrGameScreen gs;
@@ -438,6 +439,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public void mouseClicked(MouseEvent ev) {}
 
 	public boolean isDragging = false;
+	public boolean isConfig = true;
 	public int dragX = 0;
 	public int dragY = 0;
 	public int dragID = 0;
@@ -450,6 +452,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		ev_2 = ev.BUTTON2;
 		ev_3 = ev.BUTTON3;
 		advMouseMode = ev.isControlDown();
+		if(isConfig)
+		{
+			processWindows();
+			return;
+		}
 		if(isKick) return;
 		if (insideRect(mx,my,7*16+8,gs.BARPOS_Y,8,8)) // type, up
 		{
@@ -530,66 +537,80 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public void mouseReleased(MouseEvent ev) { mb = ev_no; canMousePress = true; advMouseMode = false;}
 
+	int confChr = 0;
+	int confCol = 0; 
 	public void processWindows()
 	{
-		synchronized(gs.windows)
+		ArrayList<CraftrWindow> w;
+		if(isConfig) w=is.windows;
+		else w=gs.windows;
+		try
 		{
-			if(gs.windows.size()>0)
-				for(CraftrWindow cw : gs.windows)
-				{
-					if(gs.obstructedWindow(cw,mx,my)) { }
-					else if(insideRect(mx,my,(cw.x+cw.w-1)<<3,cw.y<<3,8,8))
+			synchronized(w)
+			{
+				if(w.size()>0)
+					for(CraftrWindow cw : w)
 					{
-						// close button, any window
-						gs.toggleWindow(cw.type);
-						canMousePress = false;
-					} else if(insideRect(mx,my,(cw.x+1)<<3,(cw.y+1)<<3,(cw.w-2)<<3,(cw.h-2)<<3))
-					{
-						switch(cw.type)
+						if(!isConfig && gs.obstructedWindow(cw,mx,my)) { }
+						else if(isConfig && is.obstructedWindow(cw,mx,my)) { }
+						else if(insideRect(mx,my,(cw.x+cw.w-1)<<3,cw.y<<3,8,8))
 						{
-							case 1: // char selecting, char window only
-								int ct =(((mx-((cw.x+1)<<3))>>3)%(cw.w-2)) + ((((my>>3)-(cw.y+1))%(cw.h-2))*(cw.w-2));
-								if(ct<=255)
-								{
-									gs.sdrawChr(ct);
-									gs.chrBarOff = ct-8;
-									if(gs.chrBarOff<0) gs.chrBarOff+=256;
-								}					
-								break;
-							case 2:
-								gs.sdrawCol((((mx-((cw.x+1)<<3))>>3)&15) | (((my-((cw.y+1)<<3))<<1)&240));
-								break;
-							case 3:
-								if(insideRect(mx,my,(cw.x+2)<<3,(cw.y+2)<<3,(cw.w-4)<<3,(cw.h-4)<<3))
-								{
-									int ix = (mx-((cw.x+2)<<3))>>4;
-									int iy = (my-((cw.y+2)<<3))>>4;
-									int ip = ix+iy*4;
-									gs.drawType = cw.recBlockType[ip];
-									gs.sdrawChr(cw.recBlockChr[ip]);
-									gs.chrBarOff = gs.gdrawChr()-8;
-									if(gs.chrBarOff<0) gs.chrBarOff+=256;
-									gs.sdrawCol(cw.recBlockCol[ip]);
-									gs.toggleWindow(3);
-									canMousePress = false;
-									mouseChange = true;
-								}
-								break;
-							case 4:
-								gs.drawType=((my-((cw.y+1)<<3))>>3)-1;
-								break;
-							default:
-								break;
+							// close button, any window
+							if(isConfig) is.toggleWindow(cw.type);
+							else gs.toggleWindow(cw.type);
+							canMousePress = false;
+						} else if(insideRect(mx,my,(cw.x+1)<<3,(cw.y+1)<<3,(cw.w-2)<<3,(cw.h-2)<<3))
+						{
+							switch(cw.type)
+							{
+								case 1: // char selecting, char window only
+									confChr = (((mx-((cw.x+1)<<3))>>3)%(cw.w-2)) + ((((my>>3)-(cw.y+1))%(cw.h-2))*(cw.w-2));
+									if(confChr<=255)
+									{
+										gs.sdrawChr(confChr);
+										gs.chrBarOff = confChr-8;
+										if(gs.chrBarOff<0) gs.chrBarOff+=256;
+										if(isConfig) is.getWindow(1).charChosen = confChr;
+									}				
+									break;
+								case 2:
+									confCol = (((mx-((cw.x+1)<<3))>>3)&15) | (((my-((cw.y+1)<<3))<<1)&240);
+									gs.sdrawCol(confCol);
+									if(isConfig) is.getWindow(2).colorChosen = confCol;
+									break;
+								case 3:
+									if(insideRect(mx,my,(cw.x+2)<<3,(cw.y+2)<<3,(cw.w-4)<<3,(cw.h-4)<<3))
+									{
+										int ix = (mx-((cw.x+2)<<3))>>4;
+										int iy = (my-((cw.y+2)<<3))>>4;
+										int ip = ix+iy*4;
+										gs.drawType = cw.recBlockType[ip];
+										gs.sdrawChr(cw.recBlockChr[ip]);
+										gs.chrBarOff = gs.gdrawChr()-8;
+										if(gs.chrBarOff<0) gs.chrBarOff+=256;
+										gs.sdrawCol(cw.recBlockCol[ip]);
+										gs.toggleWindow(3);
+										canMousePress = false;
+										mouseChange = true;
+									}
+									break;
+								case 4:
+									gs.drawType=((my-((cw.y+1)<<3))>>3)-1;
+									break;
+								default:
+									break;
+							}
+						} else if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3))
+						{ // DRAGGING WINDOWS! :D
+							dragX = (mx-(cw.x<<3))>>3;
+							dragY = (my-(cw.y<<3))>>3;
+							dragID = w.indexOf(cw);
+							isDragging = true;
 						}
-					} else if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3))
-					{ // DRAGGING WINDOWS! :D
-						dragX = (mx-(cw.x<<3))>>3;
-						dragY = (my-(cw.y<<3))>>3;
-						dragID = gs.windows.indexOf(cw);
-						isDragging = true;
 					}
-				}
+			}
 		}
+		catch(Exception e) { }
 	}
 	public void mouseMoved(MouseEvent ev) {
 		updateMouse(ev.getX(),ev.getY());
@@ -601,7 +622,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	{
 		mx=(int)(umx/canvas.scaleX);
 		my=(int)(umy/canvas.scaleY);
-		if(mx >= 0 && mx < gs.WIDTH && my >= 0 && my < (gs.GRID_H<<4))
+		if(!isConfig && (mx >= 0 && mx < gs.WIDTH && my >= 0 && my < (gs.GRID_H<<4)))
 		{
 			int tx = (players[255].px+(mx>>4))-15;
 
@@ -610,14 +631,16 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		}
 		if(isDragging)
 		{
-			synchronized(gs.windows)
+			ArrayList<CraftrWindow> w = gs.windows;
+			if(isConfig) w = is.windows;
+			synchronized(w)
 			{
-				CraftrWindow dcw = gs.windows.get(dragID);
+				CraftrWindow dcw = w.get(dragID);
 				int dragRX = (mx-((dcw.x+dragX)<<3))>>3;
 				int dragRY = (my-((dcw.y+dragY)<<3))>>3;
 				dcw.x+=dragRX;
 				dcw.y+=dragRY;
-				gs.windows.set(dragID,dcw);
+				w.set(dragID,dcw);
 			}
 			if(mb != ev_1) isDragging = false;
 		}
@@ -890,8 +913,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 		}
 		else if(map.pushAttempt(px,py,dpx,dpy))
-
-
 		{
 			if(multiplayer)
 			{
@@ -950,6 +971,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		int py = players[255].py;
 		int sx = px-15;
 		int sy = py-12;
+		CraftrBlock t;
 		try
 		{
 			for(int iy=0;iy<gs.FULLGRID_H;iy++)
@@ -957,7 +979,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 
 				for(int ix=0;ix<gs.FULLGRID_W;ix++)
 				{
-					gs.blocks[(iy*gs.FULLGRID_W)+ix] = map.getBlock(ix+sx,iy+sy);
+ 					t = map.getBlock(ix+sx,iy+sy);
+					gs.blocks[(iy*gs.FULLGRID_W)+ix] = t;
+					gs.blockChr[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnChar();
+					gs.blockCol[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnColor();
 				}
 			}
 			for (int i=0;i<256;i++)
@@ -1014,27 +1039,31 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					oldmy = my;
 					oldmb = mb;
 				}
-				Thread.sleep(100);
+				Thread.sleep(33);
 			}
 		}
 		catch(Exception e)
 		{
 			System.out.println("Fatal loopInScreen error!");
-			System.exit(1);
+			if(isApplet) System.exit(1);
+			else
+			{
+				while(true) { Thread.sleep(100); }
+			}
 		}
 	}
 
-	private String configure_gets1() { return "Key mode: " + ((kim>0)?"WSAD":"Arrows"); }
-	private String configure_gets2() { return "Hideous prompts: " + ((gs.hideousPrompts)?"On":"Off"); }
 	public String configure()
 	{
 		boolean inconf = true;
 		is = new CraftrInScreen(canvas,2,"Main menu");
-		String[] modes = new String[4];
+		String[] modes = new String[6];
 		modes[0] = "Singleplayer";
 		modes[1] = "Multiplayer";
-		modes[2] = configure_gets1();
-		modes[3] = configure_gets2();
+		modes[2] = "Key mode: " + ((kim>0)?"WSAD":"Arrows");
+		modes[3] = "Hideous prompts: " + ((gs.hideousPrompts)?"On":"Off");
+		modes[4] = "Change player char ->";
+		modes[5] = "Change player color ->";
 		String ostr = "";
 		while(inconf)
 		{
@@ -1116,7 +1145,24 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					gs.hideousPrompts=!gs.hideousPrompts;
 					modes[3] = configure_gets2();
 					break;
-	
+				case 4:
+					is.toggleWindow(1);
+					while(is.getWindow(1)!=null)
+					{
+						canvas.draw(mx,my);
+						try{ Thread.sleep(33); } catch(Exception e){}
+					}
+					players[255].pchr = (byte)confChr;
+					break;
+				case 5:
+					is.toggleWindow(2);
+					while(is.getWindow(2)!=null)
+					{
+						canvas.draw(mx,my);
+						try{ Thread.sleep(33); } catch(Exception e){}
+					}
+					players[255].pcol = (byte)confCol;
+					break;
 			}
 		}
 		canvas.cs = (CraftrScreen)gs;
@@ -1153,7 +1199,20 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			applet.addKeyListener(this);
 		}
 		net = new CraftrNet();
+		if(!isApplet)
+		{
+			window.getRootPane().addMouseListener(this);
+			window.getRootPane().addMouseMotionListener(this);
+			addMouseListener(this);
+			addMouseMotionListener(this);
+		}
+		else
+		{
+			applet.getRootPane().addMouseListener(this);
+			applet.getRootPane().addMouseMotionListener(this);
+		}
 		String thost = configure();
+		isConfig=false;
 		if(!multiplayer)
 		{
 			gs.addChatMsg("you're running 64pixels " + getVersion());
@@ -1178,19 +1237,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			t1.start();
 			net.chunkRequest(0,0);
 		}
-		if(!isApplet)
-		{
-			window.getRootPane().addMouseListener(this);
-			window.getRootPane().addMouseMotionListener(this);
-			addMouseListener(this);
-			addMouseMotionListener(this);
-		}
-		else
-		{
-			applet.getRootPane().addMouseListener(this);
-			applet.getRootPane().addMouseMotionListener(this);
-		}
 		long wpso = 0;
+		Date overdate;
 		while(gameOn)
 		{
 			if(isKick) realKickOut();
@@ -1219,6 +1267,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 			}
 			else waitTime--;
+			while(overhead>33)
+			{
+				if(waitTime>0) waitTime--;
+				if(chrArrowWaiter>0) chrArrowWaiter--;
+				overhead-=33;
+			}
 			if(chrArrowWaiter>0) chrArrowWaiter--;
 			else if(mb == ev_1) {
 				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
@@ -1235,15 +1289,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					mouseChange=true;
 					if(gs.chrBarOff>255) gs.chrBarOff=0;
 				}
-			}
-			told = new Date();
-			if(told.compareTo(tnew) >= 0)
-			{
-				fps = (int)(frame-fold);
-				tnew = new Date(told.getTime() + 1000L);
-				fold = frame;
-				System.out.println(fps + " fps, physics runs at " + (cmt.wps-wpso) + "checks a second");
-				wpso = cmt.wps;
 			}
 			if(multiplayer)
 			{
@@ -1277,6 +1322,17 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				canvas.draw(mx,my);
 			}
 			frame++;
+			overdate = new Date();
+			overhead+=overdate.getTime()-told.getTime()-33;
+			told = overdate;
+			if(told.compareTo(tnew)>=0)
+			{
+				fps = (int)(frame-fold);
+				tnew = new Date(told.getTime() + 1000L);
+				fold = frame;
+				System.out.println(fps + " fps, physics runs at " + (cmt.wps-wpso) + "checks a second");
+				wpso = cmt.wps;
+			}
 		}
 	}
 	public void stop()

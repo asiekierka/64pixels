@@ -307,33 +307,16 @@ public class CraftrMap
 	
 	public CraftrBlock getBlock(int x, int y)
 	{
-		return new CraftrBlock(x,y,getBlockBytes(x,y));
-	}
-
-	private byte[] getBlockBytes(int x, int y)
-	{
 		try
 		{ 
-			byte[] data = new byte[7];
-			int px = x&63;
-			int py = y&63;
-			CraftrChunk cnk = grabChunk((x>>6),(y>>6));
-			data[0] = cnk.getBlockType(px,py);
-			data[1] = cnk.getBlockParam(px,py);
-			data[2] = cnk.getBlockChar(px,py);
-			data[3] = cnk.getBlockColor(px,py);
-			data[4] = cnk.getPushableChar(px,py);
-			data[5] = cnk.getPushableColor(px,py);
-			data[6] = cnk.getBullet(px,py);
-			return data;
+			return new CraftrBlock(x,y,grabChunk((x>>6),(y>>6)).getBlock(x&63,y&63));
 		}
 		catch(NoChunkMemException e)
 		{
 			System.out.println("getBlock: exception: no chunk memory found. Odd...");
-			//System.exit(1); // someone might still use this
 			return null;
  		}
- 	}
+	}
  	
  	// returns true if it needs to pull the player along with it
  	public boolean pushAttempt(int lolx, int loly, int lolvx, int lolvy)
