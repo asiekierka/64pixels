@@ -1045,11 +1045,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		catch(Exception e)
 		{
 			System.out.println("Fatal loopInScreen error!");
-			if(isApplet) System.exit(1);
-			else
-			{
-				while(true) { Thread.sleep(100); }
-			}
+			System.exit(1);
 		}
 	}
 
@@ -1060,8 +1056,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		String[] modes = new String[6];
 		modes[0] = "Singleplayer";
 		modes[1] = "Multiplayer";
-		modes[2] = "Key mode: " + ((kim>0)?"WSAD":"Arrows");
-		modes[3] = "Hideous prompts: " + ((gs.hideousPrompts)?"On":"Off");
 		modes[4] = "Change player char ->";
 		modes[5] = "Change player color ->";
 		String ostr = "";
@@ -1069,6 +1063,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		{
 			is = new CraftrInScreen(canvas,2,"Main menu");
 			is.isRunning=true;
+			modes[2] = "Key mode: " + ((kim>0)?"WSAD":"Arrows");
+			modes[3] = "Hideous prompts: " + ((gs.hideousPrompts)?"On":"Off");
 			is.addStrings(modes);
 			canvas.cs = (CraftrScreen)is;
 			loopInScreen();
@@ -1139,11 +1135,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					break;
 				case 2:
 					changeKeyMode(1-(kim%2));
-					modes[2] = configure_gets1();
 					break;
 				case 3:
 					gs.hideousPrompts=!gs.hideousPrompts;
-					modes[3] = configure_gets2();
 					break;
 				case 4:
 					is.toggleWindow(1);

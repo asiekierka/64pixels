@@ -7,9 +7,9 @@ import java.util.*;
 
 public class CraftrGameScreen extends CraftrScreen
 {
-	public static final int CHATBOTTOM_X = 11;
-	public static final int CHATBOTTOM_Y = (GRID_H*16)-17;
-	public static final int BARPOS_Y = (GRID_H*16);
+	public int CHATBOTTOM_X = 11;
+	public int CHATBOTTOM_Y = (GRID_H*16)-17;
+	public int BARPOS_Y = (GRID_H*16);
 	public int drawType;
 	public int[] drawChrA = new int[256];
 	public int[] drawColA = new int[256];

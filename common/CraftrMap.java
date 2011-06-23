@@ -521,12 +521,13 @@ public class CraftrMap
 		int ty = posy-(y+dy);
 		if(tx<0) tx=-tx;
 		if(ty<0) ty=-ty;
-		if(dx<=0) tx++;
-		if(dy<=0) ty++;
+		if(tx==0) tx=1;
+		if(ty==0) ty=1;
 		int txs = x+dx;
 		int tys = y+dy;
-		if((posx-dx)<txs) txs=posx-dx;
-		if((posy-dy)<tys) tys=posy-dy;
+		//if((posx-dx)<txs) txs=posx-dx;
+		//if((posy-dy)<tys) tys=posy-dy;
+		System.out.println("pushing " + txs + "," + tys + ", " + tx + ", " + ty + ", " + dx + ", " + dy);
 		pushMultiple(txs,tys,tx,ty,dx,dy);
 		setPushable(x+dx,y+dy,chr,col);
 		if(isServer)
