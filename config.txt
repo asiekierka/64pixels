@@ -2,5 +2,5 @@ tp-for-all=0
 port=25566
 private-mode=0
 name=[0.1] asie's experimental server
-spawn-x=0
-spawn-y=0
+spawn-x=14
+spawn-y=-16

@@ -69,6 +69,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public int key_down = KeyEvent.VK_DOWN;
 	public int kim = 0;
 	public String isKickS;
+	public boolean skipConfig = false;
+
 	public void playSound(int tx, int ty, int val)
 	{
 		if(val>=256)
@@ -161,7 +163,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		if(cmtsp>0) cmt.speed=(1000/cmtsp);
 		else cmt.speed=0;
 		keyHeld = new boolean[4];
-	}
+		String t3 = ja.getParameter("nick");
+		String t4 = ja.getParameter("skip");
+		if(t4!=null && !t4.equals("")) skipConfig = true;
+		if(t3!=null && !t3.equals("")) players[255].name = t3;
+	} 
 	
 	public void kickOut(String why)
 	{
@@ -1205,7 +1211,23 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			applet.getRootPane().addMouseListener(this);
 			applet.getRootPane().addMouseMotionListener(this);
 		}
-		String thost = configure();
+		String thost = "127.0.0.1";
+		if(skipConfig && isApplet)
+		{
+			String t1 = applet.getParameter("ip");
+			String t2 = applet.getParameter("port");
+			if(t1!=null && !t1.equals(""))
+			{
+				multiplayer=true;
+				thost=t1;
+				if(t2!=null && !t1.equals("")) thost+= ":" + t2;
+				else thost+=":25566";
+				net.nick = players[255].name;
+			}
+			else multiplayer=false;
+		}
+		else if (skipConfig && !isApplet) multiplayer=false;
+		else thost = configure();
 		isConfig=false;
 		if(!multiplayer)
 		{

@@ -39,7 +39,7 @@ public class CraftrNetSender implements Runnable
 						break;
 				}
 				out.flush();
-				if(alg != -1) Thread.sleep(5);
+				if(alg!=-1) Thread.sleep(2);
 			}
 		}
 		catch(Exception e)

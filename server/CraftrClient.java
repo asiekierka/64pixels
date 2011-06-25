@@ -330,6 +330,7 @@ public class CraftrClient implements Runnable
 	{
 		System.out.println("User " + id + " has disconnected!");
 		dc = 1;
+		ns.isRunning=false;
 		try
 		{
 			serv.map.setPlayer(x,y,0);
@@ -789,6 +790,7 @@ public class CraftrClient implements Runnable
 			System.out.println("Fatal CraftrServer client thread loop error!");
 			e.printStackTrace();
 			dc = 1;
+			ns.isRunning=false;
 		}
 	}
 	// for people who didn't get the earlier comment, it's an inside joke of sorts
