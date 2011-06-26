@@ -402,6 +402,16 @@ public class CraftrServer extends CraftrServerShim
 			}
 			return wt;
 		}
+		else if(cmd[0].equals("worlds"))
+		{
+			String wt = "Worlds: ";
+			for(int i=0;i<world_names.length;i++)
+			{
+					if(i>0) wt+= " ";
+				wt += world_names[i];
+			}
+			return wt;
+		}
 		else if((cmd[0].equals("id") || cmd[0].equals("identify")) && id!=255)
 		{
 			if(!opPassOn) return "Identify disabled!";
@@ -416,16 +426,16 @@ public class CraftrServer extends CraftrServerShim
 		{
 			if(id == 255)
 			{
-				return "Commands: who warps kick nick deop save ban unban delwarp pvp lock unlock";
+				return "Commands: who warps kick nick deop save ban unban delwarp pvp lock unlock worlds addworld delworld";
 			}
 			else if(clients[id].op)
 			{
 
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld";
 			}
 			else
 			{
-				return "Commands: who " + ((tpforall!=0)?"tp ":"") + "warp warps me id";
+				return "Commands: who " + ((tpforall!=0)?"tp ":"") + "warp warps me id worlds";
 			}
 		}
 		else if(cmd[0].equals("me") && id!=255)
@@ -621,12 +631,12 @@ public class CraftrServer extends CraftrServerShim
 				saveNamesFile(world_names,"worlds.txt");
 				for(int i=0;i<worlds.size();i++)
 				{
-					if(worlds.get(i).name.toLowerCase()==cmdz[1].toLowerCase())
+					if(worlds.get(i).name.equalsIgnoreCase(cmd[1]))
 					{
 						worlds.remove(i);
-						return "World '" + cmdz[1] + "' deleted.";
 					}
 				}
+				return "World '" + cmdz[1] + "' deleted.";
 			}
 			else if(cmd[0].equals("deop"))
 			{
