@@ -113,8 +113,8 @@ public class CraftrServer extends CraftrServerShim
 	
 	public void addWorld(String world)
 	{
-		ArrayList<String> t = new ArrayList<String>(op_ips.length+1);
-		for(String s:op_ips)
+		ArrayList<String> t = new ArrayList<String>(world_names.length+1);
+		for(String s:world_names)
 		{
 			if(s.equals(world.toLowerCase())) return;
 			t.add(s);
@@ -785,6 +785,7 @@ public class CraftrServer extends CraftrServerShim
 			System.out.println(op_ips.length + " op IPs!");
 			ban_ips=readNamesFile("bans.txt");
 			System.out.println(ban_ips.length + " banned IPs!");
+			worlds=new ArrayList<CraftrWorld>();
 			world_names=readNamesFile("worlds.txt");
 			System.out.println(world_names.length + " worlds!");
 			map = new CraftrMap(true,map_cache_size);
