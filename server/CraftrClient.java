@@ -497,7 +497,7 @@ public class CraftrClient implements Runnable
 										spawnPlayer();
 										for(int pli=0;pli<255;pli++)
 										{
-											if(pli != id && serv.clients[pli] != null && serv.clients[pli].dc == 0)
+											if(pli != id && serv.clients[pli] != null && serv.clients[pli].dc == 0 && serv.clients[pli].map == map)
 											{
 												synchronized(out)
 												{
@@ -584,8 +584,14 @@ public class CraftrClient implements Runnable
 								break;
 							case 0x25:
 								map.setPlayer(x,y,0);
-								map.setPlayer(serv.spawnX,serv.spawnY,1);
-								teleport(serv.spawnX,serv.spawnY);
+								if(map==serv.map)
+								{
+									map.setPlayer(serv.spawnX,serv.spawnY,1);
+									teleport(serv.spawnX,serv.spawnY);
+								} else {
+									map.setPlayer(0,0,1);
+									teleport(0,0);
+								}
 								break;
 							case 0x26:
 								break;
