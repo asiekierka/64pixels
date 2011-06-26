@@ -52,9 +52,15 @@ public class CraftrServer extends CraftrServerShim
 
 	public void kill(int pid)
 	{
-		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0 && (clients[pid].x!=spawnX || clients[pid].y!=spawnY))
+		int tX = spawnX;
+		int tY = spawnY;
+		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0)
 		{
-			clients[pid].kill();
+			if(clients[pid].map==map)
+			{
+				tX=0; tY=0;
+			}
+			if(clients[pid].x!=tX || clients[pid].y!=tY) clients[pid].kill();
 		}
 	}
 
@@ -419,7 +425,8 @@ public class CraftrServer extends CraftrServerShim
 			String wt = "Worlds: ";
 			for(int i=0;i<world_names.length;i++)
 			{
-					if(i>0) wt+= " ";
+				if(world_names[i].startsWith("$")) continue;
+				if(i>0) wt+= " ";
 				wt += world_names[i];
 			}
 			return wt;
@@ -579,6 +586,10 @@ public class CraftrServer extends CraftrServerShim
 			}
 			else if(cmd[0].equals("setspawn") && id!=255)
 			{
+				if(clients[id].map!=map)
+				{
+					return "Changing spawn on non-main maps is currently unsupported.";
+				}
 				spawnX=clients[id].x;
 				spawnY=clients[id].y;
 				return "New spawn set.";
@@ -674,6 +685,13 @@ public class CraftrServer extends CraftrServerShim
 				}
 				removeWorld(cmdz[1]);
 				saveNamesFile(world_names,"worlds.txt");
+				for(int i=0;i<255;i++)
+				{
+					if(clients[i]!=null && clients[i].dc==0 && clients[i].map==findWorld(cmdz[1]).map)
+					{
+						clients[i].changeMap(map);
+					}
+				}
 				if(findWorld(cmdz[1])!=null) worlds.remove(findWorld(cmdz[1]));
 				return "World '" + cmdz[1] + "' deleted.";
 			}
