@@ -18,9 +18,10 @@ public class CraftrPhysics
 	private Date lastBUpdate = new Date();
 	private boolean changeBullets = false;
 
-	public CraftrPlayer[] players;
+	public CraftrPlayer[] players = new CraftrPlayer[256];
 	public CraftrPhysics(boolean _isServer)
 	{
+		System.out.println("[MAP] [PHYSICS] Initializing...");
 		isServer = _isServer;
 		players = new CraftrPlayer[256];
 	}

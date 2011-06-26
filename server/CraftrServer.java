@@ -58,6 +58,18 @@ public class CraftrServer extends CraftrServerShim
 		}
 	}
 
+	public CraftrWorld findWorld(String name)
+	{
+		for(int i=0;i<worlds.size();i++)
+		{
+			if(worlds.get(i).name.equalsIgnoreCase(name))
+			{
+				return worlds.get(i);
+			}
+		}
+		return null;
+	}
+
 	public boolean isOp(String ip)
 	{
 		for(String s: op_ips)
@@ -431,11 +443,11 @@ public class CraftrServer extends CraftrServerShim
 			else if(clients[id].op)
 			{
 
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return";
 			}
 			else
 			{
-				return "Commands: who " + ((tpforall!=0)?"tp ":"") + "warp warps me id worlds";
+				return "Commands: who " + ((tpforall!=0)?"tp ":"") + "warp warps me id worlds load return";
 			}
 		}
 		else if(cmd[0].equals("me") && id!=255)
@@ -454,6 +466,21 @@ public class CraftrServer extends CraftrServerShim
 			}
 			clients[id].sendChatMsgAll("&5"+st);
 			return "";
+		}
+		else if((cmd[0].equals("load") || cmd[0].equals("goto") || cmd[0].equals("l")) && id!=255)
+		{
+			CraftrWorld tm = findWorld(cmdz[1]);
+			if(tm==null) return "No such world!";
+			else
+			{
+				clients[id].changeMap(tm.map);
+				clients[id].sendChatMsgAll("&e" + clients[id].nick + " loaded map &f'" + cmdz[1] + "'!"); 
+			}
+		}
+		else if(cmd[0].equals("return") && id!=255)
+		{
+			clients[id].changeMap(map);
+			clients[id].sendChatMsgAll("&e" + clients[id].nick + " loaded the main map!"); 
 		}
 		else
 		{
@@ -620,22 +647,34 @@ public class CraftrServer extends CraftrServerShim
 			}
 			else if(cmd[0].equals("addworld"))
 			{
+				if(cmd[1].equalsIgnoreCase("map"))
+				{
+					return "This map name cannot be used.";
+				}
+				else if (findWorld(cmdz[1])!=null)
+				{
+					return "World '" + cmdz[1] + "' already exists.";
+				}
 				addWorld(cmdz[1]);
-				worlds.add(new CraftrWorld(cmdz[1],new CraftrMap(true,map_cache_size,cmdz[1]),map_tps));
+				CraftrMap tm = new CraftrMap(true,map_cache_size,cmdz[1]);
+				tm.se = this;
+				worlds.add(new CraftrWorld(cmdz[1],tm,map_tps));
 				saveNamesFile(world_names,"worlds.txt");
 				return "World '" + cmdz[1] + "' added.";
 			}
 			else if(cmd[0].equals("delworld"))
 			{
+				if(cmd[1].equalsIgnoreCase("map"))
+				{
+					return "This map cannot be deleted.";
+				}
+				else if (findWorld(cmdz[1])==null)
+				{
+					return "World '" + cmdz[1] + "' doesn't exist.";
+				}
 				removeWorld(cmdz[1]);
 				saveNamesFile(world_names,"worlds.txt");
-				for(int i=0;i<worlds.size();i++)
-				{
-					if(worlds.get(i).name.equalsIgnoreCase(cmd[1]))
-					{
-						worlds.remove(i);
-					}
-				}
+				if(findWorld(cmdz[1])!=null) worlds.remove(findWorld(cmdz[1]));
 				return "World '" + cmdz[1] + "' deleted.";
 			}
 			else if(cmd[0].equals("deop"))
@@ -798,10 +837,14 @@ public class CraftrServer extends CraftrServerShim
 			worlds=new ArrayList<CraftrWorld>();
 			world_names=readNamesFile("worlds.txt");
 			System.out.println(world_names.length + " worlds!");
-			map = new CraftrMap(true,map_cache_size);
+			map = new CraftrMap(true,map_cache_size,"map");
+			map.se = this;
+			worlds.add(new CraftrWorld("map",map,map_tps));
 			for(String wn : world_names)
 			{
-				worlds.add(new CraftrWorld(wn,new CraftrMap(true,map_cache_size,wn),map_tps));
+				CraftrMap tm = new CraftrMap(true,map_cache_size,wn);
+				tm.se = this;
+				worlds.add(new CraftrWorld(wn,tm,map_tps));
 			}
 			if(args.length>0)
 			{
@@ -825,7 +868,6 @@ public class CraftrServer extends CraftrServerShim
 			}
 			servsock = new ServerSocket(po);
 			clients = new CraftrClient[255];
-			map.se = this;
 			out2 = new ByteArrayOutputStream(2048);
 			out = new DataOutputStream(out2);
 		}
@@ -886,6 +928,25 @@ public class CraftrServer extends CraftrServerShim
 			System.exit(1);
 		}
 	}
+
+	public void sendOthersOnMap(int a, byte[] arr, int len)
+	{
+		try
+		{
+			for(int i=0;i<255;i++)
+			{
+				if(clients[i] != null && clients[i].id != a && clients[i].dc == 0 && clients[i].map == clients[a].map)
+				{
+					clients[i].sendPacket(arr);
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Fatal CraftrServer sendOthers error!");
+			System.exit(1);
+		}
+	}
 	
 	public void sendAll(byte[] arr)
 	{
@@ -894,7 +955,10 @@ public class CraftrServer extends CraftrServerShim
 	public void sendOthers(int a, byte[] arr)
 	{
 		sendOthers(a,arr,arr.length);
-
+	}
+	public void sendOthersOnMap(int a, byte[] arr)
+	{
+		sendOthersOnMap(a,arr,arr.length);
 	}
 	public void sendAll(byte[] arr, int len)
 	{

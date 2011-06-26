@@ -46,13 +46,14 @@ public class CraftrMap
 
 	public CraftrMap(boolean _isServer, int _cachesize, boolean multiMode, String name)
 	{
+		mapName=name;
 		isServer = _isServer;
+		System.out.println("[MAP] Initializing '" + name + "'...");
 		physics = new CraftrPhysics(isServer);
 		multiplayer = multiMode;
 		chunks = new CraftrChunk[_cachesize];
 		cachesize = _cachesize;
 		saveDir = "";
-		mapName=name;
 		for(int i=0;i<cachesize;i++)
 		{
 			chunks[i] = new CraftrChunk(0,0,false);
@@ -100,6 +101,15 @@ public class CraftrMap
 		}
 	}
 	
+	public void wipeChunks()
+	{
+		for (int i=0;i<cachesize;i++)
+		{
+			chunks[i].isSet=false;
+			chunks[i].isUsed=false;
+		}
+	}
+
 	public CraftrChunk findCachedChunk(int x, int y)
 	{
 		// Is the chunk cached?

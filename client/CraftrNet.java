@@ -378,6 +378,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 						switch((int)(buf[0]&0xFF))
 						{
 							case 0x01:
+							{
 								if(loginStage>=2) break;
 								loginStage=2;
 								game.players[255].px=in.readInt();
@@ -393,6 +394,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								game.players[255].name = nick;
 								System.out.println("Logged in!");
 								break;
+							}
 							case 0x11:
 								chunkType = in.readUnsignedByte();
 								isLoadingChunk=true;
@@ -620,6 +622,22 @@ public class CraftrNet implements Runnable, CraftrNetShim
  									game.map.setBullet(x70,y70,t70);
  								}
 								break;
+							case 0x80: // reload map
+							{
+								game.players[255].px=in.readInt();
+								game.players[255].py=in.readInt();
+								int tx = game.players[255].px>>6;
+								int ty = game.players[255].py>>6;
+								chunkRequest(tx,ty);
+								chunkRequest(tx+1,ty);
+								chunkRequest(tx,ty+1);
+								chunkRequest(tx+1,ty+1);
+								synchronized(game.map)
+								{
+									game.map.wipeChunks();
+								}
+								break;
+							}
 							case 0xE1: // push me
 								int e1x = in.readInt();
 								int e1y = in.readInt();

@@ -111,6 +111,38 @@ public class CraftrClient implements Runnable
 		}
 	}
 	
+	public void changeMap(CraftrMap nmap) // it's a friendly smile, on an open port
+	{
+		try
+		{
+
+			x=0;
+			y=0;
+			map.setPlayer(x,y,0);
+			map.physics.players[id] = null;
+			despawnPlayer();
+			map=nmap;
+			map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
+			map.setPlayer(x,y,1);
+			map.physics.players[id].px=x;
+			map.physics.players[id].py=y;
+			spawnPlayer();
+			synchronized(out)
+			{
+				out.writeByte(0x80);	
+				out.writeInt(0);
+				out.writeInt(0);
+				sendPacket();
+			}
+			sendChatMsgSelf("&aMap changed to &f" + nmap.mapName);
+		}
+		catch(Exception e)
+		{
+			System.out.println("Non-fatal changeMap error! (i hope)");
+			e.printStackTrace();
+		}
+	}
+
 	public void changeNickname(String newn)
 	{
 		try
@@ -125,7 +157,7 @@ public class CraftrClient implements Runnable
 				out.writeByte(0x26);
 				out.writeByte((byte)id);
 				writeString(newn);
-				serv.sendOthers(id,getPacket());
+				serv.sendOthersOnMap(id,getPacket());
 			}
 		}
 		catch(Exception e)
@@ -232,8 +264,8 @@ public class CraftrClient implements Runnable
 		{
 			x=tx;
 			y=ty;
-			serv.map.physics.players[id].px=x;
-			serv.map.physics.players[id].py=y;
+			map.physics.players[id].px=x;
+			map.physics.players[id].py=y;
 			synchronized(out)
 			{
 				out.writeByte(0x24);
@@ -245,7 +277,7 @@ public class CraftrClient implements Runnable
 				out.writeByte((byte)id);
 				out.writeInt(x);
 				out.writeInt(y);
-				serv.sendOthers(id,getPacket());
+				serv.sendOthersOnMap(id,getPacket());
 			}
 		}
 		catch(Exception e)
@@ -333,19 +365,53 @@ public class CraftrClient implements Runnable
 		ns.isRunning=false;
 		try
 		{
-			serv.map.setPlayer(x,y,0);
-			synchronized(out)
-			{
-				out.writeByte(0x22);
-				out.writeByte((byte)id);
-				serv.sendOthers(id,getPacket());
-			}
+			map.setPlayer(x,y,0);
+			despawnPlayer();
 			sendChatMsgAll(nick + " has left.");
 		}
 		catch(Exception e)
 		{
 			System.out.println("Non-fatal CraftrServer client thread DC packet send error!");
 			e.printStackTrace();
+		}
+	}
+	public void despawnPlayer()
+	{
+		try
+		{
+			synchronized(out)
+			{
+				out.writeByte(0x22);
+				out.writeByte((byte)id);
+				serv.sendOthersOnMap(id,getPacket());
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Non-fatal despawnPlayer error!");
+		}
+	}
+
+	public void spawnPlayer()
+	{
+		try
+		{
+			synchronized(out)
+			{
+				out.writeByte(0x20);
+				out.writeByte(id);
+				writeString(nick);
+				out.writeInt(x);
+				out.writeInt(y);
+				out.writeByte(chr);
+				out.writeByte(col);
+				out.writeByte(ncol); 
+				serv.sendOthersOnMap(id,getPacket());
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Non-fatal spawnPlayer error");
 		}
 	}
 
@@ -426,20 +492,9 @@ public class CraftrClient implements Runnable
 											passWait=true;
 										}
 										sendChatMsgAll(nick + " has joined.");
-										serv.map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
-										serv.map.setPlayer(x,y,1);
-										synchronized(out)
-										{
-											out.writeByte(0x20);
-											out.writeByte(id);
-											writeString(nick);
-											out.writeInt(x);
-											out.writeInt(y);
-											out.writeByte(chr);
-											out.writeByte(col);
-											out.writeByte(ncol); 
-											serv.sendOthers(id,getPacket());
-										}
+										map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
+										map.setPlayer(x,y,1);
+										spawnPlayer();
 										for(int pli=0;pli<255;pli++)
 										{
 											if(pli != id && serv.clients[pli] != null && serv.clients[pli].dc == 0)
@@ -519,17 +574,17 @@ public class CraftrClient implements Runnable
 								{
 									kick("Invalid movement!");
 								}
-								serv.sendOthers(id,ta,4);
-								serv.map.setPlayer(x,y,0);
+								serv.sendOthersOnMap(id,ta,4);
+								map.setPlayer(x,y,0);
 								x+=ta[2];
 								y+=ta[3];
-								serv.map.physics.players[id].px=x;
-								serv.map.physics.players[id].py=y;
-								serv.map.setPlayer(x,y,1);
+								map.physics.players[id].px=x;
+								map.physics.players[id].py=y;
+								map.setPlayer(x,y,1);
 								break;
 							case 0x25:
-								serv.map.setPlayer(x,y,0);
-								serv.map.setPlayer(serv.spawnX,serv.spawnY,1);
+								map.setPlayer(x,y,0);
+								map.setPlayer(serv.spawnX,serv.spawnY,1);
 								teleport(serv.spawnX,serv.spawnY);
 								break;
 							case 0x26:
@@ -542,15 +597,15 @@ public class CraftrClient implements Runnable
 								{
 									x=x29;
 									y=y29;
-									serv.map.physics.players[id].px=x;
-									serv.map.physics.players[id].py=y;
+									map.physics.players[id].px=x;
+									map.physics.players[id].py=y;
 									synchronized(out)
 									{
 										out.writeByte(0x24);
 										out.writeByte(id);
 										out.writeInt(x29);
 										out.writeInt(y29);
-										serv.sendOthers(id,getPacket());
+										serv.sendOthersOnMap(id,getPacket());
 									}
 								}
 								break;
@@ -568,13 +623,13 @@ public class CraftrClient implements Runnable
 								ta2f[0] = buf[0];
 								ta2f[1] = (byte)id;
 								if(passWait) break;
-								serv.sendOthers(id,ta2f,2);
-								serv.map.setPlayer(x,y,0);
+								serv.sendOthersOnMap(id,ta2f,2);
+								map.setPlayer(x,y,0);
 								x+=dx2f;
 								y+=dy2f;
-								serv.map.physics.players[id].px=x;
-								serv.map.physics.players[id].py=y;
-								serv.map.setPlayer(x,y,1);
+								map.physics.players[id].px=x;
+								map.physics.players[id].py=y;
+								map.setPlayer(x,y,1);
 								break;
 							case 0x30:
 								int ax = in.readInt();
@@ -638,22 +693,22 @@ public class CraftrClient implements Runnable
 									t33[0] = at;
 									t33[3] = aco;
 									t33[2] = ach;
-									while(serv.map.maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
-									serv.map.modlock=true;
-	 								synchronized(serv.map)
+									while(map.maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
+									map.modlock=true;
+	 								synchronized(map)
 	 								{
 	 									if(at == -1)
 	 									{
-	 										serv.map.setPushable(ax,ay,ach,aco);
+	 										map.setPushable(ax,ay,ach,aco);
 	 									} else {
-	 										serv.map.setBlock(ax,ay,t33[0],t33[1],t33[2],t33[3]);
-	 										serv.map.setPushable(ax,ay,(byte)0,(byte)0);
+	 										map.setBlock(ax,ay,t33[0],t33[1],t33[2],t33[3]);
+	 										map.setPushable(ax,ay,(byte)0,(byte)0);
 	 									}
 	 								}
-									serv.map.physics.addBlockToCheck(new CraftrBlockPos(ax,ay));
+									map.physics.addBlockToCheck(new CraftrBlockPos(ax,ay));
 									for(int i=0;i<4;i++)
 									{
-										serv.map.physics.addBlockToCheck(new CraftrBlockPos(ax+serv.map.xMovement[i],ay+serv.map.yMovement[i]));
+										map.physics.addBlockToCheck(new CraftrBlockPos(ax+map.xMovement[i],ay+map.yMovement[i]));
 									}
 									synchronized(out)
 									{
@@ -664,7 +719,7 @@ public class CraftrClient implements Runnable
 										out.writeByte(t33[0]);
 										out.writeByte(t33[2]);
 										out.writeByte(t33[3]);
-										serv.sendOthers(id,getPacket());
+										serv.sendOthersOnMap(id,getPacket());
 	 									if(at != -1 && zc[5] != 0)
 	 									{
 	 										out.writeByte(0x31);
@@ -674,10 +729,10 @@ public class CraftrClient implements Runnable
 	 										out.writeByte(-1);
 	 										out.writeByte(0);
 	 										out.writeByte(0);
-	 										serv.sendOthers(id,getPacket());
+	 										serv.sendOthersOnMap(id,getPacket());
 	 									}
 									}
-									serv.map.modlock=false;
+									map.modlock=false;
 								}
 								break;
 							case 0x40:
@@ -700,9 +755,9 @@ public class CraftrClient implements Runnable
 								int xb = in.readInt();
 								int yb = in.readInt();
 								byte bt = in.readByte();
-								serv.map.setBullet(xb,yb,bt);
-								serv.map.setBulletNet(xb,yb,bt);
-								serv.map.physics.addBlockToCheck(new CraftrBlockPos(xb,yb));
+								map.setBullet(xb,yb,bt);
+								map.setBulletNet(xb,yb,bt);
+								map.physics.addBlockToCheck(new CraftrBlockPos(xb,yb));
 								break;
  							case 0xE0:
  								{
@@ -718,14 +773,14 @@ public class CraftrClient implements Runnable
  									else {
  										byte[] dq;
  										boolean pa;
- 										synchronized(serv.map)
+ 										synchronized(map)
  										{
- 											dq = serv.map.getBlock(lolx+lolvx,loly+lolvy).getBlockData();
- 											pa = serv.map.pushAttempt(lolx+lolvx,loly+lolvy,lolvx,lolvy);
+ 											dq = map.getBlock(lolx+lolvx,loly+lolvy).getBlockData();
+ 											pa = map.pushAttempt(lolx+lolvx,loly+lolvy,lolvx,lolvy);
  										}
  										if(pa)
  										{
- 											serv.map.setPlayer(x,y,0);
+ 											map.setPlayer(x,y,0);
  											x = lolx+lolvx;
  											y = loly+lolvy;
  											synchronized(out)
@@ -747,9 +802,9 @@ public class CraftrClient implements Runnable
  												out.writeByte((byte)lolvy);
  												out.writeByte(dq[4]);
  												out.writeByte(dq[5]);
- 												serv.sendOthers(id,getPacket());
- 												serv.map.setPlayer(this.x,this.y,1);
- 												serv.map.setPlayer(this.x+lolvx,this.y+lolvy,1);
+ 												serv.sendOthersOnMap(id,getPacket());
+ 												map.setPlayer(this.x,this.y,1);
+ 												map.setPlayer(this.x+lolvx,this.y+lolvy,1);
  											}
  										}
  									}
