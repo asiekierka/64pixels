@@ -20,6 +20,8 @@ public class CraftrServer extends CraftrServerShim
 	public boolean anonMode;
 	public String[] op_ips;
 	public String[] ban_ips;
+	public String[] world_names;
+	public ArrayList<CraftrWorld> worlds;
 	public int spawnX=0;
 	public int privmode=0;
 	public int spawnY=0;
@@ -27,6 +29,7 @@ public class CraftrServer extends CraftrServerShim
 	public int nagle=0;
 	public int map_tps=10;
 	public int map_save_duration=10;
+	public int map_cache_size=128;
 	public int tpforall=0;
 	public boolean passOn = false;
 	public String pass;
@@ -81,7 +84,7 @@ public class CraftrServer extends CraftrServerShim
 			if(s.equals(ip.toLowerCase())) return;
 			t.add(s);
 		}
-		t.add(ip);
+		t.add(ip.toLowerCase());
 		String[] z = new String[t.size()];
 		int i = 0;
 		for(String s : t)
@@ -106,6 +109,41 @@ public class CraftrServer extends CraftrServerShim
 			z[i++]=s.toLowerCase();
 		}
 		op_ips = z;
+	}
+	
+	public void addWorld(String world)
+	{
+		ArrayList<String> t = new ArrayList<String>(op_ips.length+1);
+		for(String s:op_ips)
+		{
+			if(s.equals(world.toLowerCase())) return;
+			t.add(s);
+		}
+		t.add(world.toLowerCase());
+		String[] z = new String[t.size()];
+		int i = 0;
+		for(String s : t)
+		{
+			z[i++]=s.toLowerCase();
+		}
+		world_names = z;
+	}
+	
+	public void removeWorld(String world)
+	{
+		ArrayList<String> t = new ArrayList<String>(world_names.length+1);
+		for(String s:world_names)
+		{
+			t.add(s);
+		}
+		t.remove(world.toLowerCase());
+		String[] z = new String[t.size()];
+		int i = 0;
+		for(String s : t)
+		{
+			z[i++]=s.toLowerCase();
+		}
+		world_names = z;
 	}
 	
 	public void ban(String ip)
@@ -187,9 +225,9 @@ public class CraftrServer extends CraftrServerShim
 				out.write(s,0,s.length());
 				out.newLine();
 			}
-			if(map.chunks.length!=128)
+			if(map_cache_size!=128)
 			{
-				s = "map-cache-size="+map.chunks.length;
+				s = "map-cache-size="+map_cache_size;
 				out.write(s,0,s.length());
 				out.newLine();
 			}
@@ -278,7 +316,7 @@ public class CraftrServer extends CraftrServerShim
 				}
 				else if(key.contains("map-cache-size"))
 				{
-					map = new CraftrMap(true,nf.parse(val).intValue());
+					map_cache_size=nf.parse(val).intValue();
 				}
 				else if(key.contains("name"))
 				{
@@ -570,6 +608,26 @@ public class CraftrServer extends CraftrServerShim
 					}
 				}
 			}
+			else if(cmd[0].equals("addworld"))
+			{
+				addWorld(cmdz[1]);
+				worlds.add(new CraftrWorld(cmdz[1],new CraftrMap(true,map_cache_size,cmdz[1]),map_tps));
+				saveNamesFile(world_names,"worlds.txt");
+				return "World '" + cmdz[1] + "' added.";
+			}
+			else if(cmd[0].equals("delworld"))
+			{
+				removeWorld(cmdz[1]);
+				saveNamesFile(world_names,"worlds.txt");
+				for(int i=0;i<worlds.size();i++)
+				{
+					if(worlds.get(i).name.toLowerCase()==cmdz[1].toLowerCase())
+					{
+						worlds.remove(i);
+						return "World '" + cmdz[1] + "' deleted.";
+					}
+				}
+			}
 			else if(cmd[0].equals("deop"))
 			{
 				for(int i=1;i<cmd.length;i++)
@@ -727,7 +785,13 @@ public class CraftrServer extends CraftrServerShim
 			System.out.println(op_ips.length + " op IPs!");
 			ban_ips=readNamesFile("bans.txt");
 			System.out.println(ban_ips.length + " banned IPs!");
-			map = new CraftrMap(true,128);
+			world_names=readNamesFile("worlds.txt");
+			System.out.println(world_names.length + " worlds!");
+			map = new CraftrMap(true,map_cache_size);
+			for(String wn : world_names)
+			{
+				worlds.add(new CraftrWorld(wn,new CraftrMap(true,map_cache_size,wn),map_tps));
+			}
 			if(args.length>0)
 			{
 				for(int i=0;i<args.length;i++)
@@ -736,14 +800,9 @@ public class CraftrServer extends CraftrServerShim
 					{
 						anonMode=true;
 					}
-					else if(args[i].equals("/c"))
-					{
-						i++;
-						map = new CraftrMap(true,new Integer(args[i]).intValue());
-					}
 					else if(args[i].equals("/h"))
 					{
-						System.out.println("64px-srvr\nUsage: 64px-srvr [params]\n\nparams - parameters:\n    /a - anonymous mode (default nicknames) (off by default)\n    /c 128 - change map buffer size (128 is default)\n    /h - show help\n    /p port - change port (25566 is default)");
+						System.out.println("64px-srvr\nUsage: 64px-srvr [params]\n\nparams - parameters:\n    /a - anonymous mode (default nicknames) (off by default)\n    /h - show help\n    /p port - change port (25566 is default)");
 						System.exit(0);
 					}
 					else if(args[i].equals("/p"))
@@ -881,11 +940,7 @@ public class CraftrServer extends CraftrServerShim
 		Thread ti4 = new Thread(new CraftrHeartThread(this));
 		if(privmode==0) ti4.start();
 		System.out.print("#");
-		CraftrMapThread ti3m = new CraftrMapThread(map);
-		ti3m.speed = (1000/map_tps);
-		if(ti3m.speed<10 || ti3m.speed>1000) ti3m.speed=100;
-		Thread ti3 = new Thread(ti3m);
-		if(map_tps>0) ti3.start();
+
 		System.out.print("#");
 		warps = new CraftrWarps();
 		warps.loadFile("warps.dat");

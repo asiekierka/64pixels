@@ -5,7 +5,8 @@ public class CraftrMapThread implements Runnable
 	public CraftrMap map;
 	public int speed = 100;
 	public long wps = 0;
-	
+	public boolean isRunning = true;
+
 	public CraftrMapThread(CraftrMap m)
 	{
 		map=m;
@@ -13,7 +14,7 @@ public class CraftrMapThread implements Runnable
 	
 	public void run()
 	{
-		while(true)
+		while(isRunning)
 		{
 			try
 			{

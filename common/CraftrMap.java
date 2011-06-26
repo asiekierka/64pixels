@@ -12,6 +12,7 @@ public class CraftrMap
 	public int genMode = 0;
 	public static Random rand = new Random();
 	public String saveDir;
+	public String mapName = "map";
 	public static final int maxType = 14;
 	public boolean multiplayer;
 	public boolean maplock;
@@ -35,12 +36,23 @@ public class CraftrMap
 
 	public CraftrMap(boolean _isServer, int _cachesize, boolean multiMode)
 	{
+		this(_isServer,_cachesize,multiMode,"map");
+	}
+
+	public CraftrMap(boolean _isServer, int _cachesize, String name)
+	{
+		this(_isServer,_cachesize,false,name);
+	}
+
+	public CraftrMap(boolean _isServer, int _cachesize, boolean multiMode, String name)
+	{
 		isServer = _isServer;
 		physics = new CraftrPhysics(isServer);
 		multiplayer = multiMode;
 		chunks = new CraftrChunk[_cachesize];
 		cachesize = _cachesize;
 		saveDir = "";
+		mapName=name;
 		for(int i=0;i<cachesize;i++)
 		{
 			chunks[i] = new CraftrChunk(0,0,false);
@@ -151,9 +163,9 @@ public class CraftrMap
 	// LOADING/SAVING - UTILITIES
 	public void checkDirs(int x, int y)
 	{
-		File tmf = new File(saveDir + "map");
+		File tmf = new File(saveDir + mapName);
 		if(!tmf.exists()) tmf.mkdir();
-		tmf = new File(saveDir + "map/" + y);
+		tmf = new File(saveDir + mapName + "/" + y);
 		if(!tmf.exists()) tmf.mkdir();
 	}
 	
@@ -195,7 +207,7 @@ public class CraftrMap
 		try	// The code proper
 		{
 			// Load file
-			in = new FileInputStream(saveDir + "map/" + CraftrChunk.getFilename(x,y));
+			in = new FileInputStream(saveDir + mapName + "/" + CraftrChunk.getFilename(x,y));
 			gin = new GZIPInputStream(in);
 			// Create buffer, check version
 			byte[] buf = new byte[256];
@@ -287,7 +299,7 @@ public class CraftrMap
 		try
 		{
 			checkDirs(x,y);
-			fout = new FileOutputStream(saveDir + "map/" + CraftrChunk.getFilename(x,y));
+			fout = new FileOutputStream(saveDir + mapName + "/" + CraftrChunk.getFilename(x,y));
 			gout = new GZIPOutputStream(fout);
 			gout.write(data,0,data.length);
 		}
