@@ -962,11 +962,19 @@ public class CraftrServer extends CraftrServerShim
 	}
 	public void sendAll(byte[] arr, int len)
 	{
+		sendOthers(256,arr,arr.length);
+	}
+	public void sendAllOnMap(byte[] arr, String map_name)
+	{
+		sendAllOnMap(arr,arr.length,map_name);
+	}
+	public void sendAllOnMap(byte[] arr, int len, String map_name)
+	{
 		try
 		{
 			for(int i=0;i<255;i++)
 			{
-				if(clients[i] != null && clients[i].dc == 0)
+				if(clients[i] != null && clients[i].dc == 0 && clients[i].map.mapName.equalsIgnoreCase(map_name))
 				{
 					clients[i].sendPacket(arr);
 				}
@@ -974,7 +982,7 @@ public class CraftrServer extends CraftrServerShim
 		}
 		catch(Exception e)
 		{
-			System.out.println("Fatal CraftrServer sendAll error!");
+			System.out.println("Fatal CraftrServer sendAllOnMap error!");
 			System.exit(1);
 		}
 	}

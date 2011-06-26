@@ -12,5 +12,7 @@ public abstract class CraftrServerShim
 	public abstract void playSound(int x, int y, int id);
 	public abstract void sendAll(byte[] arr);
 	public abstract void sendAll(byte[] arr, int len);
+	public abstract void sendAllOnMap(byte[] arr, String map_name);
+	public abstract void sendAllOnMap(byte[] arr, int len, String map_name);
 	public abstract void kill(int pid);
 }

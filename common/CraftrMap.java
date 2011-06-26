@@ -413,7 +413,7 @@ public class CraftrMap
 			se.out.writeInt(y);
 			se.out.writeByte(aType);
 			byte[] t = se.getPacket();
-			se.sendAll(t,t.length);
+			se.sendAllOnMap(t,t.length,mapName);
 		}
 		catch(Exception e) { System.out.println("setBulletNet sending error!"); }
 	}
@@ -426,7 +426,7 @@ public class CraftrMap
 			se.out.writeInt(x);
 			se.out.writeInt(y);
 			byte[] t = se.getPacket();
-			se.sendAll(t,t.length);
+			se.sendAllOnMap(t,t.length,mapName);
 		}
 		catch(Exception e) { System.out.println("setPlayerNet sending error!"); }
 	}
@@ -480,7 +480,7 @@ public class CraftrMap
 					se.out.writeByte(dx);
 					se.out.writeByte(dy);
 					byte[] t = se.getPacket();
-					se.sendAll(t,t.length);
+					se.sendAllOnMap(t,t.length,mapName);
 				}
 				catch(Exception e){ System.out.println("Failed to send pushMultiple packet!"); }
 			}
@@ -650,7 +650,7 @@ public class CraftrMap
 			se.out.writeByte(ch1);
 			se.out.writeByte(co1);
 			byte[] t = se.getPacket();
-			se.sendAll(t,t.length);
+			se.sendAllOnMap(t,t.length,mapName);
 		}
 		catch(Exception e)
 		{
