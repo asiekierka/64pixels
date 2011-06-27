@@ -7,6 +7,7 @@ public class CraftrWorld
 	public CraftrMap map;
 	private CraftrMapThread mt;
 	private Thread t;
+	public boolean isPvP;
 
 	public CraftrWorld(String n, CraftrMap m, int speed)
 	{

@@ -9,7 +9,7 @@ public abstract class CraftrServerShim
 	public DataOutputStream out;
 	
 	public abstract byte[] getPacket();
-	public abstract void playSound(int x, int y, int id);
+	public abstract void playSound(int x, int y, int id, CraftrMap mymap);
 	public abstract void sendAll(byte[] arr);
 	public abstract void sendAll(byte[] arr, int len);
 	public abstract void sendAllOnMap(byte[] arr, String map_name);

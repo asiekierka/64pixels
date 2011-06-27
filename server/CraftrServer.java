@@ -37,7 +37,6 @@ public class CraftrServer extends CraftrServerShim
 	public String opPass;
 	public CraftrWarps warps;
 	public int po = 25566;
-	public boolean pvpMode = false;
 	public boolean mapLock = false;
 
 	public int countPlayers()
@@ -525,14 +524,16 @@ public class CraftrServer extends CraftrServerShim
 			}
 			else if(cmd[0].equals("pvp"))
 			{
-				if(pvpMode)
+				String tmap = "(map " + clients[id].world.name + ")";
+				if(clients[id].map==map) tmap = "(main map)";
+				if(clients[id].world.isPvP)
 				{
-					pvpMode=false;
-					clients[id].sendChatMsgAll("&ePvP mode OFF");
+					clients[id].world.isPvP=false;
+					clients[id].sendChatMsgAll("&ePvP mode OFF &f" + tmap);
 					clients[id].sendChatMsgAll("&cDEATHS:");
 					for(int i=0;i<255;i++)
 					{
-						if(clients[i] != null && clients[i].dc == 0)
+						if(clients[i] != null && clients[i].dc == 0 && clients[i].map == clients[id].map)
 						{
 							clients[id].sendChatMsgAll("&c" + clients[i].nick + "&7 - &e" + clients[i].deaths + " times");
 						}
@@ -540,8 +541,8 @@ public class CraftrServer extends CraftrServerShim
 				}
 				else
 				{
-					pvpMode=true;
-					clients[id].sendChatMsgAll("&ePvP mode ON!");
+					clients[id].world.isPvP=true;
+					clients[id].sendChatMsgAll("&ePvP mode ON! &f" + tmap);
 					for(int i=0;i<255;i++)
 					{
 						if(clients[i] != null && clients[i].dc == 0) clients[id].resetPvP();
@@ -1005,11 +1006,11 @@ public class CraftrServer extends CraftrServerShim
 		}
 	}
 	
-	public void playSound(int x, int y, int id)
+	public void playSound(int x, int y, int id, CraftrMap mymap)
 	{
 		for(int i=0;i<255;i++)
 		{
-			if(clients[i] != null && clients[i].dc == 0) 
+			if(clients[i] != null && clients[i].dc == 0 && clients[i].map==mymap) 
 			{
 				// This screws up meloders.
 				// Adrian, see me after class. --GM
@@ -1055,6 +1056,7 @@ public class CraftrServer extends CraftrServerShim
 					if(clients[i] == null || clients[i].dc > 0)
 					{
 						clients[i] = new CraftrClient(t,map,i,this);
+						clients[i].world = findWorld("map");
 						Thread t1 = new Thread(clients[i]);
 						t1.start();
 						break;

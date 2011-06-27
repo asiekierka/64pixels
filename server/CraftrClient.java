@@ -33,6 +33,7 @@ public class CraftrClient implements Runnable
 	private CraftrAuth auth;
 	public boolean passWait=false;
 	public CraftrCopier cc;
+	public CraftrWorld world;
 	public boolean isCopying = false;
 	public boolean isPasting = false;
 	public int copyStage = 0;
@@ -80,7 +81,7 @@ public class CraftrClient implements Runnable
 
 	public void kill()
 	{
-		if(!serv.pvpMode) return;
+		if(!world.isPvP) return;
 		deaths++;
 		sendChatMsgAll("&c" + nick + "&c was killed!");
 		if(map==serv.map) teleport(serv.spawnX,serv.spawnY);
@@ -124,6 +125,7 @@ public class CraftrClient implements Runnable
 			despawnPlayer();
 			despawnOthers();
 			map=nmap;
+			world=serv.findWorld(map.mapName);
 			map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
 			map.setPlayer(x,y,1);
 			map.physics.players[id].px=x;

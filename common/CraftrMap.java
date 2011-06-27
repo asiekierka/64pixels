@@ -561,7 +561,7 @@ public class CraftrMap
 	{
 		if(isServer)
 		{
-			se.playSound(x,y,id);
+			se.playSound(x,y,id,this);
 		} else {
 			game.playSound(x,y,id);
 		}
