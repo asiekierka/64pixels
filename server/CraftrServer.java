@@ -1026,7 +1026,7 @@ public class CraftrServer extends CraftrServerShim
 	public void start()
 	{
 		System.out.println("64px-srvr version " + CraftrVersion.getVersionName());
-		System.out.println("Bonus points for my ISP cutting my internet off for a day");
+		System.out.println("Svetlana, I'm sorry.");
 		System.out.print("Initializing: #");
 		run = true;
 		ci = new CraftrInput(this);
@@ -1040,8 +1040,6 @@ public class CraftrServer extends CraftrServerShim
 		System.out.print("#");
 		Thread ti4 = new Thread(new CraftrHeartThread(this));
 		if(privmode==0) ti4.start();
-		System.out.print("#");
-
 		System.out.print("#");
 		warps = new CraftrWarps();
 		warps.loadFile("warps.dat");
@@ -1062,6 +1060,7 @@ public class CraftrServer extends CraftrServerShim
 						break;
 					}
 				}
+				Thread.sleep(10);
 			}
 			catch(Exception e)
 			{

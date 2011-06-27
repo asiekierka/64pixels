@@ -29,6 +29,7 @@ public class CraftrInput implements Runnable
 					String t = serv.parseMessage(inp,255);
 					if(!t.equals("$N") && !t.equals("")) System.out.println(t);
 				}
+			Thread.sleep(10);
 			}
 			catch(NullPointerException ne)
 			{
