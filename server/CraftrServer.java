@@ -1083,12 +1083,22 @@ public class CraftrServer extends CraftrServerShim
 				map.saveChunkFile(i);
 			}
 		}
+		for(CraftrWorld w : worlds)
+		{
+			for(int i=0;i<w.map.chunks.length;i++)
+			{
+				if(w.map.chunks[i].isSet || w.map.chunks[i].isUsed)
+				{
+					w.map.saveChunkFile(i);
+				}
+			}
+		}
 		mapBeSaved=false;
 	}
 	public void end()
 	{
 		saveMap();
-		while(mapBeSaved) { try{Thread.sleep(2);}catch(Exception e){} } // you never know
+		while(mapBeSaved) { try{Thread.sleep(10);}catch(Exception e){} } // you never know
 		saveConfig();
 	}
 }
