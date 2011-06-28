@@ -6,7 +6,7 @@ public class CraftrVersion
 	private static final int releaseVer = 0;
 	private static final int majorVer = 1;
 	private static final int minorVer = 5;
-	private static final int patchVer = 2;
+	private static final int patchVer = 3;
 	public CraftrVersion()
 	{
 	}

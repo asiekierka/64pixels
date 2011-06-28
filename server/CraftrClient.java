@@ -84,8 +84,7 @@ public class CraftrClient implements Runnable
 		if(!world.isPvP) return;
 		deaths++;
 		sendChatMsgAll("&c" + nick + "&c was killed!");
-		if(map==serv.map) teleport(serv.spawnX,serv.spawnY);
-		else teleport(0,0);
+		teleport(world.spawnX,world.spawnY);
 	}
 	public void resetPvP()
 	{
@@ -117,26 +116,23 @@ public class CraftrClient implements Runnable
 	{
 		try
 		{
-
-			x=0;
-			y=0;
 			map.setPlayer(x,y,0);
 			map.physics.players[id] = null;
 			despawnPlayer();
 			despawnOthers();
 			map=nmap;
 			world=serv.findWorld(map.mapName);
+			x=world.spawnX;
+			y=world.spawnY;
 			map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
 			map.setPlayer(x,y,1);
-			map.physics.players[id].px=x;
-			map.physics.players[id].py=y;
 			spawnPlayer();
 			spawnOthers();
 			synchronized(out)
 			{
 				out.writeByte(0x80);	
-				out.writeInt(0);
-				out.writeInt(0);
+				out.writeInt(x);
+				out.writeInt(y);
 				sendPacket();
 			}
 			sendChatMsgSelf("&aMap changed to &f" + nmap.mapName);
@@ -189,6 +185,32 @@ public class CraftrClient implements Runnable
 				out.writeByte((byte)id);
 				writeString(m2);
 				sendPacket();
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Non-fatal sendChatMsgSelf error!");
+		}
+	}
+
+	public void sendChatMsgID(String m, int i)
+	{
+		try
+		{
+			String m2 = m;
+			synchronized(out)
+			{
+				while(m2.length()>40)
+				{
+					out.writeByte(0x41);
+					out.writeByte((byte)i);
+					writeString(m2.substring(0,40));
+					m2=m2.substring(40);
+				}
+				out.writeByte(0x41);
+				out.writeByte((byte)i);
+				writeString(m2);
+				serv.clients[i].sendPacket(getPacket());
 			}
 		}
 		catch(Exception e)
@@ -622,14 +644,15 @@ public class CraftrClient implements Runnable
 								map.setPlayer(x,y,1);
 								break;
 							case 0x25:
+								if(world.isPvP) break;
 								map.setPlayer(x,y,0);
 								if(map==serv.map)
 								{
 									map.setPlayer(serv.spawnX,serv.spawnY,1);
 									teleport(serv.spawnX,serv.spawnY);
 								} else {
-									map.setPlayer(0,0,1);
-									teleport(0,0);
+									map.setPlayer(world.spawnX,world.spawnY,1);
+									teleport(world.spawnX,world.spawnY);
 								}
 								break;
 							case 0x26:

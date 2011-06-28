@@ -1,6 +1,8 @@
+map-save-duration=10
+map-ticks=10
 tp-for-all=0
 port=25566
 private-mode=0
 name=[0.1.5] asie's multiserver
-spawn-x=14
-spawn-y=-16
+spawn-x=0
+spawn-y=-6

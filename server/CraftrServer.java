@@ -38,6 +38,7 @@ public class CraftrServer extends CraftrServerShim
 	public CraftrWarps warps;
 	public int po = 25566;
 	public boolean mapLock = false;
+	public CraftrWorld world;
 
 	public int countPlayers()
 	{
@@ -49,17 +50,19 @@ public class CraftrServer extends CraftrServerShim
 		return t;
 	}
 
+	public void changeMainSpawnXY(int x, int y)
+	{
+		spawnX=x; world.spawnX=x;
+		spawnY=y; world.spawnY=y;
+	}
+
 	public void kill(int pid)
 	{
-		int tX = spawnX;
-		int tY = spawnY;
-		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0)
+		int tX=clients[pid].world.spawnX;
+		int tY=clients[pid].world.spawnY;
+		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0 && (clients[pid].x!=tX || clients[pid].y!=tY))
 		{
-			if(clients[pid].map==map)
-			{
-				tX=0; tY=0;
-			}
-			if(clients[pid].x!=tX || clients[pid].y!=tY) clients[pid].kill();
+			clients[pid].kill();
 		}
 	}
 
@@ -199,6 +202,60 @@ public class CraftrServer extends CraftrServerShim
 	}
 	
 	
+	public void saveWorldConfig(CraftrWorld world)
+	{
+		try
+		{
+			NumberFormat nf = NumberFormat.getNumberInstance();
+			BufferedWriter out = new BufferedWriter(new FileWriter(map.saveDir + world.name + "/config.txt"));
+			String s = "" ;
+			s = "map-ticks=" + world.tickSpeed;
+			out.write(s,0,s.length());
+			out.newLine();
+			s = "spawn-x=" + world.spawnX;
+			out.write(s,0,s.length());
+			out.newLine();
+			s = "spawn-y=" + world.spawnY;
+			out.write(s,0,s.length());
+			out.close();	
+		}
+		catch (Exception e)
+		{
+			System.out.println("Error writing config data! " + e.getMessage());
+		}
+	}
+
+	public void loadWorldConfig(CraftrWorld world)
+	{
+		try
+		{
+			NumberFormat nf = NumberFormat.getNumberInstance();
+			CraftrConfig nc = new CraftrConfig(map.saveDir + world.name + "/config.txt");
+			for(int i=0;i<nc.keys;i++)
+			{
+				String key = nc.key[i];
+				String val = nc.value[i];
+				System.out.println("Config key found: " + key);
+				if(key.contains("spawn-x"))
+				{
+					world.spawnX = nf.parse(val).intValue();
+				}
+				else if(key.contains("spawn-y"))
+				{
+					world.spawnY = nf.parse(val).intValue();
+				}
+				else if(key.contains("map-ticks"))
+				{
+					world.changeTickSpeed(nf.parse(val).intValue());
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			System.out.println("Error reading config data! " + e.getMessage());
+		}
+	}
+
 	public void saveConfig()
 	{
 		try
@@ -215,12 +272,6 @@ public class CraftrServer extends CraftrServerShim
 			if(nagle>0)
 			{
 				s = "use-nagle=" + nagle;
-				out.write(s,0,s.length());
-				out.newLine();
-			}
-			if(map_tps!=10)
-			{
-				s = "map-ticks=" + map_tps;
 				out.write(s,0,s.length());
 				out.newLine();
 			}
@@ -248,12 +299,12 @@ public class CraftrServer extends CraftrServerShim
 				out.write(s,0,s.length());
 				out.newLine();
 			}
-			if(map_save_duration!=10)
-			{
-				s = "map-save-duration="+map_save_duration;
-				out.write(s,0,s.length());
-				out.newLine();
-			}
+			s = "map-save-duration="+map_save_duration;
+			out.write(s,0,s.length());
+			out.newLine();
+			s = "map-ticks=" + map_tps;
+			out.write(s,0,s.length());
+			out.newLine();
 			s = "tp-for-all=" + tpforall;
 			out.write(s,0,s.length());
 			out.newLine();
@@ -275,7 +326,7 @@ public class CraftrServer extends CraftrServerShim
 		}
 		catch (Exception e)
 		{
-			System.out.println("Error reading config data! " + e.getMessage());
+			System.out.println("Error writing config data! " + e.getMessage());
 		}
 	}
 	
@@ -361,7 +412,7 @@ public class CraftrServer extends CraftrServerShim
 		{
 			cmd[i]=cmdz[i].toLowerCase();
 		}
-		if(cmd[0].equals("who") || cmd[0].equals("players") || cmd[0].equals("playerlist"))
+		if(cmd[0].equals("who") || cmd[0].equals("players") || cmd[0].equals("playerlist") || cmd[0].equals("list") || cmd[0].equals("users"))
 		{
 			String lol = "";
 			int ap = 0;
@@ -388,16 +439,17 @@ public class CraftrServer extends CraftrServerShim
 			}
 			else
 			{
+				if(clients[id].map!=clients[t].map) clients[id].changeMap(clients[t].map);
 				clients[id].teleport(clients[t].x,clients[t].y);
 				return "";
 			}
 		}
 		else if(cmd[0].equals("warp") && id!=255)
 		{
-			int t = warps.findWarpID(cmd[1]);
+			int t = clients[id].world.warps.findWarpID(cmd[1]);
 			if(t>=0)
 			{
-				CraftrWarp w = warps.warps.get(t);
+				CraftrWarp w = clients[id].world.warps.warps.get(t);
 				clients[id].teleport(w.x,w.y);
 				return "";
 			}
@@ -408,24 +460,24 @@ public class CraftrServer extends CraftrServerShim
 		}
 		else if(cmd[0].equals("warps"))
 		{
-			String wt = "Warps: ";
-			for(int i=0;i<warps.warps.size();i++)
+			String wt = "Warps (map " + clients[id].world.name + " ): ";
+			for(int i=0;i<clients[id].world.warps.warps.size();i++)
 			{
-				if(warps.warps.get(i)!=null)
+				if(clients[id].world.warps.warps.get(i)!=null)
 				{
-					if(i>0) wt+= " ";
-					wt += warps.warps.get(i).name;
+					if(i>0) wt+= ", ";
+					wt += clients[id].world.warps.warps.get(i).name;
 				}
 			}
 			return wt;
 		}
-		else if(cmd[0].equals("worlds"))
+		else if(cmd[0].equals("worlds") || cmd[0].equals("maps"))
 		{
 			String wt = "Worlds: ";
 			for(int i=0;i<world_names.length;i++)
 			{
 				if(world_names[i].startsWith("$")) continue;
-				if(i>0) wt+= " ";
+				if(i>0) wt+= ", ";
 				wt += world_names[i];
 			}
 			return wt;
@@ -444,16 +496,16 @@ public class CraftrServer extends CraftrServerShim
 		{
 			if(id == 255)
 			{
-				return "Commands: who warps kick nick deop save ban unban delwarp pvp lock unlock worlds addworld delworld";
+				return "Commands: who warps kick nick deop save ban unban delwarp pvp lock unlock worlds addworld delworld msg";
 			}
 			else if(clients[id].op)
 			{
 
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg";
 			}
 			else
 			{
-				return "Commands: who " + ((tpforall!=0)?"tp ":"") + "warp warps me id worlds load return";
+				return "Commands: who " + ((tpforall!=0)?"tp ":"") + "warp warps me id worlds load return msg";
 			}
 		}
 		else if(cmd[0].equals("me") && id!=255)
@@ -488,6 +540,27 @@ public class CraftrServer extends CraftrServerShim
 			clients[id].changeMap(map);
 			clients[id].sendChatMsgAll("&e" + clients[id].nick + " loaded the main map!"); 
 		}
+		else if(cmd[0].equals("m") || cmd[0].equals("msg"))
+		{
+			if(cmd.length<3) return "No nickname/message specified!";
+			int t = findByNick(cmd[1]);
+			if(t<0 || t>255)
+			{
+				return "No such nickname!";
+			}
+			else
+			{
+				String msg = "";
+				for(int i=2;i<cmdz.length;i++)
+				{
+					if(i>2) msg+=" ";
+					msg+=cmdz[i];
+				}
+				String msg2 = "&a[PM] >&f" + clients[id].nick + ": " + msg;
+				clients[id].sendChatMsgID(msg2,t);
+				return msg2;
+			}
+		}
 		else
 		{
 			if(id != 255 && !clients[id].op) return "$N";
@@ -516,6 +589,7 @@ public class CraftrServer extends CraftrServerShim
 					}
 					else
 					{
+						if(clients[id].map!=clients[t].map) clients[t].changeMap(clients[id].map);
 						clients[t].teleport(clients[id].x,clients[id].y);
 						clients[t].sendChatMsgSelf("Fetched by " + clients[id].nick + "!");
 						return "User fetched!";
@@ -589,11 +663,14 @@ public class CraftrServer extends CraftrServerShim
 			{
 				if(clients[id].map!=map)
 				{
-					return "Changing spawn on non-main maps is currently unsupported.";
+					clients[id].world.spawnX = clients[id].x;
+					clients[id].world.spawnY = clients[id].y;
 				}
-				spawnX=clients[id].x;
-				spawnY=clients[id].y;
-				return "New spawn set.";
+	 			else
+				{
+					changeMainSpawnXY(clients[id].x,clients[id].y);
+				}
+				return "New spawn set at [" + clients[id].x + "," + clients[id].y + "].";
 			}
 			else if(cmd[0].equals("say") && id!=255)
 			{
@@ -670,7 +747,9 @@ public class CraftrServer extends CraftrServerShim
 				addWorld(cmdz[1]);
 				CraftrMap tm = new CraftrMap(true,map_cache_size,cmdz[1]);
 				tm.se = this;
-				worlds.add(new CraftrWorld(cmdz[1],tm,map_tps));
+				CraftrWorld w = new CraftrWorld(cmdz[1],tm,map_tps, new CraftrWarps());
+				loadWorldConfig(w);
+				worlds.add(w);
 				saveNamesFile(world_names,"worlds.txt");
 				return "World '" + cmdz[1] + "' added.";
 			}
@@ -693,7 +772,11 @@ public class CraftrServer extends CraftrServerShim
 						clients[i].changeMap(map);
 					}
 				}
-				if(findWorld(cmdz[1])!=null) worlds.remove(findWorld(cmdz[1]));
+				if(findWorld(cmdz[1])!=null)
+				{
+					saveWorldConfig(findWorld(cmdz[1]));
+					worlds.remove(findWorld(cmdz[1]));
+				}
 				return "World '" + cmdz[1] + "' deleted.";
 			}
 			else if(cmd[0].equals("deop"))
@@ -754,26 +837,28 @@ public class CraftrServer extends CraftrServerShim
 			}
 			else if(cmd[0].equals("setwarp") && id!=255)
 			{
-				int t = warps.findWarpID(cmd[1]);
+				int t = clients[id].world.warps.findWarpID(cmd[1]);
 				if(t>=0)
 				{
-					warps.warps.get(t).x=clients[id].x;
-					warps.warps.get(t).y=clients[id].y;
+					clients[id].world.warps.warps.get(t).x=clients[id].x;
+					clients[id].world.warps.warps.get(t).y=clients[id].y;
+					clients[id].world.saveWarps();
 					return "Warp location changed.";
 				}
 				else
 				{
-					warps.warps.add(new CraftrWarp(clients[id].x,clients[id].y,cmd[1]));
+					clients[id].world.warps.warps.add(new CraftrWarp(clients[id].x,clients[id].y,cmd[1]));
+					clients[id].world.saveWarps();
 					return "New warp added.";
 				}
 			}
 			else if(cmd[0].equals("delwarp"))
 			{
-				int t = warps.findWarpID(cmd[1]);
+				int t = clients[id].world.warps.findWarpID(cmd[1]);
 				if(t>=0)
 				{
-					warps.warps.remove(t);
-					warps.saveFile("warps.dat");
+					clients[id].world.warps.warps.remove(t);
+					clients[id].world.saveWarps();
 					return "Warp removed.";
 				}
 				else
@@ -853,17 +938,21 @@ public class CraftrServer extends CraftrServerShim
 			System.out.println(op_ips.length + " op IPs!");
 			ban_ips=readNamesFile("bans.txt");
 			System.out.println(ban_ips.length + " banned IPs!");
+			map = new CraftrMap(true,map_cache_size,"map");
+			map.se = this;
+			warps = new CraftrWarps();
+			world = new CraftrWorld("map",map,map_tps,warps);
 			worlds=new ArrayList<CraftrWorld>();
 			world_names=readNamesFile("worlds.txt");
 			System.out.println(world_names.length + " worlds!");
-			map = new CraftrMap(true,map_cache_size,"map");
-			map.se = this;
-			worlds.add(new CraftrWorld("map",map,map_tps));
+			worlds.add(world);
 			for(String wn : world_names)
 			{
 				CraftrMap tm = new CraftrMap(true,map_cache_size,wn);
 				tm.se = this;
-				worlds.add(new CraftrWorld(wn,tm,map_tps));
+				CraftrWorld w = new CraftrWorld(wn,tm,map_tps,new CraftrWarps());
+				loadWorldConfig(w);
+				worlds.add(w);
 			}
 			if(args.length>0)
 			{
@@ -908,14 +997,22 @@ public class CraftrServer extends CraftrServerShim
 	
 	public int findByNick(String nick)
 	{
+		int curr_id = -1;
+		int curr_id_prob = 255; 
 		for(int i=0;i<255;i++)
 		{
 			if(clients[i] != null && clients[i].nick.toLowerCase().startsWith(nick.toLowerCase()) && clients[i].dc == 0)
 			{
-				return i;
+				int t = clients[i].nick.toLowerCase().compareTo(nick.toLowerCase());
+				if(t<0) t=-t;
+				if(t<curr_id_prob)
+				{
+					curr_id = i;
+					curr_id_prob = t;
+				}
 			}
 		}
-		return -1;
+		return curr_id;
 	}
 	public int findByIP(String ip)
 	{
@@ -1042,9 +1139,6 @@ public class CraftrServer extends CraftrServerShim
 		Thread ti4 = new Thread(new CraftrHeartThread(this));
 		if(privmode==0) ti4.start();
 		System.out.print("#");
-		warps = new CraftrWarps();
-		warps.loadFile("warps.dat");
-		System.out.println("#");
 		System.out.println("READY!");
 		while(run)
 		{
@@ -1102,5 +1196,9 @@ public class CraftrServer extends CraftrServerShim
 		saveMap();
 		while(mapBeSaved) { try{Thread.sleep(10);}catch(Exception e){} } // you never know
 		saveConfig();
+		for(CraftrWorld w : worlds)
+		{
+			saveWorldConfig(w);
+		}
 	}
 }
