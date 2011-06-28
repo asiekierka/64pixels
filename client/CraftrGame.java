@@ -1257,12 +1257,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		Date overdate;
 		while(gameOn)
 		{
-			if(isKick) realKickOut();
 			try
 			{
 			Thread.sleep(33);
 			}
 			catch (Exception e) { }
+			if(isKick) realKickOut();
 			if(waitTime==0)
 			{
 				if(keyHeld[0]==true)

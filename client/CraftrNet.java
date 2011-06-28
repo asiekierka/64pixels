@@ -349,9 +349,9 @@ public class CraftrNet implements Runnable, CraftrNetShim
 				{
 					out.writeByte(0x0F);
 					writeString(nick);
-					writeString("Dude, you lag too much, you must live in New Zealand");
+					writeString("Why do i still have this here? Also HARUHIISM");
 					out.writeByte(0x00);
-					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE
+					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE. NEVER. NEVER!!!
 					out.writeInt(CraftrVersion.getProtocolVersion());
 					out.writeByte(game.players[255].pchr);
 					out.writeByte(game.players[255].pcol);

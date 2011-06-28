@@ -1125,6 +1125,7 @@ public class CraftrServer extends CraftrServerShim
 	{
 		System.out.println("64px-srvr version " + CraftrVersion.getVersionName());
 		System.out.println("Svetlana, I'm sorry.");
+		System.out.println("Also let's create servers with Haruhi Suzumiya! (yeah, haruhiism plug FTW)");
 		System.out.print("Initializing: #");
 		run = true;
 		ci = new CraftrInput(this);

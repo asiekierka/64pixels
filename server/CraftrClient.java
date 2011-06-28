@@ -260,6 +260,7 @@ public class CraftrClient implements Runnable
 				writeString(msg);
 				sendPacket();
 			}
+			Thread.sleep(100);
 			disconnect();
 			System.out.println("User " + id + " was kicked! (" + msg + ")");
 		}
