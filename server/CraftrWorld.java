@@ -42,7 +42,7 @@ public class CraftrWorld
 
 	public void changeTickSpeed(int ts)
 	{
-		tickSpeed=ts;
+		tickSpeed=(1000/ts);
 		if(tickSpeed>100 || tickSpeed<=0) tickSpeed=10;
 		mt.speed=tickSpeed;
 	}

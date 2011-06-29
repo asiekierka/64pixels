@@ -154,16 +154,29 @@ public class CraftrPhysics
 					bshot = true;
 				}
 			}
-			if(blockData[6]>0 && blockData[6]<=4 && surrBlockO[blockData[6]-1].isEmpty() && !bshot)
+			if(blockData[6]>0 && blockData[6]<=4 && !bshot)
 			{
-				surrBlockO[blockData[6]-1].setBullet((byte)blockO.getBullet());
-				addBlockToSet(surrBlockO[blockData[6]-1]);
-				addBlockToCheck(new CraftrBlockPos(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y));
-				for(int i=0;i<4;i++)
+				if(surrBlockO[blockData[6]-1].isEmpty())
 				{
-					int tbx = surrBlockO[blockData[6]-1].x+xMovement[i];
-					int tby = surrBlockO[blockData[6]-1].y+yMovement[i];
-					if(isUpdated(map.getBlock(tbx,tby).getType())) addBlockToCheck(new CraftrBlockPos(tbx,tby));
+					surrBlockO[blockData[6]-1].setBullet((byte)blockO.getBullet());
+					addBlockToSet(surrBlockO[blockData[6]-1]);
+					addBlockToCheck(new CraftrBlockPos(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y));
+					for(int i=0;i<4;i++)
+					{
+						int tbx = surrBlockO[blockData[6]-1].x+xMovement[i];
+						int tby = surrBlockO[blockData[6]-1].y+yMovement[i];
+						if(isUpdated(map.getBlock(tbx,tby).getType())) addBlockToCheck(new CraftrBlockPos(tbx,tby));
+					}
+				} else
+				{
+					for(int i=0;i<256;i++)
+					{
+						if(players[i]!=null && players[i].px==blockO.x+xMovement[blockData[6]-1] && players[i].py==blockO.y+yMovement[blockData[6]-1])
+						{
+							map.se.kill(i);
+							bshot = true;
+						}
+					}
 				}
 			}
 			if(surrBlockO[blockData[6]-1].getType()==14)

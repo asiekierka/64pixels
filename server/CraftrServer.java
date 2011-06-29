@@ -460,7 +460,7 @@ public class CraftrServer extends CraftrServerShim
 		}
 		else if(cmd[0].equals("warps"))
 		{
-			String wt = "Warps (map " + clients[id].world.name + " ): ";
+			String wt = "Warps (map " + clients[id].world.name + "): ";
 			for(int i=0;i<clients[id].world.warps.warps.size();i++)
 			{
 				if(clients[id].world.warps.warps.get(i)!=null)
@@ -474,11 +474,16 @@ public class CraftrServer extends CraftrServerShim
 		else if(cmd[0].equals("worlds") || cmd[0].equals("maps"))
 		{
 			String wt = "Worlds: ";
+			boolean wasVal = false;
 			for(int i=0;i<world_names.length;i++)
 			{
-				if(world_names[i].startsWith("$")) continue;
-				if(i>0) wt+= ", ";
-				wt += world_names[i];
+				if(!world_names[i].startsWith("$"))
+				{
+					if(wasVal) wt+= ", ";
+					wt += world_names[i];
+					wasVal=true;
+				}
+				else wasVal=false;
 			}
 			return wt;
 		}
