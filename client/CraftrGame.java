@@ -991,42 +991,94 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		int sx = px-15;
 		int sy = py-12;
 		CraftrBlock t;
-		try
-		{
-			for(int iy=0;iy<gs.FULLGRID_H;iy++)
-			{
+		boolean raytrace = true;
 
-				for(int ix=0;ix<gs.FULLGRID_W;ix++)
-				{
- 					t = map.getBlock(ix+sx,iy+sy);
-					gs.blocks[(iy*gs.FULLGRID_W)+ix] = t;
-					gs.blockChr[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnChar();
-					gs.blockCol[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnColor();
-				}
-			}
-			for (int i=0;i<256;i++)
-			{
-				if(players[i] == null)
-				{
-					gs.removePlayer(i);
-					continue;
-				}
-				int tx = (players[i].px-players[255].px)+15;
-				int ty = (players[i].py-players[255].py)+12;
-				gs.removePlayer(i);
-				if(tx>=0 && ty>=0 && tx<32 && ty<25)
-				{
-					CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
-					if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
-				}
-			}
+	    try
+	    {
+            if (!raytrace)
+            {
+		        for(int iy=0;iy<gs.FULLGRID_H;iy++)
+		        {
+
+			        for(int ix=0;ix<gs.FULLGRID_W;ix++)
+			        {
+     					t = map.getBlock(ix+sx,iy+sy);
+				        gs.blocks[(iy*gs.FULLGRID_W)+ix] = t;
+				        gs.blockChr[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnChar();
+				        gs.blockCol[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnColor();
+			        }
+		        }
+		        for (int i=0;i<256;i++)
+		        {
+			        if(players[i] == null)
+			        {
+				        gs.removePlayer(i);
+				        continue;
+			        }
+			        int tx = (players[i].px-players[255].px)+15;
+			        int ty = (players[i].py-players[255].py)+12;
+			        gs.removePlayer(i);
+			        if(tx>=0 && ty>=0 && tx<32 && ty<25)
+			        {
+				        CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
+				        if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
+			        }
+		        }
+		    }else{
+		        for(int iy=0;iy<gs.FULLGRID_H;iy++)
+		        {
+
+			        for(int ix=0;ix<gs.FULLGRID_W;ix++)
+			        {
+				        gs.blocks[(iy*gs.FULLGRID_W)+ix] = null;
+			        }
+		        }
+		        
+		        for(double angle=0;angle<360;angle+=1.0)
+		        {
+		            for(double len=0;len<64;len+=0.25)
+		            {
+		                int x = (int)(15.5+Math.sin(Math.toRadians(angle))*len);
+		                int y = (int)(12.5+Math.cos(Math.toRadians(angle))*len);
+		                if(x>=0 && y>=0 && x<32 && y<25)
+		                {
+         					t = map.getBlock(x+sx,y+sy);
+				            gs.blocks[(y*gs.FULLGRID_W)+x] = t;
+				            gs.blockChr[(y*gs.FULLGRID_W)+x] = (byte)t.getDrawnChar();
+				            gs.blockCol[(y*gs.FULLGRID_W)+x] = (byte)t.getDrawnColor();
+		                    if(!t.isEmpty())
+		                    {
+		                        len = 128;
+		                    }
+		                }else{
+		                    len = 128;
+		                }
+		            }
+		        }
+		        for (int i=0;i<256;i++)
+		        {
+			        if(players[i] == null)
+			        {
+				        gs.removePlayer(i);
+				        continue;
+			        }
+			        int tx = (players[i].px-players[255].px)+15;
+			        int ty = (players[i].py-players[255].py)+12;
+			        gs.removePlayer(i);
+			        if(tx>=0 && ty>=0 && tx<32 && ty<25)
+			        {
+				        CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
+				        if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
+			        }
+		        }
+		    }
 		}
-		catch (Exception e)
-		{
-			System.out.println("[SEVERE] render exception: " + e.toString() + " | " + e.getMessage() + " | " + e.getCause());
-			e.printStackTrace();
-			System.exit(1);
-		}
+	    catch (Exception e)
+	    {
+		    System.out.println("[SEVERE] render exception: " + e.toString() + " | " + e.getMessage() + " | " + e.getCause());
+		    e.printStackTrace();
+		    System.exit(1);
+	    }
 	}
 	public void init()
 	{
@@ -1254,6 +1306,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			System.out.println("Connecting...");
 			CraftrKickScreen cks = new CraftrKickScreen(canvas,"Wait a second...");
 			cks.mName="CONNECTING...";
+
 			cks.bgcolor = new Color(128,128,128);
 			canvas.cs = (CraftrScreen)cks;
 			net.connect(CraftrConvert.getHost(thost),CraftrConvert.getPort(thost), nagle);

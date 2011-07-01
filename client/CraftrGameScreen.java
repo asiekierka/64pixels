@@ -140,9 +140,13 @@ public class CraftrGameScreen extends CraftrScreen
 		{
 			for(int ix=0;ix<FULLGRID_W;ix++)
 			{
-				c.DrawChar(ix<<4,iy<<4,blockChr[ix+(iy*FULLGRID_W)],blockCol[ix+(iy*FULLGRID_W)], g);
-				if(blocks[ix+(iy*FULLGRID_W)].isBullet()) c.DrawChar(ix<<4,iy<<4,(byte)248,(byte)15, g);
-				
+			    if(blocks[ix+(iy*FULLGRID_W)] != null)
+			    {
+				    c.DrawChar(ix<<4,iy<<4,blockChr[ix+(iy*FULLGRID_W)],blockCol[ix+(iy*FULLGRID_W)], g);
+				    if(blocks[ix+(iy*FULLGRID_W)].isBullet()) c.DrawChar(ix<<4,iy<<4,(byte)248,(byte)15, g);
+				}else{
+				    c.DrawChar(ix<<4,iy<<4,(byte)0x00,(byte)0x00, g);
+				}
 			}
 		}
 		for (int i=0;i<256;i++)
