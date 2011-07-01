@@ -498,12 +498,12 @@ public class CraftrServer extends CraftrServerShim
 		{
 			if(id == 255)
 			{
-				return "Commands: who warps kick nick deop save ban unban delwarp pvp lock unlock worlds addworld delworld msg";
+				return "Commands: who warps kick nick deop save ban unban delwarp lock unlock worlds addworld delworld msg";
 			}
 			else if(clients[id].op)
 			{
 
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg rays";
 			}
 			else
 			{
@@ -599,7 +599,34 @@ public class CraftrServer extends CraftrServerShim
 					}
 				}
 			}
-			else if(cmd[0].equals("pvp"))
+			else if(cmd[0].equals("rays") && id!=255)
+			{
+				String tmap = "(map " + clients[id].world.name + ")";
+				if(clients[id].map==map) tmap = "(main map)";
+				if(clients[id].world.isRays)
+				{
+					clients[id].world.isRays=false;
+					clients[id].sendChatMsgAll("&eRaytracing OFF &f" + tmap);
+					for(int i=0;i<255;i++)
+					{
+						if(clients[i] != null && clients[i].dc == 0 && clients[i].map == clients[id].map)
+						{
+							clients[i].setRays(false);
+						}
+					}
+				}
+				else
+				{
+					clients[id].world.isRays=true;
+					clients[id].sendChatMsgAll("&eRaytracing ON! &f" + tmap);
+					for(int i=0;i<255;i++)
+					{
+						if(clients[i] != null && clients[i].dc == 0 && clients[i].map == clients[id].map) clients[i].setRays(true);
+					}
+				}
+				return "";
+			}
+			else if(cmd[0].equals("pvp") && id!=255)
 			{
 				String tmap = "(map " + clients[id].world.name + ")";
 				if(clients[id].map==map) tmap = "(main map)";

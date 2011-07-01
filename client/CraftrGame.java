@@ -71,7 +71,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public String isKickS;
 	public boolean skipConfig = false;
 	public boolean muted = false;
-	public boolean raytrace = true;
+	public boolean raytrace = false;
 	public void playSound(int tx, int ty, int val)
 	{
 		if(muted) return;

@@ -638,6 +638,16 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								}
 								break;
 							}
+							case 0x81:
+							{
+								game.raytrace=false;
+								break;
+							}
+							case 0x82:
+							{
+								game.raytrace=true;
+								break;
+							}
 							case 0xE1: // push me
 								int e1x = in.readInt();
 								int e1y = in.readInt();

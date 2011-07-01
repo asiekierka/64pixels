@@ -12,6 +12,7 @@ public class CraftrWorld
 	public int tickSpeed = 10;
 	public int spawnX = 0;
 	public int spawnY = 0;
+	public boolean isRays = false;
 
 	public CraftrWorld(String n, CraftrMap m, int speed, CraftrWarps w)
 	{

@@ -135,6 +135,7 @@ public class CraftrClient implements Runnable
 				out.writeInt(y);
 				sendPacket();
 			}
+			setRays(world.isRays);
 			sendChatMsgSelf("&aMap changed to &f" + nmap.mapName);
 		}
 		catch(Exception e)
@@ -403,6 +404,23 @@ public class CraftrClient implements Runnable
 			e.printStackTrace();
 		}
 	}
+	public void setRays(boolean r)
+	{
+		try
+		{
+			synchronized(out)
+			{
+				if(r) out.writeByte(0x82);
+				else out.writeByte(0x81);
+				sendPacket();
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Non-fatal setRays error!");
+		}
+	}
+
 	public void despawnPlayer()
 	{
 		try
