@@ -1009,9 +1009,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		        }
 		    }else{
 			gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
-		        for(double angle=0;angle<360;angle+=3.15)
+		        for(double angle=0;angle<360;angle+=0.5)
 		        {
-		            for(double len=0;len<64;len+=0.5)
+		            for(double len=0.5;len<64;len+=0.5)
 		            {
 		                int x = (int)(15.5+Math.sin(Math.toRadians(angle))*len);
 		                int y = (int)(12.5+Math.cos(Math.toRadians(angle))*len);

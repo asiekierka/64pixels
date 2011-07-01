@@ -145,7 +145,7 @@ public class CraftrGameScreen extends CraftrScreen
 				    c.DrawChar(ix<<4,iy<<4,blockChr[ix+(iy*FULLGRID_W)],blockCol[ix+(iy*FULLGRID_W)], g);
 				    if(blocks[ix+(iy*FULLGRID_W)].isBullet()) c.DrawChar(ix<<4,iy<<4,(byte)248,(byte)15, g);
 				}else{
-				    c.DrawChar(ix<<4,iy<<4,(byte)177,(byte)0x08, g);
+				    c.DrawChar(ix<<4,iy<<4,(byte)177,(byte)0x7F, g);
 				}
 			}
 		}
