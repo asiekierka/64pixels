@@ -1033,15 +1033,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				        gs.blocks[(iy*gs.FULLGRID_W)+ix] = null;
 			        }
 		        }
-		        int center_x = gs.FULLGRID_H/2;
-		        int center_y = gs.FULLGRID_W/2;
 		        
-		        for(double angle=0;angle<360;angle+=0.25)
+		        for(double angle=0;angle<360;angle+=1.0)
 		        {
 		            for(double len=0;len<64;len+=0.25)
 		            {
-		                int x = (int)((double)center_x+Math.sin(Math.toRadians(angle))*len);
-		                int y = (int)((double)center_x+Math.cos(Math.toRadians(angle))*len);
+		                int x = (int)(15.5+Math.sin(Math.toRadians(angle))*len);
+		                int y = (int)(12.5+Math.cos(Math.toRadians(angle))*len);
 		                if(x>=0 && y>=0 && x<32 && y<25)
 		                {
          					t = map.getBlock(x+sx,y+sy);
