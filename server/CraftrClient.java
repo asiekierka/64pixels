@@ -589,6 +589,7 @@ public class CraftrClient implements Runnable
 											passWait=true;
 										}
 										sendChatMsgAll(nick + " has joined.");
+										setRays(world.isRays);
 										map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
 										map.setPlayer(x,y,1);
 										spawnPlayer();
