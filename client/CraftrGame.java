@@ -71,7 +71,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public String isKickS;
 	public boolean skipConfig = false;
 	public boolean muted = false;
-
+	public boolean raytrace = true;
 	public void playSound(int tx, int ty, int val)
 	{
 		if(muted) return;
@@ -991,7 +991,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		int sx = px-15;
 		int sy = py-12;
 		CraftrBlock t;
-		boolean raytrace = true;
 
 	    try
 	    {
@@ -1008,53 +1007,29 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				        gs.blockCol[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnColor();
 			        }
 		        }
-		        for (int i=0;i<256;i++)
-		        {
-			        if(players[i] == null)
-			        {
-				        gs.removePlayer(i);
-				        continue;
-			        }
-			        int tx = (players[i].px-players[255].px)+15;
-			        int ty = (players[i].py-players[255].py)+12;
-			        gs.removePlayer(i);
-			        if(tx>=0 && ty>=0 && tx<32 && ty<25)
-			        {
-				        CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
-				        if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
-			        }
-		        }
 		    }else{
-		        for(int iy=0;iy<gs.FULLGRID_H;iy++)
+			gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
+		        for(double angle=0;angle<360;angle+=3.15)
 		        {
-
-			        for(int ix=0;ix<gs.FULLGRID_W;ix++)
-			        {
-				        gs.blocks[(iy*gs.FULLGRID_W)+ix] = null;
-			        }
-		        }
-		        
-		        for(double angle=0;angle<360;angle+=1.0)
-		        {
-		            for(double len=0;len<64;len+=0.25)
+		            for(double len=0;len<64;len+=0.5)
 		            {
 		                int x = (int)(15.5+Math.sin(Math.toRadians(angle))*len);
 		                int y = (int)(12.5+Math.cos(Math.toRadians(angle))*len);
-		                if(x>=0 && y>=0 && x<32 && y<25)
-		                {
+				if(x>=0 && y>=0 && x<32 && y<25)
+				{
+					if(gs.blocks[(y*gs.FULLGRID_W)+x] == null)
+					{
          					t = map.getBlock(x+sx,y+sy);
-				            gs.blocks[(y*gs.FULLGRID_W)+x] = t;
-				            gs.blockChr[(y*gs.FULLGRID_W)+x] = (byte)t.getDrawnChar();
-				            gs.blockCol[(y*gs.FULLGRID_W)+x] = (byte)t.getDrawnColor();
-		                    if(!t.isEmpty())
-		                    {
-		                        len = 128;
-		                    }
-		                }else{
-		                    len = 128;
-		                }
+				        	gs.blocks[(y*gs.FULLGRID_W)+x] = t;
+				        	gs.blockChr[(y*gs.FULLGRID_W)+x] = (byte)t.getDrawnChar();
+				        	gs.blockCol[(y*gs.FULLGRID_W)+x] = (byte)t.getDrawnColor();
+		                		if(!t.isEmpty()) len = 128;
+					}
+					else if(!gs.blocks[(y*gs.FULLGRID_W)+x].isEmpty()) len=128;
+		                } else len=128;
 		            }
 		        }
+		    }
 		        for (int i=0;i<256;i++)
 		        {
 			        if(players[i] == null)
@@ -1065,13 +1040,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			        int tx = (players[i].px-players[255].px)+15;
 			        int ty = (players[i].py-players[255].py)+12;
 			        gs.removePlayer(i);
-			        if(tx>=0 && ty>=0 && tx<32 && ty<25)
+			        if(tx>=0 && ty>=0 && tx<32 && ty<25 && gs.blocks[(ty*gs.FULLGRID_W)+tx] != null)
 			        {
 				        CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
 				        if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
 			        }
 		        }
-		    }
 		}
 	    catch (Exception e)
 	    {
