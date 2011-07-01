@@ -474,18 +474,15 @@ public class CraftrServer extends CraftrServerShim
 		else if(cmd[0].equals("worlds") || cmd[0].equals("maps"))
 		{
 			String wt = "Worlds: ";
-			boolean wasVal = false;
 			for(int i=0;i<world_names.length;i++)
 			{
 				if(!world_names[i].startsWith("$"))
 				{
-					if(wasVal) wt+= ", ";
 					wt += world_names[i];
-					wasVal=true;
+					wt += ", ";
 				}
-				else wasVal=false;
 			}
-			return wt;
+			return wt.substring(0,wt.length()-2);
 		}
 		else if((cmd[0].equals("id") || cmd[0].equals("identify")) && id!=255)
 		{
@@ -530,14 +527,15 @@ public class CraftrServer extends CraftrServerShim
 			clients[id].sendChatMsgAll("&5"+st);
 			return "";
 		}
-		else if((cmd[0].equals("load") || cmd[0].equals("goto") || cmd[0].equals("l")) && id!=255)
-		{
+		else if((cmd[0].equals("load") || cmd[0].equals("goto") || cmd[0].equals("l") || cmd[0].equals("join")) && id!=255)
+		{ 
 			CraftrWorld tm = findWorld(cmdz[1]);
 			if(tm==null) return "No such world!";
 			else
 			{
 				clients[id].changeMap(tm.map);
-				clients[id].sendChatMsgAll("&e" + clients[id].nick + " loaded map &f'" + cmdz[1] + "'!"); 
+				if(!cmd[1].equals("map")) clients[id].sendChatMsgAll("&e" + clients[id].nick + " loaded map &f'" + cmdz[1] + "'!"); 
+				else clients[id].sendChatMsgAll("&e" + clients[id].nick + " loaded the main map!");
 			}
 		}
 		else if(cmd[0].equals("return") && id!=255)
@@ -624,7 +622,7 @@ public class CraftrServer extends CraftrServerShim
 					clients[id].sendChatMsgAll("&ePvP mode ON! &f" + tmap);
 					for(int i=0;i<255;i++)
 					{
-						if(clients[i] != null && clients[i].dc == 0) clients[id].resetPvP();
+						if(clients[i] != null && clients[i].dc == 0) clients[i].resetPvP();
 					}
 				}
 				return "";
@@ -1125,6 +1123,31 @@ public class CraftrServer extends CraftrServerShim
 			}
 		}
 	}
+
+	public void writeString(String s, DataOutputStream out)
+	{
+		try
+		{
+			byte[] t = s.getBytes();
+			synchronized(out)
+			{
+				out.writeByte(s.length());
+				out.write(t,0,s.length());
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Non-fatal CraftrServer writeString error!");
+			try
+			{
+				synchronized(out){out.writeByte(0x00);}
+			}
+			catch(Exception ee)
+			{
+				System.out.println("Fatal CraftrServer writeString error!");
+			}
+		} 
+	}
 	
 	public void start()
 	{
@@ -1150,6 +1173,7 @@ public class CraftrServer extends CraftrServerShim
 		{
 			try
 			{
+				boolean accepted = false;
 				Socket t = servsock.accept();
 				for(int i=0;i<255;i++)
 				{
@@ -1159,8 +1183,15 @@ public class CraftrServer extends CraftrServerShim
 						clients[i].world = findWorld("map");
 						Thread t1 = new Thread(clients[i]);
 						t1.start();
+						accepted = true;
 						break;
 					}
+				}
+				if(!accepted)
+				{
+					DataOutputStream to = new DataOutputStream(t.getOutputStream());
+					to.writeByte(0xF5);
+					writeString("Too many players!",to);
 				}
 				Thread.sleep(10);
 			}

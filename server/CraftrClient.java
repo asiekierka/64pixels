@@ -827,6 +827,7 @@ public class CraftrClient implements Runnable
 								map.setBullet(xb,yb,bt);
 								map.setBulletNet(xb,yb,bt);
 								map.physics.addBlockToCheck(new CraftrBlockPos(xb,yb));
+								for(int i=0;i<4;i++) map.physics.addBlockToCheck(new CraftrBlockPos(xb+map.xMovement[i],yb+map.yMovement[i]));
 								break;
  							case 0xE0:
  								{

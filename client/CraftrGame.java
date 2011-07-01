@@ -70,9 +70,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public int kim = 0;
 	public String isKickS;
 	public boolean skipConfig = false;
+	public boolean muted = false;
 
 	public void playSound(int tx, int ty, int val)
 	{
+		if(muted) return;
 		if(val>=256)
 		{
 			playSample(tx,ty,val-256);
@@ -84,6 +86,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public void playSample(int tx, int ty, int val)
 	{
+		if(muted) return;
 		int x=players[255].px-tx;
 		int y=players[255].py-ty;
 		audio.playSampleByNumber(x,y,val,1.0);
@@ -754,7 +757,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		{
 			net.shoot(sx,sy,(dir+1));
 		}
-		else map.physics.addBlockToCheck(new CraftrBlockPos(sx,sy));
+		else
+		{
+			map.physics.addBlockToCheck(new CraftrBlockPos(sx,sy));
+			for(int i=0;i<4;i++) map.physics.addBlockToCheck(new CraftrBlockPos(sx+map.xMovement[i],sy+map.yMovement[i]));
+		}
 	}
 
 	public void keyTyped(KeyEvent ev) {} // this one sucks even more
@@ -886,6 +893,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(chr >= 32 && chr <= 127) gs.chatMsg += chr;
 				mouseChange = true;
 			}
+		}
+		if(kc==KeyEvent.VK_F7)
+		{
+			muted=!muted;
+			if(muted) gs.addChatMsg("&6Sound muted.");
+			else gs.addChatMsg("&6Sound unmuted.");
 		}
 	}
 	public void keyReleased(KeyEvent ev)

@@ -611,7 +611,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								int ta60y = in.readByte();
 								int ta60v = in.readUnsignedByte();
 								// best not to screw up meloders --GM
-								game.audio.playNote(ta60x,ta60y,ta60v,1.0);
+								if(!game.muted) game.audio.playNote(ta60x,ta60y,ta60v,1.0);
 								break;
 							case 0x70:
 								int x70 = in.readInt();
