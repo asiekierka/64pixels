@@ -1,0 +1,4 @@
+CraftrPlayer
+
+Function: Handles player looks, nick, location
+Code level: Good

@@ -1,0 +1,3 @@
+CraftrNetShim
+
+Function: Adding interfaces between CraftrMap and CraftrNet (if you need new functions from CraftrNet, edit this)

@@ -1,0 +1,4 @@
+CraftrVersion
+
+Function: Gives the game's protocol/game version.
+Code level: Good

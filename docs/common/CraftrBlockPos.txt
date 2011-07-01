@@ -1,0 +1,4 @@
+CraftrBlockPos
+
+Function: Store block positions for CraftrPhysics
+Code level: Good (all functions are self-explanatory)

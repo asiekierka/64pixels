@@ -1,0 +1,11 @@
+CraftrChunk
+
+Function: Store/handle chunks (except load/save from/to file which is handled in CraftrMap)
+Code level: Good (all functions are self-explanatory)
+
+loadByte (byte[] rawdata) - load data from byte array
+byte[] saveByte() - save data to byte array
+fixDisplay() - handled after loadByte(), useful for changing some block stuff
+generate (int mode) - generate in a specific mapgen mode, useful for adding mapgens!
+index(int x, y) - index position in chunk
+getFilename(int x, y) - get save location for chunk

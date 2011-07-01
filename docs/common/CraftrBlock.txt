@@ -1,0 +1,4 @@
+CraftrBlock
+
+Function: Store blocks for editing/handling
+Code level: Good (all functions are self-explanatory)

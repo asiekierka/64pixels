@@ -1,0 +1,11 @@
+CraftrPhysics
+
+Function: Handles the game's physics
+Code level: Medium
+
+pnandDir[], pnandDir2[] - calculating a P-NAND's direction from char.
+xMovement[], yMovement[] - x/y neighbour delta locations for iteration
+isUpdated(int type) - is the block checked
+isSent(int type) - is the block sent over the internet
+tick(CraftrMap map) - handles a physics tick on a map, also places new blocks generated during the tick
+runPhysics(CraftrBlockPos cbp, CraftrMap map) - runs a physics tick on block [cbp], map map.
