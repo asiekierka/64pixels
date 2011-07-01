@@ -21,10 +21,9 @@ public class CraftrWorld
 		if(!name.equals("map")) warps.loadFile(name + "/warps.dat");
 		else warps.loadFile("warps.dat");
 		mt = new CraftrMapThread(map);
-		mt.speed = (1000/speed);
 		tickSpeed = speed;
 		if(tickSpeed>100 || tickSpeed<=0) tickSpeed=10;
-		if(mt.speed<10 || mt.speed>1000) mt.speed=100;
+		mt.speed = (1000/tickSpeed);
 		t = new Thread(mt);
 		t.start();
 	}
@@ -42,8 +41,8 @@ public class CraftrWorld
 
 	public void changeTickSpeed(int ts)
 	{
-		tickSpeed=(1000/ts);
+		tickSpeed=ts;
 		if(tickSpeed>100 || tickSpeed<=0) tickSpeed=10;
-		mt.speed=tickSpeed;
+		mt.speed=(1000/tickSpeed);
 	}
 }
