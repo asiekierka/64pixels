@@ -423,7 +423,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				{
 					String[] dchi = key.split("\\|");
 					/* as | is a special character here, we need to escape it with \. *
-					 *  but \ is also special so we escape THAT with another \         */
+					 *  but \ is also special so we escape THAT with another \	 */
 					if(dchi.length==2)
 					{
 						gs.drawChrA[nf.parse(dchi[1]).intValue()]=nf.parse(val).intValue();
@@ -1004,63 +1004,63 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		int sx = px-15;
 		int sy = py-12;
 		CraftrBlock t;
-
-	    try
-	    {
-            if (!raycasting)
-            {
-		        for(int iy=0;iy<gs.FULLGRID_H;iy++)
-		        {
-
-			        for(int ix=0;ix<gs.FULLGRID_W;ix++)
-			        {
-				        gs.blocks[(iy*gs.FULLGRID_W)+ix] = map.getBlock(ix+sx,iy+sy);
-			        }
-		        }
-		    }else{
-			gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
-		        for(double angle=0;angle<360;angle+=0.15)
-		        {
-		            for(double len=0;len<64;len+=0.5)
-		            {
-		                int x = (int)(15.5+Math.sin(Math.toRadians(angle))*len);
-		                int y = (int)(12.5+Math.cos(Math.toRadians(angle))*len);
-				if(x>=0 && y>=0 && x<32 && y<25)
+		try
+		{
+			if (!raycasting)
+			{
+				for(int iy=0;iy<gs.FULLGRID_H;iy++)
 				{
-					if(gs.blocks[(y*gs.FULLGRID_W)+x] == null)
+					for(int ix=0;ix<gs.FULLGRID_W;ix++)
 					{
-         					t = map.getBlock(x+sx,y+sy);
-				        	gs.blocks[(y*gs.FULLGRID_W)+x] = t;
-		                		if(!t.isEmpty()) len = 128;
+						gs.blocks[(iy*gs.FULLGRID_W)+ix] = map.getBlock(ix+sx,iy+sy);
 					}
-					else if(!gs.blocks[(y*gs.FULLGRID_W)+x].isEmpty()) len=128;
-		                } else len=128;
-		            }
-		        }
-		    }
-		        for (int i=0;i<256;i++)
-		        {
-			        if(players[i] == null)
-			        {
-				        gs.removePlayer(i);
-				        continue;
-			        }
-			        int tx = (players[i].px-players[255].px)+15;
-			        int ty = (players[i].py-players[255].py)+12;
-			        gs.removePlayer(i);
-			        if(tx>=0 && ty>=0 && tx<32 && ty<25 && gs.blocks[(ty*gs.FULLGRID_W)+tx] != null)
-			        {
-				        CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
-				        if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
-			        }
-		        }
+				}
+			}
+			else
+			{
+				gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
+				for(double angle=0;angle<360;angle+=0.15)
+				{
+					for(double len=0;len<64;len+=0.5)
+					{
+						int x = (int)(15.5+Math.sin(Math.toRadians(angle))*len);
+						int y = (int)(12.5+Math.cos(Math.toRadians(angle))*len);
+						if(x>=0 && y>=0 && x<32 && y<25)
+						{
+							if(gs.blocks[(y*gs.FULLGRID_W)+x] == null)
+							{
+			 					t = map.getBlock(x+sx,y+sy);
+								gs.blocks[(y*gs.FULLGRID_W)+x] = t;
+								if(!t.isEmpty()) len = 128;
+							}
+							else if(!gs.blocks[(y*gs.FULLGRID_W)+x].isEmpty()) len=128;
+						} else len=128;
+					}
+				}
+			}
+			for (int i=0;i<256;i++)
+			{
+				if(players[i] == null)
+				{
+					gs.removePlayer(i);
+					continue;
+				}
+				int tx = (players[i].px-players[255].px)+15;
+				int ty = (players[i].py-players[255].py)+12;
+				gs.removePlayer(i);
+				if(tx>=0 && ty>=0 && tx<32 && ty<25 && gs.blocks[(ty*gs.FULLGRID_W)+tx] != null)
+				{
+					CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
+					if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
+				}
+			}
 		}
-	    catch (Exception e)
-	    {
-		    System.out.println("[SEVERE] render exception: " + e.toString() + " | " + e.getMessage() + " | " + e.getCause());
-		    e.printStackTrace();
-		    System.exit(1);
-	    }
+		catch (Exception e)
+		{
+			System.out.println("[SEVERE] render exception: " + e.toString() + " | " + e.getMessage() + " | " + e.getCause());
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 	public void init()
 	{
