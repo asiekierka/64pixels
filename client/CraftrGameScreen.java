@@ -26,8 +26,6 @@ public class CraftrGameScreen extends CraftrScreen
 	public int my = 0;
 	public ArrayList<CraftrWindow> windows;
 	
-	public byte[] blockChr;
-	public byte[] blockCol;
 	public CraftrBlock[] blocks;
 
 	public CraftrChatMsg[] chatarr;
@@ -43,8 +41,6 @@ public class CraftrGameScreen extends CraftrScreen
 		c = cc;
 		windows = new ArrayList<CraftrWindow>();
 		blocks = new CraftrBlock[FULLGRID_W*FULLGRID_H];
-		blockChr = new byte[FULLGRID_W*FULLGRID_H];
-		blockCol = new byte[FULLGRID_W*FULLGRID_H];
 		chatarr = new CraftrChatMsg[20];
 		chatlen = 0;
 		for(int i=0;i<256;i++) drawColA[i] = 15;
@@ -136,14 +132,16 @@ public class CraftrGameScreen extends CraftrScreen
 		my = mmy;
 		g.setColor(new Color(0x000000));
 		g.fillRect(0,0,c.sizeX,c.sizeY);
+		CraftrBlock t;
 		for(int iy=0;iy<FULLGRID_H-1;iy++)
 		{
 			for(int ix=0;ix<FULLGRID_W;ix++)
 			{
-			    if(blocks[ix+(iy*FULLGRID_W)] != null)
+			    t = blocks[ix+(iy*FULLGRID_W)];
+			    if(t != null)
 			    {
-				    c.DrawChar(ix<<4,iy<<4,blockChr[ix+(iy*FULLGRID_W)],blockCol[ix+(iy*FULLGRID_W)], g);
-				    if(blocks[ix+(iy*FULLGRID_W)].isBullet()) c.DrawChar(ix<<4,iy<<4,(byte)248,(byte)15, g);
+				    c.DrawChar(ix<<4,iy<<4,(byte)t.getDrawnChar(),(byte)t.getDrawnColor(), g);
+				    if(t.isBullet()) c.DrawChar(ix<<4,iy<<4,(byte)248,(byte)15, g);
 				}else{
 				    c.DrawChar(ix<<4,iy<<4,(byte)177,(byte)0x08, g);
 				}
@@ -182,8 +180,7 @@ public class CraftrGameScreen extends CraftrScreen
 				cw.typeChosen = drawType;
 				cw.charChosen = gdrawChr();
 				cw.colorChosen = gdrawCol();
-				if(drawType==7) cw.isMelodium=true;
-				else cw.isMelodium=false;
+				cw.isMelodium=(drawType==7);
 				cw.render(c,g);
 			}
 		}
