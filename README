@@ -1,26 +1,12 @@
 64pixels source code
 asiekierka, 2010-2011
 
-Read the LICENSE file before publishing your forks, please. (i should change it)
+Read the LICENSE file before publishing your forks, please. (i should change it to a real license, any help/0
 Some tips:
 
-1. use compile.sh to compile source files from craftr/ and craftr-srvr/ or else!!! (common/ doesnt need it)
-	^ note: this will need to be updated to point to client/server or something like that --GM
-2. use make_jars.sh to make the JARs (all of them)
+1. use make and make clean. (thanks AJF!)
 
 notes from GM:
-	code merge has been done. stuff is in client/common/server.
-	stuff in craftr/craftr-srvr is old and will not be updated so don't use them.
-	also some bugs were fixed.
-	
-	the architecture is still a bit messed up, and will still need some improvement,
-	but stuff shouldn't need to be copy-pasted between two almost-identical files now.
-	
 	the *Shim files are used as interfaces.
 	unfortunately, CraftrServer or something still uses public variables,
 	so I've had to use an abstract class instead.
-	having said that, i deleted CraftrSoundShim as all the sound interfacing is in the client.
-	
-	one more thing.
-	asiekierka, i basically ignored your common/ updates.
-	feel free to shove any specifics back in.
