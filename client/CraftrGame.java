@@ -24,32 +24,17 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public CraftrMap map;
 	public CraftrPlayer players[] = new CraftrPlayer[256];
 	
-	public Date told = new Date();
-	public Date tnew;
 	public int fps = 0;
-	public int ix = 0;
-	public int iy = 0;
-	public int mx = -1;
-	public int my = -1;
-	public int oldmx = -1;
-	public int oldmy = -1;
-	public int lpx = 0;
-	public int lpy = 0;
 	public long frame = 0;
 	public long fold = 0;
 	public int waitTime = 0;
 	public int nagle=0;
 	public boolean isApplet;
-	public int mb = 0;
-	public int oldmb = 0;
-	public int ev_no,ev_1,ev_2,ev_3;
 	public boolean blockChange = false;
 	public boolean playerChange = false;
 	public boolean mouseChange = false;
 	public boolean netChange = false;
 	public boolean multiplayer;
-	public boolean canMousePress;
-	public boolean isShift = false;
 	public boolean isKick = false;
 	public CraftrMapThread cmt;
 	public int cmtsp=30;
@@ -63,16 +48,35 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public boolean[] keyHeld;
 	public boolean advMouseMode = false;
 	public int netThreadRequest = 0;
-	private int key_up = KeyEvent.VK_UP;
-	private int key_left = KeyEvent.VK_LEFT;
-	private int key_right = KeyEvent.VK_RIGHT;
-	private int key_down = KeyEvent.VK_DOWN;
 	public int kim = 0;
 	public String isKickS;
 	public boolean skipConfig = false;
 	public boolean muted = false;
 	public boolean raytrace = false;
+
+	private long wpso = 0;
+	private Date overdate;
+	private Date told = new Date();
+	private Date tnew;
+	private int ix = 0;
+	private int iy = 0;
+	private int mx = -1;
+	private int my = -1;
+	private int oldmx = -1;
+	private int oldmy = -1;
+	private int lpx = 0;
+	private int lpy = 0;
+	private boolean canMousePress;
+	private boolean isShift = false;
+	private int mb = 0;
+	private int oldmb = 0;
+	private int ev_no,ev_1,ev_2,ev_3;
+	private int key_up = KeyEvent.VK_UP;
+	private int key_left = KeyEvent.VK_LEFT;
+	private int key_right = KeyEvent.VK_RIGHT;
+	private int key_down = KeyEvent.VK_DOWN;
 	private static final byte[] extendDir = { 30, 31, 16, 17 };
+	private CraftrGameThread gt;
 
 	public void playSound(int tx, int ty, int val)
 	{
@@ -1020,7 +1024,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
 		        for(double angle=0;angle<360;angle+=0.5)
 		        {
-		            for(double len=0.5;len<64;len+=0.5)
+		            for(double len=0;len<64;len+=0.25)
 		            {
 		                int x = (int)(15.5+Math.sin(Math.toRadians(angle))*len);
 		                int y = (int)(12.5+Math.cos(Math.toRadians(angle))*len);
@@ -1247,6 +1251,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			applet.addKeyListener(this);
 		}
 		net = new CraftrNet();
+		gt = new CraftrGameThread(this);
 		if(!isApplet)
 		{
 			window.getRootPane().addMouseListener(this);
@@ -1302,111 +1307,111 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			t1.start();
 			net.chunkRequest(0,0);
 		}
-		long wpso = 0;
-		Date overdate;
-		while(gameOn)
+		Thread t2 = new Thread(gt);
+		t2.start();
+	}
+	public void runOnce()
+	{
+		if(isKick) { gt.isRunning=false; realKickOut(); }
+		if(waitTime==0)
 		{
-			try
+			if(keyHeld[0]==true)
 			{
-			Thread.sleep(33);
+				waitTime=movePlayer(0,-1);
 			}
-			catch (Exception e) { }
-			if(isKick) realKickOut();
-			if(waitTime==0)
+			if(keyHeld[1]==true)
 			{
-				if(keyHeld[0]==true)
-				{
-					waitTime=movePlayer(0,-1);
-				}
-				if(keyHeld[1]==true)
-				{
-					waitTime=movePlayer(-1,0);
-				}
-				if(keyHeld[2]==true)
-				{
-					waitTime=movePlayer(1,0);
-				}
-				if(keyHeld[3]==true)
-				{
-					waitTime=movePlayer(0,1);
-				}
+				waitTime=movePlayer(-1,0);
 			}
-			else waitTime--;
-			while(overhead>33)
+			if(keyHeld[2]==true)
 			{
-				if(waitTime>0) waitTime--;
-				if(chrArrowWaiter>0) chrArrowWaiter--;
-				overhead-=33;
+				waitTime=movePlayer(1,0);
 			}
-			if(chrArrowWaiter>0) chrArrowWaiter--;
-			else if(mb == ev_1) {
-				if(insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
-				{
-					gs.chrBarOff -= 1;
-					chrArrowWaiter=2;
-					mouseChange=true;
-					if(gs.chrBarOff<0) gs.chrBarOff = 255;
-				}
-				else if(insideRect(mx,my,29*16,gs.BARPOS_Y+1,8,14))
-				{
-					gs.chrBarOff += 1;
-					chrArrowWaiter=2;
-					mouseChange=true;
-					if(gs.chrBarOff>255) gs.chrBarOff=0;
-				}
-			}
-			if(multiplayer)
+			if(keyHeld[3]==true)
 			{
-				for(int i=0;i<256;i++)
-				{
-					if(players[i] != null && players[i].posChanged)
-					{
-						playerChange = true;
-						players[i].posChanged = false;
-					}
-				}
-				if(netThreadRequest>0) parseNTR();
-			}
-			else
-			{
-				playerChange = players[255].posChanged;
-				players[255].posChanged = false;
-			}
-			if(!multiplayer || net.loginStage > 0)
-			{
-				processMouse();
-				if(mx != oldmx || my != oldmy || mb != oldmb)
-				{
-					mouseChange = true;
-					oldmx = mx;
-
-					oldmy = my;
-					oldmb = mb;
-				}
-				render();
-				canvas.draw(mx,my);
-			}
-			frame++;
-			overdate = new Date();
-			overhead+=overdate.getTime()-told.getTime()-33;
-			told = overdate;
-			if(told.compareTo(tnew)>=0)
-			{
-				fps = (int)(frame-fold);
-				tnew = new Date(told.getTime() + 1000L);
-				fold = frame;
-				System.out.println(fps + " fps, physics runs at " + (cmt.wps-wpso) + "checks a second");
-				wpso = cmt.wps;
+				waitTime=movePlayer(0,1);
 			}
 		}
+		else waitTime--;
+		while(overhead>33)
+		{
+			if(waitTime>0) waitTime--;
+			if(chrArrowWaiter>0) chrArrowWaiter--;
+			overhead-=33;
+		}
+		if(chrArrowWaiter>0) chrArrowWaiter--;
+		else if(mb == ev_1) {
+			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
+			{
+				gs.chrBarOff -= 1;
+				chrArrowWaiter=2;
+				mouseChange=true;
+				if(gs.chrBarOff<0) gs.chrBarOff = 255;
+			}
+			else if(insideRect(mx,my,29*16,gs.BARPOS_Y+1,8,14))
+			{
+				gs.chrBarOff += 1;
+				chrArrowWaiter=2;
+				mouseChange=true;
+				if(gs.chrBarOff>255) gs.chrBarOff=0;
+			}
+		}
+		if(multiplayer)
+		{
+			for(int i=0;i<256;i++)
+			{
+				if(players[i] != null && players[i].posChanged)
+				{
+					playerChange = true;
+					players[i].posChanged = false;
+				}
+			}
+			if(netThreadRequest>0) parseNTR();
+		}
+		else
+		{
+			playerChange = players[255].posChanged;
+			players[255].posChanged = false;
+		}
+		if(!multiplayer || net.loginStage > 0)
+		{
+			processMouse();
+			if(mx != oldmx || my != oldmy || mb != oldmb)
+			{
+				mouseChange = true;
+				oldmx = mx;
+
+				oldmy = my;
+				oldmb = mb;
+			}
+			render();
+			canvas.draw(mx,my);
+		}
+		frame++;
+		overdate = new Date();
+		overhead+=overdate.getTime()-told.getTime()-33;
+		told = overdate;
+		if(told.compareTo(tnew)>=0)
+		{
+			tnew = new Date(told.getTime() + 1000L);
+			fold = frame;
+			fps = (int)gt.fps;
+			gt.fps=0;
+			System.out.println(fps + " fps, physics runs at " + (cmt.wps-wpso) + "checks a second");
+			wpso = cmt.wps;
+		}
+		gt.isRunning=gameOn;
 	}
 	public void stop()
 	{
+		gt.isRunning=false;
 		gameOn = false;
 	}
 	public void end()
 	{
 		System.out.print("Saving... ");
+		gt.isRunning=false;
+		gameOn=false;
 		if(map.saveDir != "")
 		{
 			if(!multiplayer)

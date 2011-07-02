@@ -1,5 +1,5 @@
 package common;
-
+import java.util.*;
 public class CraftrMapThread implements Runnable
 {
 	public CraftrMap map;
@@ -14,14 +14,26 @@ public class CraftrMapThread implements Runnable
 	
 	public void run()
 	{
+		int overhead=0;
 		while(isRunning)
 		{
 			try
 			{
-			if(speed>0)Thread.sleep(speed);
+				if(speed>0)
+				{
+					if(overhead<speed)
+					{
+						Thread.sleep(speed-overhead);
+						overhead=0;
+					} else {
+						overhead-=speed;
+					}
+				}
 			}
 			catch(Exception e){}
+			Date told = new Date();
 			map.physics.tick(map);
+			overhead+=(new Date().getTime())-told.getTime();
 			wps++;
 		}
 	}
