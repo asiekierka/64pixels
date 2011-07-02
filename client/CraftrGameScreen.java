@@ -282,7 +282,7 @@ public class CraftrGameScreen extends CraftrScreen
 			case 14:
 				return "Break";
 			case 15:
-				return "Slider";
+				return "Extend";
 			case -1:
 				return "Pushium";
 		}
@@ -308,6 +308,11 @@ public class CraftrGameScreen extends CraftrScreen
 		c.DrawString1x(0,BARPOS_Y,">" + chatMsg, 15, g);
 	}
 	
+	public boolean isArrow()
+	{
+		return (drawType==3 || drawType==15);
+	}
+
 	public void DrawBar(Graphics g)
 	{
 		g.setColor(new Color(0x000000));
@@ -328,8 +333,9 @@ public class CraftrGameScreen extends CraftrScreen
 		if(drawType == 4) barselMode=2;
 		int bsmt= barselMode;
 		if(drawType == 2) bsmt=3;
-		else if(drawType == 3 && barselMode == 1) bsmt=4;
+		else if(isArrow() && barselMode == 1) bsmt=4;
 		if(drawType == 3 && (gdrawChr()<24 || gdrawChr()>=28)) sdrawChr(25);
+		else if(drawType == 15 && !(gdrawChr()==30 || gdrawChr()==31 || gdrawChr()==16 || gdrawChr()==17)) sdrawChr(31);
 		else if(drawType==4) sdrawChr(206);
 		switch(bsmt)
 		{
@@ -353,7 +359,7 @@ public class CraftrGameScreen extends CraftrScreen
 				break;
 			case 2: // color
 				if(hideousPrompts) c.DrawString1x(12*16+8,BARPOS_Y+16,"      Color       ",9,g);
-				if(drawType==3) c.DrawString1x(8*16+8,BARPOS_Y,"Dir",15,g);
+				if(isArrow()) c.DrawString1x(8*16+8,BARPOS_Y,"Dir",15,g);
 				else if (drawType != 4) c.DrawString1x(8*16+8,BARPOS_Y,"Chr",15,g);
 				c.DrawString1x(8*16+8,BARPOS_Y+8,"Col",240,g);
 				for(int j=0;j<16;j++)
@@ -386,15 +392,37 @@ public class CraftrGameScreen extends CraftrScreen
 			case 4: // p-nand direction
 				c.DrawString1x(8*16+8,BARPOS_Y,"Dir",240,g);
 				c.DrawString1x(8*16+8,BARPOS_Y+8,"Col",15,g);
-				for(int j=24;j<28;j++)
+				if(drawType==3)
 				{
-					c.DrawChar(12*16+8+((j-24)<<4),BARPOS_Y,(byte)j,(byte)15,g);
+					for(int j=24;j<28;j++)
+					{
+						c.DrawChar(12*16+8+((j-24)<<4),BARPOS_Y,(byte)j,(byte)15,g);
+					}
+					g.setColor(new Color(0xAAAAAA));
+					g.drawRect(12*16+8+((gdrawChr()-24)<<4),BARPOS_Y,15,15);
+				}
+				else if(drawType==15)
+				{
+					c.DrawChar(12*16+8,BARPOS_Y,(byte)30,(byte)15,g);
+					c.DrawChar(12*16+24,BARPOS_Y,(byte)31,(byte)15,g);
+					c.DrawChar(12*16+40,BARPOS_Y,(byte)16,(byte)15,g);
+					c.DrawChar(12*16+56,BARPOS_Y,(byte)17,(byte)15,g);
+					g.setColor(new Color(0xAAAAAA));
+					switch(gdrawChr())
+					{
+						case 30:
+						case 31:
+							g.drawRect(12*16+8+((gdrawChr()-30)<<4),BARPOS_Y,15,15);
+							break;
+						case 16:
+						case 17:
+							g.drawRect(12*16+40+((gdrawChr()-16)<<4),BARPOS_Y,15,15);
+							break;
+					}
 				}
 				c.DrawString1x(16*16+12,BARPOS_Y+4,"Direction",15,g);
 				c.DrawChar1x(21*16+8,BARPOS_Y,(byte)179,(byte)15,g);
 				c.DrawChar1x(21*16+8,BARPOS_Y+8,(byte)179,(byte)15,g);
-				g.setColor(new Color(0xAAAAAA));
-				g.drawRect(12*16+8+((gdrawChr()-24)<<4),BARPOS_Y,15,15);
 			default:
 				break;
 		}

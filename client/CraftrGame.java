@@ -63,15 +63,17 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public boolean[] keyHeld;
 	public boolean advMouseMode = false;
 	public int netThreadRequest = 0;
-	public int key_up = KeyEvent.VK_UP;
-	public int key_left = KeyEvent.VK_LEFT;
-	public int key_right = KeyEvent.VK_RIGHT;
-	public int key_down = KeyEvent.VK_DOWN;
+	private int key_up = KeyEvent.VK_UP;
+	private int key_left = KeyEvent.VK_LEFT;
+	private int key_right = KeyEvent.VK_RIGHT;
+	private int key_down = KeyEvent.VK_DOWN;
 	public int kim = 0;
 	public String isKickS;
 	public boolean skipConfig = false;
 	public boolean muted = false;
 	public boolean raytrace = false;
+	private static final byte[] extendDir = { 30, 31, 16, 17 };
+
 	public void playSound(int tx, int ty, int val)
 	{
 		if(muted) return;
@@ -501,11 +503,18 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				gs.sdrawCol((mx-(12*16+8))>>4);
 			}
 		}
-		else if (gs.barselMode == 1 && gs.drawType == 3)
+		else if (gs.barselMode == 1 && gs.drawType == 3) // p-nand dir
 		{
 			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,64,16))
 			{
 				gs.sdrawChr(24+((mx-(12*16+8))>>4));
+			}
+		}
+		else if (gs.barselMode == 1 && gs.drawType == 15) // extend dir
+		{
+			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,64,16))
+			{
+				gs.sdrawChr(extendDir[((mx-(12*16+8))>>4)]);
 			}
 		}
 		else if (gs.barselMode == 1) // checkings, chr

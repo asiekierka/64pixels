@@ -11,6 +11,8 @@ public class CraftrPhysics
 	private Set<CraftrBlock> blocksToSetOld = new HashSet<CraftrBlock>();
 	private static final int[] pnandDir = {26,27,25,24};
 	private static final int[] pnandDir2 = {27,26,24,25};
+	private static final int[] extendDir = {16,17,31,30};
+	private static final int[] extendDir2 = {17,16,30,31};
 	private static final int[] xMovement = { -1, 1, 0, 0 };
 	private static final int[] yMovement = { 0, 0, -1, 1 };
 	private boolean isServer;
@@ -28,7 +30,7 @@ public class CraftrPhysics
 
 	public boolean isUpdated(int type)
 	{
-		return (type>=2 && type<=4) || type==6 || type==7 || type==10 || type==11 || type==12 || type==13;
+		return (type>=2 && type<=4) || type==6 || type==7 || type==10 || type==11 || type==12 || type==13 || type==15;
 	}
 	
 	public boolean isSent(int type)
@@ -137,6 +139,9 @@ public class CraftrPhysics
 				case 13:
 					if(surrBlockData[i][1]>0) strength[i]=15;
 					break;
+				case 15:
+					if(extendDir[i]==surrBlockData[i][2]) strength[i]=(surrBlockData[i][1]!=0)?15:0;
+					break;
 				default:
 					strength[i]=0;
 					break;
@@ -194,7 +199,7 @@ public class CraftrPhysics
 		byte oldd3 = blockData[3];
 		byte oldd1 = blockData[1];
 		int maxSignal = 0;
-		int ss = blockData[1]&15;
+		int lowParam = blockData[1]&15;
 		switch(blockData[0])
 		{
 			case 2:
@@ -206,11 +211,11 @@ public class CraftrPhysics
 					int ty = surrBlockData[i][0];
 					int str = strength[i];
 					if(oldmSi<4 && (oldmSi^1)==i) continue;
-					if(str>maxSignal && str>ss) { maxSignal=str; mSi=i;}
+					if(str>maxSignal && str>lowParam) { maxSignal=str; mSi=i;}
 				}
 				if(maxSignal<=1)
 				{
-					if(ss>0) blockData[3]=(byte)(blockData[3]&7);
+					if(lowParam>0) blockData[3]=(byte)(blockData[3]&7);
 					if(oldd1!=((byte)(mSi<<4)))
 					{
 						addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(mSi<<4),blockData[2],blockData[3]));
@@ -224,7 +229,7 @@ public class CraftrPhysics
 				}
 				else
 				{
-					if(ss==0) blockData[3]=(byte)((blockData[3]&7)|8);
+					if(lowParam==0) blockData[3]=(byte)((blockData[3]&7)|8);
 					if(oldd1!=((byte)((maxSignal-1) | (mSi<<4))))
 					{
 						addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)((maxSignal-1) | (mSi<<4)),blockData[2],blockData[3]));
@@ -260,7 +265,7 @@ public class CraftrPhysics
 				}
 				if(signals==1 || signals==2)
 				{
-					if(ss==0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
+					if(lowParam==0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)15,blockData[2],blockData[3]));
 					int ty = surrBlockData[pnps][0];
 					blockData[1]=15;
@@ -269,7 +274,7 @@ public class CraftrPhysics
 				}
 				else
 				{
-					if(ss>0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
+					if(lowParam>0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)0,blockData[2],blockData[3]));
 					int ty = surrBlockData[pnps][0];
 					blockData[1]=0;
@@ -535,6 +540,45 @@ public class CraftrPhysics
 				}
 				if(dc)
 				{
+					for(int i=0;i<4;i++)
+					{
+						int t = surrBlockData[i][0];
+						int str = strength[i];
+						if(isUpdated(t)) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+					}
+				}
+			} break;
+			case 15: // Extend
+			{
+				int pnps = 3;
+				for(int i=0;i<4;i++)
+				{
+					if(extendDir2[i]==blockData[2]) { pnps=i; break; }
+				}
+				int signals=0;
+				for(int i=0;i<4;i++)
+				{
+					if(i==pnps) continue;
+					int ty = surrBlockData[i][0];
+					int str = strength[i];
+					if((ty==1) || str>0) { signals=1; break; }
+				}
+				if(blockData[1]!=(byte)0)
+				{
+					blockData[1]-=(byte)1;
+					if(blockData[1]==(byte)0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
+				}
+				if(signals>0)
+				{
+					if(blockData[1]==(byte)0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
+					blockData[1]+=(byte)2;
+				}
+				addBlockToSet(new CraftrBlock(x,y,blockData[0],blockData[1],blockData[2],blockData[3]));
+				int ty = surrBlockData[pnps][0];
+				if(isUpdated(ty)) addBlockToCheck(new CraftrBlockPos(x+xMovement[pnps],y+yMovement[pnps]));
+				if(oldd1!=blockData[1])
+				{
+					addBlockToCheck(new CraftrBlockPos(x,y));
 					for(int i=0;i<4;i++)
 					{
 						int t = surrBlockData[i][0];
