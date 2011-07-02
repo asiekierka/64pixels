@@ -423,7 +423,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				{
 					String[] dchi = key.split("\\|");
 					/* as | is a special character here, we need to escape it with \. *
-					 *  but \ is also special so we escape THAT with another \		 */
+					 *  but \ is also special so we escape THAT with another \	 */
 					if(dchi.length==2)
 					{
 						gs.drawChrA[nf.parse(dchi[1]).intValue()]=nf.parse(val).intValue();
@@ -1004,7 +1004,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		int sx = px-15;
 		int sy = py-12;
 		CraftrBlock t;
-
 		try
 		{
 			if (!raycasting)
@@ -1013,36 +1012,29 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				{
 					for(int ix=0;ix<gs.FULLGRID_W;ix++)
 					{
-	 					t = map.getBlock(ix+sx,iy+sy);
-						gs.blocks[(iy*gs.FULLGRID_W)+ix] = t;
-						gs.blockChr[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnChar();
-						gs.blockCol[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnColor();
+						gs.blocks[(iy*gs.FULLGRID_W)+ix] = map.getBlock(ix+sx,iy+sy);
 					}
 				}
-			}else{
+			}
+			else
+			{
 				gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
 				for(double angle=0;angle<360;angle+=0.15)
 				{
-					double sin = Math.sin(Math.toRadians(angle));
-					double cos = Math.cos(Math.toRadians(angle));
-					for(double len=0;len<64;len+=0.25)
+					for(double len=0;len<64;len+=0.5)
 					{
-						int x = (int)(15.5+sin*len);
-						int y = (int)(12.5+cos*len);
+						int x = (int)(15.5+Math.sin(Math.toRadians(angle))*len);
+						int y = (int)(12.5+Math.cos(Math.toRadians(angle))*len);
 						if(x>=0 && y>=0 && x<32 && y<25)
 						{
 							if(gs.blocks[(y*gs.FULLGRID_W)+x] == null)
 							{
 			 					t = map.getBlock(x+sx,y+sy);
 								gs.blocks[(y*gs.FULLGRID_W)+x] = t;
-								gs.blockChr[(y*gs.FULLGRID_W)+x] = (byte)t.getDrawnChar();
-								gs.blockCol[(y*gs.FULLGRID_W)+x] = (byte)t.getDrawnColor();
-								if(!t.isEmpty())
-									break;
-							}else{
-								if(!gs.blocks[(y*gs.FULLGRID_W)+x].isEmpty()) break;
+								if(!t.isEmpty()) len = 128;
 							}
-						}else break;
+							else if(!gs.blocks[(y*gs.FULLGRID_W)+x].isEmpty()) len=128;
+						} else len=128;
 					}
 				}
 			}
