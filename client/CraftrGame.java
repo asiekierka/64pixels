@@ -24,11 +24,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public CraftrMap map;
 	public CraftrPlayer players[] = new CraftrPlayer[256];
 	
-	public int fps = 0;
-	public long frame = 0;
-	public long fold = 0;
-	public int waitTime = 0;
-	public int nagle=0;
 	public boolean isApplet;
 	public boolean blockChange = false;
 	public boolean playerChange = false;
@@ -44,8 +39,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public CraftrGameScreen gs;
 	public CraftrInScreen is;
 	public CraftrSound audio;
-	public int chrArrowWaiter = 0;
-	public boolean[] keyHeld;
 	public boolean advMouseMode = false;
 	public int netThreadRequest = 0;
 	public int kim = 0;
@@ -54,6 +47,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public boolean muted = false;
 	public boolean raytrace = false;
 
+	private int fps = 0;
+	private long frame = 0;
+	private long fold = 0;
+	private int waitTime = 0;
+	private int nagle=0;
+	private int chrArrowWaiter = 0;
+	private boolean[] keyHeld;
 	private long wpso = 0;
 	private Date overdate;
 	private Date told = new Date();
