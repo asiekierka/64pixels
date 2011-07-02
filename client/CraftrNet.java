@@ -640,12 +640,12 @@ public class CraftrNet implements Runnable, CraftrNetShim
 							}
 							case 0x81:
 							{
-								game.raytrace=false;
+								game.raycasting=false;
 								break;
 							}
 							case 0x82:
 							{
-								game.raytrace=true;
+								game.raycasting=true;
 								break;
 							}
 							case 0xE1: // push me

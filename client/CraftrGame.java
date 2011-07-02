@@ -45,7 +45,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public String isKickS;
 	public boolean skipConfig = false;
 	public boolean muted = false;
-	public boolean raytrace = false;
+	public boolean raycasting = false;
 
 	private int fps = 0;
 	private long frame = 0;
@@ -1007,7 +1007,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 
 	    try
 	    {
-            if (!raytrace)
+            if (!raycasting)
             {
 		        for(int iy=0;iy<gs.FULLGRID_H;iy++)
 		        {

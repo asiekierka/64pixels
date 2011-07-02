@@ -135,7 +135,7 @@ public class CraftrClient implements Runnable
 				out.writeInt(y);
 				sendPacket();
 			}
-			setRays(world.isRays);
+			setRaycasting(world.isRaycasted);
 			sendChatMsgSelf("&aMap changed to &f" + nmap.mapName);
 		}
 		catch(Exception e)
@@ -404,7 +404,7 @@ public class CraftrClient implements Runnable
 			e.printStackTrace();
 		}
 	}
-	public void setRays(boolean r)
+	public void setRaycasting(boolean r)
 	{
 		try
 		{
@@ -417,7 +417,9 @@ public class CraftrClient implements Runnable
 		}
 		catch(Exception e)
 		{
-			System.out.println("Non-fatal setRays error!");
+			System.out.println("Non-fatal setRaycasting error!");
+
+
 		}
 	}
 
@@ -589,7 +591,7 @@ public class CraftrClient implements Runnable
 											passWait=true;
 										}
 										sendChatMsgAll(nick + " has joined.");
-										setRays(world.isRays);
+										setRaycasting(world.isRaycasted);
 										map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
 										map.setPlayer(x,y,1);
 										spawnPlayer();
