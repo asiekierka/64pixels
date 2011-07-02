@@ -98,7 +98,10 @@ public class CraftrPhysics
 	
 	public void addBlockToSet(CraftrBlock cb)
 	{
-		blocksToSet.add(cb);
+		synchronized(blocksToSet)
+		{
+			blocksToSet.add(cb);
+		}
 	}
 
 	public void runPhysics(CraftrBlockPos cbp, CraftrMap map)
@@ -155,7 +158,10 @@ public class CraftrPhysics
 			{
 				if(players[i]!=null && players[i].px==blockO.x && players[i].py==blockO.y)
 				{
-					map.se.kill(i);
+					synchronized(map.se)
+					{
+						map.se.kill(i);
+					}
 					bshot = true;
 				}
 			}
@@ -178,7 +184,10 @@ public class CraftrPhysics
 					{
 						if(players[i]!=null && players[i].px==blockO.x+xMovement[blockData[6]-1] && players[i].py==blockO.y+yMovement[blockData[6]-1])
 						{
-							map.se.kill(i);
+							synchronized(map.se)
+							{
+								map.se.kill(i);
+							}
 							bshot = true;
 						}
 					}
@@ -360,9 +369,11 @@ public class CraftrPhysics
 				{
 					if(prevon==0)
 					{
-						if(isServer)
-							map.setPlayerNet(x,y,1);
-						map.playSample(x,y,3);
+						synchronized(map)
+						{
+							if(isServer) map.setPlayerNet(x,y,1);
+							map.playSample(x,y,3);
+						}
 					}
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(counter|0x80),blockData[2],blockData[3]));
 				}
@@ -370,9 +381,11 @@ public class CraftrPhysics
 				{
 					if(prevon!=0)
 					{
-						if(isServer)
-							map.setPlayerNet(x,y,0);
-						map.playSample(x,y,2);
+						synchronized(map)
+						{
+							if(isServer) map.setPlayerNet(x,y,0);
+							map.playSample(x,y,2);
+						}
 					}
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)counter,blockData[2],blockData[3]));
 				}
@@ -393,7 +406,7 @@ public class CraftrPhysics
 				}
 				if(sig>0 && (blockData[1]&1)==0)
 				{
-					map.playSound(x,y,(0xFF&(int)blockData[2])%248);
+					synchronized(map) { map.playSound(x,y,(0xFF&(int)blockData[2])%248); }
 				}
 				int np=sig>0?1:0;
 				if((blockData[1]&1)!=np) addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)np,blockData[2],blockData[3]));
@@ -452,15 +465,18 @@ public class CraftrPhysics
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],non,blockData[2],blockData[3]));
 					if(non>0 && non<5)
 					{
-						if((blockData[3]&0x0F)!=0)
+						synchronized(map)
 						{
-							map.tryPushM(x,y,xMovement[non-1],yMovement[non-1],blockData[2],(byte)(blockData[3]&0x0F));
-						}
-						else if (surrBlockData[(non-1)][5]!=0)
-						{
-							map.setPushable(x+xMovement[non-1],y+yMovement[non-1],(byte)0,(byte)0);
-							if(isServer)
-								map.setPushableNet(x+xMovement[non-1],y+yMovement[non-1],(byte)0,(byte)0);
+							if((blockData[3]&0x0F)!=0)
+							{
+								map.tryPushM(x,y,xMovement[non-1],yMovement[non-1],blockData[2],(byte)(blockData[3]&0x0F));
+							}
+							else if (surrBlockData[(non-1)][5]!=0)
+							{
+								map.setPushable(x+xMovement[non-1],y+yMovement[non-1],(byte)0,(byte)0);
+								if(isServer)
+									map.setPushableNet(x+xMovement[non-1],y+yMovement[non-1],(byte)0,(byte)0);
+							}
 						}
 					}
 				}
