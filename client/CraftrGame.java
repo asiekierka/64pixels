@@ -1014,17 +1014,14 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 
 			        for(int ix=0;ix<gs.FULLGRID_W;ix++)
 			        {
-     					t = map.getBlock(ix+sx,iy+sy);
-				        gs.blocks[(iy*gs.FULLGRID_W)+ix] = t;
-				        gs.blockChr[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnChar();
-				        gs.blockCol[(iy*gs.FULLGRID_W)+ix] = (byte)t.getDrawnColor();
+				        gs.blocks[(iy*gs.FULLGRID_W)+ix] = map.getBlock(ix+sx,iy+sy);
 			        }
 		        }
 		    }else{
 			gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
-		        for(double angle=0;angle<360;angle+=0.5)
+		        for(double angle=0;angle<360;angle+=0.15)
 		        {
-		            for(double len=0;len<64;len+=0.25)
+		            for(double len=0;len<64;len+=0.5)
 		            {
 		                int x = (int)(15.5+Math.sin(Math.toRadians(angle))*len);
 		                int y = (int)(12.5+Math.cos(Math.toRadians(angle))*len);
@@ -1034,8 +1031,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					{
          					t = map.getBlock(x+sx,y+sy);
 				        	gs.blocks[(y*gs.FULLGRID_W)+x] = t;
-				        	gs.blockChr[(y*gs.FULLGRID_W)+x] = (byte)t.getDrawnChar();
-				        	gs.blockCol[(y*gs.FULLGRID_W)+x] = (byte)t.getDrawnColor();
 		                		if(!t.isEmpty()) len = 128;
 					}
 					else if(!gs.blocks[(y*gs.FULLGRID_W)+x].isEmpty()) len=128;
