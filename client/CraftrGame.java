@@ -1021,20 +1021,23 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
 				for(double angle=0;angle<360;angle+=0.15)
 				{
+					double sin = Math.sin(Math.toRadians(angle));
+					double cos = Math.cos(Math.toRadians(angle));
 					for(double len=0;len<64;len+=0.5)
 					{
-						int x = (int)(15.5+Math.sin(Math.toRadians(angle))*len);
-						int y = (int)(12.5+Math.cos(Math.toRadians(angle))*len);
+						int x = (int)(15.5+sin*len);
+						int y = (int)(12.5+cos*len);
 						if(x>=0 && y>=0 && x<32 && y<25)
 						{
 							if(gs.blocks[(y*gs.FULLGRID_W)+x] == null)
 							{
 			 					t = map.getBlock(x+sx,y+sy);
 								gs.blocks[(y*gs.FULLGRID_W)+x] = t;
-								if(!t.isEmpty()) len = 128;
+								if(!t.isEmpty()) break;
 							}
-							else if(!gs.blocks[(y*gs.FULLGRID_W)+x].isEmpty()) len=128;
-						} else len=128;
+							else if(!gs.blocks[(y*gs.FULLGRID_W)+x].isEmpty()) break;
+						}
+						else break;
 					}
 				}
 			}
