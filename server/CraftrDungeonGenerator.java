@@ -54,6 +54,11 @@ public class CraftrDungeonGenerator
 			}
 	}
 
+	public boolean checkZero(int x, int y)
+	{
+		if(x<0 || y<0 || x>=w || y>=h) return false;	
+		return types[(y*w)+x]!=(byte)0;
+	}
 	public int ind(int x,int y)
 	{
 		int ty = y;
@@ -68,7 +73,7 @@ public class CraftrDungeonGenerator
 	{
 		for(int y=0;y<h;y++)
 			for(int x=0;x<w;x++)
-				if(types[ind(x,y)]==(byte)0 && ((types[ind(x,y-1)]!=(byte)0 || types[ind(x,y+1)]!=(byte)0) && (types[ind(x-1,y)]!=(byte)0 || types[ind(x+1,y)]!=(byte)0))) 
+				if(types[ind(x,y)]==(byte)0 && ((checkZero(x,y-1) || checkZero(x,y+1)) && (checkZero(x-1,y) || checkZero(x+1,y)))) 
 					types[ind(x,y)]=(byte)1;
 	}
 	public Random rand = new Random();

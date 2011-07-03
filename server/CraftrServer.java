@@ -498,12 +498,12 @@ public class CraftrServer extends CraftrServerShim
 		{
 			if(id == 255)
 			{
-				return "Commands: who warps kick nick deop save ban unban delwarp lock unlock worlds addworld delworld msg adddungeon";
+				return "Commands: who warps kick nick deop save ban unban delwarp lock unlock worlds addworld delworld msg";
 			}
 			else if(clients[id].op)
 			{
 
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg raycast adddungeon";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg raycast";
 			}
 			else
 			{
@@ -599,6 +599,7 @@ public class CraftrServer extends CraftrServerShim
 					}
 				}
 			}
+/*
 			else if(cmd[0].equals("adddungeon"))
 			{
 				if(cmd.length<4) return "Usage: /adddungeon [world] [width] [height]";
@@ -621,6 +622,7 @@ public class CraftrServer extends CraftrServerShim
 				}
 				return "Creating dungeon...";
 			}
+*/
 			else if(cmd[0].equals("raycast") && id!=255)
 			{
 				String tmap = "(map " + clients[id].world.name + ")";
