@@ -243,48 +243,7 @@ public class CraftrGameScreen extends CraftrScreen
 			}
 		}
 	}
-	
-	public static String getName(int t)
-	{
-		switch(t)
-		{
-			case 0:
-				return "Floor";
-			case 1:
-				return "Wall";
-			case 2:
-				return "Wirium";
-			case 3:
-				return "P-NAND";
-			case 4:
-				return "Crossuh";
-			case 5:
-				return "Plate";
-			case 6:
-				return "Door";
-			case 7:
-				return "Meloder";
-			case 8:
-				return "Roofy";
-			case 9:
-				return "Pensor";
-			case 10:
-				return "Pumulty";
-			case 11:
-				return "Bodder";
-			case 12:
-				return "Cannona";
-			case 13:
-				return "Bullsor";
-			case 14:
-				return "Break";
-			case 15:
-				return "Extend";
-			case -1:
-				return "Pushium";
-		}
-		return "???????";
-	}
+
 	// painting handlers
 	
 	public void DrawMouse(Graphics g)
@@ -292,7 +251,7 @@ public class CraftrGameScreen extends CraftrScreen
 		g.setColor(new Color(0xAAAAAA));
 		if(mx >= 0 && mx < WIDTH && my >= 0 && my < (GRID_H<<4))
 		{
-			String tstr=getName(hov_type);
+			String tstr=CraftrBlock.getName(hov_type);
 			g.drawRect((mx&(~15)),(my&(~15)),15,15);
 			if(viewFloorsMode) writeChat(mx-(tstr.length()<<2),my-10,new CraftrChatMsg(tstr),g);
 		}
@@ -315,7 +274,7 @@ public class CraftrGameScreen extends CraftrScreen
 		g.setColor(new Color(0x000000));
 		g.fillRect(0,BARPOS_Y,WIDTH,16);
 		if(hideousPrompts) c.DrawString1x(0,BARPOS_Y+16,"      Type       ",9,g);
-		c.DrawString(0,BARPOS_Y,getName(drawType),15,g);
+		c.DrawString(0,BARPOS_Y,CraftrBlock.getName(drawType),15,g);
 		c.DrawChar1x(7*16,BARPOS_Y+8,(byte)'T',(byte)10,g);
 		c.DrawChar1x(7*16+8,BARPOS_Y,(byte)30,(byte)14,g);
 		c.DrawChar1x(7*16+8,BARPOS_Y+8,(byte)31,(byte)14,g);

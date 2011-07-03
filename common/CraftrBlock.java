@@ -63,6 +63,10 @@ public class CraftrBlock
 	{
 		return block[6]!=0;
 	}
+	public boolean isPistonable()
+	{
+		return (isPushable() || (block[0]!=4));
+	}
 
 	public int getBullet()
 	{
@@ -163,5 +167,47 @@ public class CraftrBlock
 	public byte[] getBlockData()
 	{
 		return block;
+	}
+
+	public static String getName(int t)
+	{
+		switch(t)
+		{
+			case 0:
+				return "Floor";
+			case 1:
+				return "Wall";
+			case 2:
+				return "Wirium";
+			case 3:
+				return "P-NAND";
+			case 4:
+				return "Crossuh";
+			case 5:
+				return "Plate";
+			case 6:
+				return "Door";
+			case 7:
+				return "Meloder";
+			case 8:
+				return "Roofy";
+			case 9:
+				return "Pensor";
+			case 10:
+				return "Pumulty";
+			case 11:
+				return "Bodder";
+			case 12:
+				return "Cannona";
+			case 13:
+				return "Bullsor";
+			case 14:
+				return "Break";
+			case 15:
+				return "Extend";
+			case -1:
+				return "Pushium";
+		}
+		return "???????";
 	}
 }

@@ -193,7 +193,7 @@ public class CraftrWindow
 				{
 					int col=143;
 					if(i==typeChosen) col=248;
-					String t = CraftrGameScreen.getName(i);
+					String t = CraftrBlock.getName(i);
 					int xm = (x+((w-1)>>1));
 					cc.DrawString1x(((x<<3)+(w<<2))-(t.length()<<2),(y+1+(i+1))<<3,t,col,g);
 				}

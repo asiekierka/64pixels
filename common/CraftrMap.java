@@ -553,6 +553,36 @@ public class CraftrMap
 			setPushableNet(x+dx,y+dy,chr,col);
 	}
 
+	public void piston(int x, int y, int dx, int dy, boolean pull)
+	{
+		if((dx!=0 && dy!=0) || (dx==0 && dy==0)) return; // don't do diagonals.
+		if(dx>1 || dx<-1 || dy>1 || dy<-1) return; // no.
+		if(getBlock(x+dx,y+dy).isEmpty()) return;
+		int posx = x+dx;
+		int posy = y+dy;
+		// we'll have to push unless we see a wall and until we have pushiums
+		while(getBlock(posx,posy).isPistonable())
+		{
+			posx+=dx;
+			posy+=dy;
+		}
+		if( !( getBlock(posx,posy).isEmpty() ) ) return;
+		int tx = posx-(x+dx);
+		int ty = posy-(y+dy);
+		if(tx<0) tx=-tx;
+		if(ty<0) ty=-ty;
+		if(tx==0) tx=1;
+		if(ty==0) ty=1;
+		int txs = x+dx;
+		int tys = y+dy;
+		if(pull)
+		{
+			dx=-dx;
+			dy=-dy;
+		}
+		pushMultiple(txs,tys,tx,ty,dx,dy);
+	}
+
 	public void playSample(int x, int y, int id)
 	{
 		playSound(x,y,id+256);
