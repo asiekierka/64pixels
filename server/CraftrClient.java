@@ -775,7 +775,7 @@ public class CraftrClient implements Runnable
 								}
 								else
 								{
-									if((int)(at&0xFF) > CraftrMap.maxType && at != -1)
+									if((int)(at&0xFF) > CraftrBlock.maxType && at != -1)
 									{
 										kick("Invalid block type!");
 									}

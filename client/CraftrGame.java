@@ -365,7 +365,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(key.contains("drawn-type"))
 				{
 					gs.drawType = nf.parse(val).byteValue();
-					if(gs.drawType>map.maxType || gs.drawType<-1) gs.drawType = 0;
+					if(gs.drawType>CraftrBlock.maxType || gs.drawType<-1 || !CraftrBlock.isPlaceable(gs.drawType)) gs.drawType = 0;
 				}
 				else if(key.contains("player-char"))
 				{
@@ -475,12 +475,16 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		if(isKick) return;
 		if (insideRect(mx,my,7*16+8,gs.BARPOS_Y,8,8)) // type, up
 		{
-			gs.drawType = (gs.drawType-1);
-			if(gs.drawType < -1) gs.drawType = map.maxType;
+			gs.drawType-=1;
+			while(!CraftrBlock.isPlaceable(gs.drawType)) gs.drawType-=1;
+			if(gs.drawType < -1) gs.drawType = CraftrBlock.maxType;
+			while(!CraftrBlock.isPlaceable(gs.drawType)) gs.drawType-=1;
 		} else if (insideRect(mx,my,7*16+8,gs.BARPOS_Y+8,8,8)) // type, down
 		{
-			gs.drawType = (gs.drawType+1);
-			if(gs.drawType > map.maxType) gs.drawType = -1;
+			gs.drawType+=1;
+			while(!CraftrBlock.isPlaceable(gs.drawType)) gs.drawType+=1;
+			if(gs.drawType > CraftrBlock.maxType) gs.drawType = -1;
+			while(!CraftrBlock.isPlaceable(gs.drawType)) gs.drawType+=1;
 		}
 		else if (insideRect(mx,my,7*16,gs.BARPOS_Y+8,8,8)) // T
 		{
@@ -617,7 +621,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 									}
 									break;
 								case 4:
-									gs.drawType=((my-((cw.y+1)<<3))>>3)-1;
+									gs.drawType=CraftrWindow.getBlockType((my-((cw.y+1)<<3))>>3);
 									break;
 								default:
 									break;
@@ -679,6 +683,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					if(gs.players[i] != null && gs.players[i].px == mx>>4 && gs.players[i].py == my>>4) return;
 				}
 				byte[] tmparr = new byte[4];
+				CraftrBlock capturedBlock = map.getBlock(players[255].px-15+(mx>>4),players[255].py-12+(my>>4));
+				if(!capturedBlock.isPlaceable()) return;
 				if(mb == ev_1)
 				{
 					tmparr[0] = (byte)gs.drawType;
@@ -688,8 +694,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 				if(mb == ev_2)
 				{
-					CraftrBlock capturedBlock = map.getBlock(players[255].px-15+(mx>>4),players[255].py-12+(my>>4));
- 					if(!advMouseMode) gs.drawType = capturedBlock.getTypeWithVirtual();
+					if(capturedBlock.isPlaceable() && !advMouseMode) gs.drawType = capturedBlock.getTypeWithVirtual();
  					gs.sdrawChr(capturedBlock.getChar());
  					gs.sdrawCol(capturedBlock.getColor());
 					gs.chrBarOff = gs.gdrawChr()-8;

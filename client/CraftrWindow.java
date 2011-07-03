@@ -38,6 +38,19 @@ public class CraftrWindow
 		if(chr>=240) return drum_names[chr-240];
 		else return note_names[(chr%24)>>1]+"-"+(chr/24);
 	}
+
+	public static int getBlockType(int pos)
+	{
+		int i = 0;
+		int j = -1;
+		for(;j<=CraftrBlock.maxType;j++)
+		{
+			if(i==pos) break;
+			if(CraftrBlock.isPlaceable(j)) i++;
+		}
+		return j;
+	}
+
 	public void resize()
 	{
 		switch(type)
@@ -59,7 +72,7 @@ public class CraftrWindow
 				break;
 			case 4: // type screen
 				w = 16;
-				h = CraftrMap.maxType+4;
+				h = CraftrBlock.maxType+4-CraftrBlock.invalidTypes;
 				title = "Types";
 				break;
 			default:
@@ -189,13 +202,18 @@ public class CraftrWindow
 				}
 				break;
 			case 4: // types screen
-				for(int i=-1;i<=CraftrMap.maxType;i++)
+				int i = 0;
+				for(int j=-1;j<=CraftrBlock.maxType;j++)
 				{
-					int col=143;
-					if(i==typeChosen) col=248;
-					String t = CraftrBlock.getLongName(i);
-					int xm = (x+((w-1)>>1));
-					cc.DrawString1x(((x<<3)+(w<<2))-(t.length()<<2),(y+1+(i+1))<<3,t,col,g);
+					if(CraftrBlock.isPlaceable(j))
+					{
+						int col=143;
+						if(j==typeChosen) col=248;
+						String t = CraftrBlock.getLongName(j);
+						int xm = (x+((w-1)>>1));
+						cc.DrawString1x(((x<<3)+(w<<2))-(t.length()<<2),(y+1+i)<<3,t,col,g);
+						i++;
+					}
 				}
 				break;
 			default:

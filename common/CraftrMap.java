@@ -13,7 +13,6 @@ public class CraftrMap
 	public static Random rand = new Random();
 	public String saveDir;
 	public String mapName = "map";
-	public static final int maxType = 15;
 	public boolean multiplayer;
 	public boolean maplock;
 	public boolean modlock;

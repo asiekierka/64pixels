@@ -5,7 +5,9 @@ public class CraftrBlock
 	public int x = 0;
 	public int y = 0;
 	private byte[] block = new byte[7];
-	
+	public static final int maxType = 16;
+	public static final int invalidTypes = 1;
+
 	public CraftrBlock()
 	{
 	}
@@ -169,6 +171,16 @@ public class CraftrBlock
 		return block;
 	}
 
+	public static boolean isPlaceable(int t)
+	{
+		return (t != 16);
+	}
+
+	public boolean isPlaceable()
+	{
+		return isPlaceable(0xFF&(int)block[0]);
+	}
+
 	public static String getName(int t)
 	{
 		switch(t)
@@ -205,6 +217,8 @@ public class CraftrBlock
 				return "Break";
 			case 15:
 				return "Extend";
+			case 16:
+				return "Opium";
 			case -1:
 				return "Pushium";
 		}
