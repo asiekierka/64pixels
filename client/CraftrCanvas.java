@@ -177,7 +177,7 @@ public class CraftrCanvas extends JComponent
 	public void DrawChar(int x, int y, byte bChr, byte bCol)
 	{
 		int aCol = 255&(int)bCol;
-		if(palette[(aCol>>4)] > 0) FillRect(palette[(aCol>>4)],x,y,8,8);
+		if(palette[(aCol>>4)] > 0) FillRect(palette[(aCol>>4)],x,y,16,16);
 		Graphics2D g2 = (Graphics2D)g;
 		g2.drawImage(charsetImage2[(255&(int)bChr)][(aCol&15)],null,x,y);
 	}

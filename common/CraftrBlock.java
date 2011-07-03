@@ -232,6 +232,8 @@ public class CraftrBlock
 				return "Powered-NAND";
 			case 15:
 				return "Extender";
+			case 16:
+				return "Gee's linctus";
 		}
 		return getName(t);
 	}
