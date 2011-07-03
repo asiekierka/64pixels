@@ -21,5 +21,5 @@ public abstract class CraftrScreen
 	{
 	
 	}
-	public abstract void paint(Graphics g, int mmx, int mmy);
+	public abstract void paint(int mmx, int mmy);
 }

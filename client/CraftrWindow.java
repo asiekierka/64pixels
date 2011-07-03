@@ -117,26 +117,25 @@ public class CraftrWindow
 		recBlockType[0]=t;
 	}
 	
-	public void makeWindow(CraftrCanvas cc, Graphics g)
+	public void makeWindow(CraftrCanvas cc)
 	{
 		for(int i=(x+1)<<3;i<=(x+w-2)<<3;i+=8)
 		{
-			cc.DrawChar1x(i,y<<3,(byte)linechr[4],(byte)143,g);
-			cc.DrawChar1x(i,(y+h-1)<<3,(byte)linechr[4],(byte)143,g);
+			cc.DrawChar1x(i,y<<3,(byte)linechr[4],(byte)143);
+			cc.DrawChar1x(i,(y+h-1)<<3,(byte)linechr[4],(byte)143);
 		}
 		for(int i=(y+1)<<3;i<=(y+h-2)<<3;i+=8)
 		{
-			cc.DrawChar1x(x<<3,i,(byte)linechr[5],(byte)143,g);
-			cc.DrawChar1x((x+w-1)<<3,i,(byte)linechr[5],(byte)143,g);
+			cc.DrawChar1x(x<<3,i,(byte)linechr[5],(byte)143);
+			cc.DrawChar1x((x+w-1)<<3,i,(byte)linechr[5],(byte)143);
 		}
-		cc.DrawChar1x(x<<3,y<<3,(byte)linechr[0],(byte)143,g);
-		cc.DrawChar1x((x+w-1)<<3,y<<3,(byte)linechr[1],(byte)143,g);
-		cc.DrawChar1x(x<<3,(y+h-1)<<3,(byte)linechr[2],(byte)143,g);
-		cc.DrawChar1x((x+w-1)<<3,(y+h-1)<<3,(byte)linechr[3],(byte)143,g);
-		cc.DrawChar1x((x+w-1)<<3,y<<3,(byte)'X',(byte)143,g);
-		cc.DrawString1x((x+1)<<3,y<<3,title,(byte)143,g);
-		g.setColor(new Color(cc.palette[8]));
-		g.fillRect((x+1)<<3,(y+1<<3),(w-2)<<3,(h-2)<<3);
+		cc.DrawChar1x(x<<3,y<<3,(byte)linechr[0],(byte)143);
+		cc.DrawChar1x((x+w-1)<<3,y<<3,(byte)linechr[1],(byte)143);
+		cc.DrawChar1x(x<<3,(y+h-1)<<3,(byte)linechr[2],(byte)143);
+		cc.DrawChar1x((x+w-1)<<3,(y+h-1)<<3,(byte)linechr[3],(byte)143);
+		cc.DrawChar1x((x+w-1)<<3,y<<3,(byte)'X',(byte)143);
+		cc.DrawString1x((x+1)<<3,y<<3,title,(byte)143);
+		cc.FillRect(cc.palette[8],(x+1)<<3,(y+1<<3),(w-2)<<3,(h-2)<<3);
 	}
 	
 	public boolean insideRect(int mx, int my, int x, int y, int w, int h)
@@ -150,10 +149,10 @@ public class CraftrWindow
 		}
 	}
 
-	public void render(CraftrCanvas cc, Graphics g)
+	public void render(CraftrCanvas cc)
 	{
 		resize();
-		makeWindow(cc,g);
+		makeWindow(cc);
 		int fx = (x+1)<<3;
 		int fy = (y+1)<<3;
 		switch(type)
@@ -161,31 +160,28 @@ public class CraftrWindow
 			case 1: // char screen
 				for(int i=0;i<256;i++)
 				{
-					cc.DrawChar1x(fx+((i%(w-2))<<3),fy+((i/(w-2))<<3),(byte)i,(byte)143,g);
+					cc.DrawChar1x(fx+((i%(w-2))<<3),fy+((i/(w-2))<<3),(byte)i,(byte)143);
 					if(i==charChosen)
 					{
-						g.setColor(new Color(0xAAAAAA));
-						g.drawRect(fx+((i%(w-2))<<3),fy+((i/(w-2))<<3),7,7);
+						cc.DrawRect(0xAAAAAA,fx+((i%(w-2))<<3),fy+((i/(w-2))<<3),7,7);
 					}
 					String tn = getNoteName(charChosen&0xFF);
 					String t = "" + (charChosen&0xFF);
-					if(isMelodium) cc.DrawString1x((x+w-2-t.length()-tn.length())<<3,(y+h-1)<<3,tn,142,g);
-					cc.DrawString1x((x+w-1-t.length())<<3,(y+h-1)<<3,t,142,g);
+					if(isMelodium) cc.DrawString1x((x+w-2-t.length()-tn.length())<<3,(y+h-1)<<3,tn,142);
+					cc.DrawString1x((x+w-1-t.length())<<3,(y+h-1)<<3,t,142);
 				}
 				break;
 			case 2: // color screen
-				g.setColor(new Color(0x000000));
-				g.fillRect(fx,fy,128,8); // DrawChar workaround
+				cc.FillRect(0x000000,fx,fy,128,8); // DrawChar workaround
 				for(int i=0;i<256;i++)
 				{
-					cc.DrawChar1x(fx+((i&15)<<3),fy+((i>>4)<<3),(byte)254,(byte)i,g);
+					cc.DrawChar1x(fx+((i&15)<<3),fy+((i>>4)<<3),(byte)254,(byte)i);
 					if(i==colorChosen)
 					{
-						g.setColor(new Color(0xAAAAAA));
-						g.drawRect(fx+((i&15)<<3),fy+((i>>4)<<3),7,7);
+						cc.DrawRect(0xAAAAAA,fx+((i&15)<<3),fy+((i>>4)<<3),7,7);
 					}
 					String t = "" + (colorChosen&0xFF);
-					cc.DrawString1x((x+w-1-t.length())<<3,(y+h-1)<<3,t,142,g);
+					cc.DrawString1x((x+w-1-t.length())<<3,(y+h-1)<<3,t,142);
 				}
 				break;
 			case 3: // recent blocks screen
@@ -193,11 +189,10 @@ public class CraftrWindow
 				{
 					int tmx = fx+8+((i&3)<<4);
 					int tmy = fy+8+((i>>2)<<4);
-					cc.DrawChar(tmx,tmy,(byte)recBlockChr[i],(byte)recBlockCol[i],g);
+					cc.DrawChar(tmx,tmy,(byte)recBlockChr[i],(byte)recBlockCol[i]);
 					if(insideRect(cc.mx,cc.my,tmx,tmy,16,16))
 					{
-						g.setColor(new Color(0xAAAAAA));
-						g.drawRect(tmx,tmy,15,15);
+						cc.DrawRect(0xAAAAAA,tmx,tmy,15,15);
 					}
 				}
 				break;
@@ -211,7 +206,7 @@ public class CraftrWindow
 						if(j==typeChosen) col=248;
 						String t = CraftrBlock.getLongName(j);
 						int xm = (x+((w-1)>>1));
-						cc.DrawString1x(((x<<3)+(w<<2))-(t.length()<<2),(y+1+i)<<3,t,col,g);
+						cc.DrawString1x(((x<<3)+(w<<2))-(t.length()<<2),(y+1+i)<<3,t,col);
 						i++;
 					}
 				}

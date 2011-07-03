@@ -37,6 +37,8 @@ public class CraftrCanvas extends JComponent
 	public static BufferedImage charsetImage[][];
 	public static BufferedImage charsetImage2[][];
 	public static int pixelchrn[];
+
+	private Graphics g;
 	// CONSTRUCTORS
 	
 	public CraftrCanvas()
@@ -172,31 +174,23 @@ public class CraftrCanvas extends JComponent
 	}
 	// DrawChar
 	
-	public void DrawChar(int x, int y, byte bChr, byte bCol, Graphics g)
+	public void DrawChar(int x, int y, byte bChr, byte bCol)
 	{
 		int aCol = 255&(int)bCol;
-		if(palette[(aCol>>4)] > 0)
-		{
-			g.setColor(new Color(palette[(aCol>>4)]));
-			g.fillRect(x,y,16,16);
-		}
+		if(palette[(aCol>>4)] > 0) FillRect(palette[(aCol>>4)],x,y,8,8);
 		Graphics2D g2 = (Graphics2D)g;
 		g2.drawImage(charsetImage2[(255&(int)bChr)][(aCol&15)],null,x,y);
 	}
 
-	public void DrawChar1x(int x, int y, byte bChr, byte bCol, Graphics g)
+	public void DrawChar1x(int x, int y, byte bChr, byte bCol)
 	{
 		int aCol = 255&(int)bCol;
-		if(palette[(aCol>>4)] > 0)
-		{
-			g.setColor(new Color(palette[(aCol>>4)]));
-			g.fillRect(x,y,8,8);
-		}
+		if(palette[(aCol>>4)] > 0) FillRect(palette[(aCol>>4)],x,y,8,8);
 		Graphics2D g2 = (Graphics2D)g;
 		g2.drawImage(charsetImage[(255&(int)bChr)][(aCol&15)],null,x,y);
 	}
 
-	public void paintComponent(Graphics g)
+	public void paintComponent(Graphics gz)
 	{
 		int tx = sizeX;
 		int ty = sizeY;
@@ -204,8 +198,9 @@ public class CraftrCanvas extends JComponent
 		if(ty<HEIGHT) ty=HEIGHT;
 		BufferedImage bi = new BufferedImage(tx,ty,BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2 = bi.createGraphics();
-		cs.paint((Graphics)g2,mx,my);
-		Graphics2D g2o = (Graphics2D)g;
+		g = (Graphics)g2;
+		cs.paint(mx,my);
+		Graphics2D g2o = (Graphics2D)gz;
 		g2o.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 		img=bi;
 		g2o.drawRenderedImage(bi,AffineTransform.getScaleInstance((float)sizeX/WIDTH,(float)sizeY/HEIGHT));
@@ -220,12 +215,23 @@ public class CraftrCanvas extends JComponent
 
 	// Utilities
 	
+	public void FillRect(int col, int x, int y, int w, int h)
+	{
+		g.setColor(new Color(col));
+		g.fillRect(x,y,w,h);
+	}
+
+	public void DrawRect(int col, int x, int y, int w, int h)
+	{
+		g.setColor(new Color(col));
+		g.drawRect(x,y,w,h);
+	}
 	public int Index(int x, int y)
 	{
 		return x+(y*FULLGRID_W);
 	}
 	
-	public void DrawString(int x, int y, String str, int col, Graphics g)
+	public void DrawString(int x, int y, String str, int col)
 	{
 		char[] ca = str.toCharArray();
 		int j = 0;
@@ -237,11 +243,11 @@ public class CraftrCanvas extends JComponent
 				k+=WIDTH;
 				j+=16;
 			}
-			DrawChar(x+(i<<4)-k,y+j,(byte)ca[i],(byte)col,g);
+			DrawChar(x+(i<<4)-k,y+j,(byte)ca[i],(byte)col);
 		}
 	}
 	
-	public void DrawString1x(int x, int y, String str, int col, Graphics g)
+	public void DrawString1x(int x, int y, String str, int col)
 	{
 		char[] ca = str.toCharArray();
 		int j = 0;
@@ -253,7 +259,7 @@ public class CraftrCanvas extends JComponent
 				k+=WIDTH;
 				j+=8;
 			}
-			DrawChar1x(x+(i<<3)-k,y+j,(byte)ca[i],(byte)col,g);
+			DrawChar1x(x+(i<<3)-k,y+j,(byte)ca[i],(byte)col);
 		}
 	}
 }

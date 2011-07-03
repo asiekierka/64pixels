@@ -104,39 +104,38 @@ public class CraftrInScreen extends CraftrScreen
 		}
 	}
 
-	public void paint(Graphics g, int mmx, int mmy)
+	public void paint(int mmx, int mmy)
 	{
 		mx = mmx;
 		my = mmy;
-		g.setColor(new Color(0,0,0));
-		g.fillRect(0,0,WIDTH,HEIGHT);
+		c.FillRect(0x000000,0,0,WIDTH,HEIGHT);
 		int xPos=(WIDTH-(name.length()<<4))/2;
 		switch(inputMode)
 		{
 			case 1:
-				c.DrawString(xPos,12*16,name,15,g);
+				c.DrawString(xPos,12*16,name,15);
 				xPos=(WIDTH-(inString.length()<<3))/2;
 				String tString = inString;
 				if(step == 1) tString+="_";
 				step=1-step;
-				c.DrawString1x(xPos,14*16,tString,7,g);
+				c.DrawString1x(xPos,14*16,tString,7);
 				break;
 			case 2:
 				int offset = (HEIGHT-30-(inputStrings.length*10))/2;
-				c.DrawString(xPos,offset,name,15,g);
+				c.DrawString(xPos,offset,name,15);
 				for(int i=0;i<inputStrings.length;i++)
 				{
 					int j = 15;
 					if(inSel==i) j=(j<<4);
 					xPos=(WIDTH-(inputStrings[i].length()<<3))/2;
-					c.DrawString1x(xPos,offset+30+(i*10),inputStrings[i],j,g);
+					c.DrawString1x(xPos,offset+30+(i*10),inputStrings[i],j);
 				}
 				break;
 		}
 		synchronized(windows)
 		{
 			for(CraftrWindow cw : windows)
-				cw.render(c,g);
+				cw.render(c);
 		}
 	}
 	

@@ -1140,7 +1140,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					boolean doCustom = true;
 					CraftrKickScreen cks = new CraftrKickScreen(canvas,"Loading serverlist...");
 					cks.mName="DON'T PANIC";
-					cks.bgcolor = new Color(128,128,128);
+					cks.bgcolor = 0x808080;
 					canvas.cs = (CraftrScreen) cks;
 					canvas.draw(mx,my);
 					System.out.print("fetching... ");
@@ -1169,7 +1169,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					else
 					{
 						System.out.println("not fetched (probably means glados)");
-						cks.bgcolor = new Color(170,0,0);
+						cks.bgcolor = 0xAA0000;
 						cks.mName="SERVERLIST NOT FOUND";
 						cks.name="PLEASE DON'T PANIC, ONE SECOND...";
 						if(isApplet) cks.name="DON'T PANIC (does the applet have proper permissions?)";
@@ -1298,7 +1298,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			CraftrKickScreen cks = new CraftrKickScreen(canvas,"Wait a second...");
 			cks.mName="CONNECTING...";
 
-			cks.bgcolor = new Color(128,128,128);
+			cks.bgcolor = 0x808080;
 			canvas.cs = (CraftrScreen)cks;
 			net.connect(CraftrConvert.getHost(thost),CraftrConvert.getPort(thost), nagle);
 			System.out.println("Connected! Logging in...");
