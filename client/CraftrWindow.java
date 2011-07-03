@@ -58,7 +58,7 @@ public class CraftrWindow
 				title = "History";
 				break;
 			case 4: // type screen
-				w = 12;
+				w = 16;
 				h = CraftrMap.maxType+4;
 				title = "Types";
 				break;
@@ -193,7 +193,7 @@ public class CraftrWindow
 				{
 					int col=143;
 					if(i==typeChosen) col=248;
-					String t = CraftrBlock.getName(i);
+					String t = CraftrBlock.getLongName(i);
 					int xm = (x+((w-1)>>1));
 					cc.DrawString1x(((x<<3)+(w<<2))-(t.length()<<2),(y+1+(i+1))<<3,t,col,g);
 				}

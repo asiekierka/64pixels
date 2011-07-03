@@ -210,4 +210,15 @@ public class CraftrBlock
 		}
 		return "???????";
 	}
+	public static String getLongName(int t)
+	{
+		switch(t)
+		{
+			case 3:
+				return "Powered-NAND";
+			case 15:
+				return "Extender";
+		}
+		return getName(t);
+	}
 }
