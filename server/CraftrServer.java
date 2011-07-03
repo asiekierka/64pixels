@@ -498,12 +498,12 @@ public class CraftrServer extends CraftrServerShim
 		{
 			if(id == 255)
 			{
-				return "Commands: who warps kick nick deop save ban unban delwarp lock unlock worlds addworld delworld msg";
+				return "Commands: who warps kick nick deop save ban unban delwarp lock unlock worlds addworld delworld msg adddungeon";
 			}
 			else if(clients[id].op)
 			{
 
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg raycast";
+				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg raycast adddungeon";
 			}
 			else
 			{
@@ -598,6 +598,28 @@ public class CraftrServer extends CraftrServerShim
 						return "User fetched!";
 					}
 				}
+			}
+			else if(cmd[0].equals("adddungeon"))
+			{
+				if(cmd.length<4) return "Usage: /adddungeon [world] [width] [height]";
+				else if (findWorld(cmdz[1])==null)
+				{
+					return "World '" + cmdz[1] + "' does not exist.";
+				}
+				CraftrWorld w = findWorld(cmdz[1]);
+				CraftrDungeonGenerator cdg = new CraftrDungeonGenerator();
+				NumberFormat nf = NumberFormat.getNumberInstance();
+				try
+				{
+					CraftrDungeonThread cdt = new CraftrDungeonThread(this,id,cdg,w.map,nf.parse(cmdz[2]).intValue(),nf.parse(cmdz[3]).intValue());
+					Thread dt = new Thread(cdt);
+					dt.start();
+				}
+				catch(Exception e)
+				{
+					return "&cERROR: &fInvalid arguments!";
+				}
+				return "Creating dungeon...";
 			}
 			else if(cmd[0].equals("raycast") && id!=255)
 			{

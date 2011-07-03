@@ -49,7 +49,7 @@ public class CraftrDungeonGenerator
 		for(int y=0;y<h;y++)
 			for(int x=0;x<w;x++)
 			{
-				if(types[ind(x,y)]==(byte)0) map.setBlock(x-cx,y-cy,(byte)0,(byte)0,(byte)0,(byte)0);
+				if(types[ind(x,y)]!=(byte)0) map.setBlock(x-cx,y-cy,(byte)0,(byte)0,(byte)0,(byte)0);
 				else map.setBlock(x-cy,y-cy,(byte)1,(byte)0,(byte)177,(byte)0x87);
 			}
 	}
@@ -60,9 +60,9 @@ public class CraftrDungeonGenerator
 		int tx = x;
 		if(tx<0) tx=0;
 		if(ty<0) ty=0;
-		if(x>=w) x=w-1;
-		if(y>=h) y=h-1;	
-		return (y*w)+x;
+		if(tx>=w) tx=w-1;
+		if(ty>=h) ty=h-1;	
+		return (ty*w)+tx;
 	}
 	public void trim()
 	{
@@ -94,7 +94,7 @@ public class CraftrDungeonGenerator
 			}
 			int ww = x2-x1+1;
 			int hh = y2-y1+1;
-			if(ww<=1 || hh<=1 || (ww*hh)<maxarea) continue;	
+			if(ww<=1 || hh<=1 || (ww*hh)>maxarea) continue;	
 			drawrect(x1,y1,x2,y2);
 		}
 	}
