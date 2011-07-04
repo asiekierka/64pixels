@@ -801,6 +801,7 @@ public class CraftrServer extends CraftrServerShim
 				}
 				addWorld(cmdz[1]);
 				CraftrMap tm = new CraftrMap(true,map_cache_size,cmdz[1]);
+				tm.checkDirs(0,0);
 				tm.se = this;
 				CraftrWorld w = new CraftrWorld(cmdz[1],tm,map_tps, new CraftrWarps());
 				loadWorldConfig(w);
@@ -997,6 +998,7 @@ public class CraftrServer extends CraftrServerShim
 			map.se = this;
 			warps = new CraftrWarps();
 			world = new CraftrWorld("map",map,map_tps,warps);
+			map.checkDirs(0,0);
 			worlds=new ArrayList<CraftrWorld>();
 			world_names=readNamesFile("worlds.txt");
 			System.out.println(world_names.length + " worlds!");
@@ -1005,6 +1007,7 @@ public class CraftrServer extends CraftrServerShim
 			{
 				CraftrMap tm = new CraftrMap(true,map_cache_size,wn);
 				tm.se = this;
+				tm.checkDirs(0,0);
 				CraftrWorld w = new CraftrWorld(wn,tm,map_tps,new CraftrWarps());
 				loadWorldConfig(w);
 				worlds.add(w);
