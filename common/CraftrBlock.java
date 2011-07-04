@@ -67,7 +67,7 @@ public class CraftrBlock
 	}
 	public boolean isPistonable()
 	{
-		return (isPushable() || !(block[0]==4 || block[0]==16 || block[0]==17));
+		return (isPushable() || !(block[0]==4 || block[0]==16 || block[0]==18));
 	}
 
 	public int getBullet()
@@ -173,7 +173,7 @@ public class CraftrBlock
 
 	public static boolean isPlaceable(int t)
 	{
-		return t != 16 || t != 18;
+		return !(t == 16 || t == 18);
 	}
 
 	public boolean isPlaceable()

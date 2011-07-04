@@ -41,12 +41,12 @@ public class CraftrWindow
 
 	public static int getBlockType(int pos)
 	{
-		int i = 0;
+		int i = -1;
 		int j = -1;
 		for(;j<=CraftrBlock.maxType;j++)
 		{
-			if(i==pos) break;
 			if(CraftrBlock.isPlaceable(j)) i++;
+			if(i==pos) break;
 		}
 		return j;
 	}

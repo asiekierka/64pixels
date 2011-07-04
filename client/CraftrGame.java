@@ -504,6 +504,17 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		{
 			gs.toggleWindow(2);
 		}
+		else if (gs.drawType == 17)
+		{
+			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,48,8))
+			{
+				gs.isSticky=false;
+			}
+			else if(insideRect(mx,my,12*16+8,gs.BARPOS_Y+8,48,8))
+			{
+				gs.isSticky=true;
+			}
+		}
 		else if (gs.drawType == 2)
 		{
 			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,128,16))

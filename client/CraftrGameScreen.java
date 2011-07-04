@@ -25,7 +25,8 @@ public class CraftrGameScreen extends CraftrScreen
 	public int mx = 0;
 	public int my = 0;
 	public ArrayList<CraftrWindow> windows;
-	
+	public boolean isSticky;
+
 	public CraftrBlock[] blocks;
 
 	public CraftrChatMsg[] chatarr;
@@ -280,12 +281,19 @@ public class CraftrGameScreen extends CraftrScreen
 		c.DrawChar1x(12*16,BARPOS_Y,(byte)179,(byte)15);
 		c.DrawChar1x(12*16,BARPOS_Y+8,(byte)179,(byte)15);
 		if(drawType == 4) barselMode=2;
-		int bsmt= barselMode;
+		int bsmt = barselMode;
 		if(drawType == 2) bsmt=3;
 		else if(isArrow() && barselMode == 1) bsmt=4;
+		else if(drawType == 17) bsmt=5;
 		if(drawType == 3 && (gdrawChr()<24 || gdrawChr()>=28)) sdrawChr(25);
 		else if(drawType == 15 && !(gdrawChr()==30 || gdrawChr()==31 || gdrawChr()==16 || gdrawChr()==17)) sdrawChr(31);
 		else if(drawType==4) sdrawChr(206);
+		else if (drawType == 17)
+		{
+			if(isSticky) sdrawCol(0x2E);
+			else sdrawCol(0x7F);
+			sdrawChr(177);
+		}
 		switch(bsmt)
 		{
 			case 1: // char
@@ -367,6 +375,18 @@ public class CraftrGameScreen extends CraftrScreen
 				c.DrawString1x(16*16+12,BARPOS_Y+4,"Direction",15);
 				c.DrawChar1x(21*16+8,BARPOS_Y,(byte)179,(byte)15);
 				c.DrawChar1x(21*16+8,BARPOS_Y+8,(byte)179,(byte)15);
+				break;
+			case 5: // pusher info
+				if(isSticky)
+				{
+					c.DrawString1x(12*16+8,BARPOS_Y,"Normal",15);
+					c.DrawString1x(12*16+8,BARPOS_Y+8,"Sticky",240);
+				} else
+				{
+					c.DrawString1x(12*16+8,BARPOS_Y,"Normal",240);
+					c.DrawString1x(12*16+8,BARPOS_Y+8,"Sticky",15);
+				}
+				break;
 			default:
 				break;
 		}
