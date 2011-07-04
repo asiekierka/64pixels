@@ -13,6 +13,8 @@ public class CraftrPhysics
 	private static final int[] pnandDir2 = {27,26,24,25};
 	private static final int[] extendDir = {16,17,31,30};
 	private static final int[] extendDir2 = {17,16,30,31};
+	private static final int[] pistonDir = {198,181,210,208};
+	private static final int[] pistonDir2 = {181,198,208,210};
 	private static final int[] xMovement = { -1, 1, 0, 0 };
 	private static final int[] yMovement = { 0, 0, -1, 1 };
 	private boolean isServer;
@@ -30,7 +32,7 @@ public class CraftrPhysics
 
 	public boolean isUpdated(int type)
 	{
-		return (type>=2 && type<=4) || type==6 || type==7 || type==10 || type==11 || type==12 || type==13 || type==15;
+		return (type>=2 && type<=4) || type==6 || type==7 || (type>=10 && type<=13) || type==15 || type==17 || type==18;
 	}
 	
 	public boolean isSent(int type)
