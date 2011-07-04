@@ -36,13 +36,9 @@ public class CraftrDungeonGenerator
 		threshold = (width*height*2)/5;
 		cover = 0;
 		drawrect((width/2)-3,(height/2)-3,(width/2)+3,(height/2)+3);
-		System.out.println("scrawling");
 		scrawl();
-		System.out.println("trimming");
 		trim();
-		System.out.println("putting");
 		putOnMap(map);
-		System.out.println("im done");
 		return 0;
 	}
 
@@ -54,7 +50,7 @@ public class CraftrDungeonGenerator
 			for(int x=0;x<w;x++)
 			{
 				if(types[ind(x,y)]!=(byte)0) map.setBlock(x-cx,y-cy,(byte)0,(byte)0,(byte)0,(byte)0);
-				else map.setBlock(x-cy,y-cy,(byte)1,(byte)0,(byte)177,(byte)0x87);
+				else map.setBlock(x-cx,y-cy,(byte)1,(byte)0,(byte)177,(byte)0x87);
 			}
 	}
 

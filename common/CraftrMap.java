@@ -89,6 +89,7 @@ public class CraftrMap
 		{
 			// Use up the first chunk you see 
 			int i = randc.nextInt(cachesize);
+			saveChunkFile(i);
 			chunks[i] = new CraftrChunk(x,y,true);
 			chunks[i].isUsed = true;
 			chunks[i].loadByte(readChunkFile(x,y,true));
@@ -99,7 +100,7 @@ public class CraftrMap
 			throw new NoChunkMemException(x,y);
 		}
 	}
-	
+
 	public void wipeChunks()
 	{
 		for (int i=0;i<cachesize;i++)
