@@ -1023,7 +1023,15 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 			else
 			{
+				// i'm a bit worried that this may thrash the garbage collector a bit too much.
+				// i'll leave it in, though, as i suspect the old thing gets freed immediately. --GM
 				gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
+				
+				// ajf's code. sadly, it's a bit flawed (can see through diagonals) and a bit slow.
+				// this is the Most Obvious Solution(TM), by the way,
+				// so if you're ever in a hurry, this should suffice.
+				// i must say, that was a very good attempt. --GM
+				/*
 				for(double angle=0;angle<360;angle+=0.15)
 				{
 					double sin = Math.sin(Math.toRadians(angle));
@@ -1045,6 +1053,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						else break;
 					}
 				}
+				*/
+				// this is the recursive route.
+				gs.blocks[(12*gs.FULLGRID_W)+15] = map.getBlock(px,py);
+				castRayPillars(px,py,-1, 0,-1,-1,-1, 1,17);
+				castRayPillars(px,py, 1, 0, 1,-1, 1, 1,17);
+				castRayPillars(px,py, 0,-1,-1,-1, 1,-1,13);
+				castRayPillars(px,py, 0, 1,-1, 1, 1, 1,13);
 			}
 			for (int i=0;i<256;i++)
 			{
@@ -1070,6 +1085,138 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			System.exit(1);
 		}
 	}
+	
+	private void castRayPillars(int sx, int sy, int dx, int dy, int x1, int y1, int x2, int y2, int maxtrace)
+	{
+		assert(x1 <= x2 && y1 <= y2);
+		
+		// TODO: make it aim for the block corners.
+		//       that way we can get the FULL visibility,
+		//       rather than a slightly clipped one.
+		
+		int ox1 = x1;
+		int oy1 = y1;
+		int ox2 = x2;
+		int oy2 = y2;
+		
+		
+		int adx = (dx < 0 ? -dx : dx);
+		int ady = (dy < 0 ? -dy : dy);
+		
+		while(maxtrace > 0)
+		{
+			//System.out.printf("maxtrace %d %d %d: %d %d -> %d %d\n", maxtrace, dx, dy, x1, y1, x2, y2);
+			boolean hitone = false;
+			boolean hittingone = false;
+			int x = x1, y = y1;
+			
+			// AFAIK this is pretty similar to Bresenham's thing.
+			while(x <= x2 && y <= y2)
+			{
+				// RANGE CHECK!
+				if(x >= -15 && x < gs.FULLGRID_W-15 && y >= -12 && y < gs.FULLGRID_H-12)
+				{
+					CraftrBlock t = map.getBlock(x+sx,y+sy);
+					
+					// first check: block behind is empty
+					// second check: block is aligned with the axis
+					// third check: block right/left is empty
+					boolean antidiagcheck = 
+						   map.getBlock(x+sx-dx,y+sy-dy).isEmpty()
+						|| x == 0 || y == 0
+						|| map.getBlock(x+sx-(x < 0 ? -ady : ady),y+sy-(y < 0 ? -adx : adx)).isEmpty();
+					
+					//if(antidiagcheck || !t.isEmpty()) // no corners for you - TODO: fix the "flicker"
+					if(antidiagcheck)
+						gs.blocks[((y+12)*gs.FULLGRID_W)+x+15] = t;
+					
+					if(!(t.isEmpty() && antidiagcheck))
+					{
+						if(!hittingone)
+						{
+							hitone = true;
+							hittingone = true;
+							// we must split this.
+							if(x1 != x || y1 != y)
+								castRayPillars(sx,sy,dx,dy,x1,y1,x-ady,y-adx,maxtrace);
+						}
+					} else if(hittingone) {
+						hittingone = false;
+						x1 = x;
+						y1 = y;
+					}
+				}
+				x += ady;
+				y += adx;
+			}
+			
+			// touch walls if necessary
+			x = x1;
+			y = y1;
+			{
+				CraftrBlock t2 = map.getBlock(x+sx,y+sy);
+				if(t2.isEmpty())
+				{
+					x -= ady;
+					y -= adx;
+					if(x >= -15 && x < gs.FULLGRID_W-15 && y >= -12 && y < gs.FULLGRID_H-12)
+					{
+						CraftrBlock t = map.getBlock(x+sx,y+sy);
+						if(!t.isEmpty())
+							gs.blocks[((y+12)*gs.FULLGRID_W)+x+15] = t;	
+					}
+				}
+			}
+			
+			x = x2;
+			y = y2;
+			{
+				CraftrBlock t2 = map.getBlock(x+sx,y+sy);
+				if(t2.isEmpty())
+				{
+					x += ady;
+					y += adx;
+					if(x >= -15 && x < gs.FULLGRID_W-15 && y >= -12 && y < gs.FULLGRID_H-12)
+					{
+						CraftrBlock t = map.getBlock(x+sx,y+sy);
+						if(!t.isEmpty())
+							gs.blocks[((y+12)*gs.FULLGRID_W)+x+15] = t;	
+					}
+				}
+			}
+			
+			if(hitone)
+			{
+				if(!hittingone)
+				{
+					castRayPillars(sx,sy,dx,dy,x1,y1,x2,y2,maxtrace);
+				}
+				
+				return;
+			}
+			
+			if(dy == 0)
+			{
+				x1 += dx;
+				x2 += dx;
+			} else {
+				y1 += dy;
+				y2 += dy;
+			}
+			
+			if(dy == 0)
+			{
+				y1 = (int)(oy1*x1/ox1);
+				y2 = (int)(oy2*x2/ox2);
+			} else {
+				x1 = (int)(ox1*y1/oy1);
+				x2 = (int)(ox2*y2/oy2);
+			}
+			
+			maxtrace--;
+		}
+	}
+	
 	public void init()
 	{
 		if(isApplet)
