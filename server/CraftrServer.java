@@ -599,7 +599,6 @@ public class CraftrServer extends CraftrServerShim
 					}
 				}
 			}
-/*
 			else if(cmd[0].equals("adddungeon"))
 			{
 				if(cmd.length<4) return "Usage: /adddungeon [world] [width] [height]";
@@ -622,7 +621,6 @@ public class CraftrServer extends CraftrServerShim
 				}
 				return "Creating dungeon...";
 			}
-*/
 			else if(cmd[0].equals("raycast") && id!=255)
 			{
 				String tmap = "(map " + clients[id].world.name + ")";
