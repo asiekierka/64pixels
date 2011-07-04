@@ -624,9 +624,13 @@ public class CraftrMap
 			int px = x&63;
 			int py = y&63;
 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
-			findCachedChunk((x>>6),(y>>6)).place(px,py,data[0],data[2],data[3],data[1]);
+			grabChunk((x>>6),(y>>6)).place(px,py,data[0],data[2],data[3],data[1]);
 		}
-
+		catch(NoChunkMemException e)
+		{
+			System.out.println("Map cache too small!");
+			if(!multiplayer) System.exit(1);
+		}
 		catch(NullPointerException e)
 		{
 			if(!multiplayer) System.exit(1);
@@ -642,7 +646,12 @@ public class CraftrMap
 			int px = x&63;
 			int py = y&63;
 			//System.out.println("setBlock at chunk " + (x>>6) + "," + (y>>6) + ", pos " + px + "," + py);
-			findCachedChunk((x>>6),(y>>6)).place(px,py,(byte)t2,(byte)ch2,(byte)co2,(byte)p2);
+			grabChunk((x>>6),(y>>6)).place(px,py,(byte)t2,(byte)ch2,(byte)co2,(byte)p2);
+		}
+		catch(NoChunkMemException e)
+		{
+			System.out.println("Map cache too small!");
+			if(!multiplayer) System.exit(1);
 		}
 		catch(NullPointerException e)
 		{
@@ -657,7 +666,12 @@ public class CraftrMap
 			if(t1==-1) setPushable(x,y,ch1,co1);
 			int px = x&63;
 			int py = y&63;
-			findCachedChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,p1);
+			grabChunk((x>>6),(y>>6)).place(px,py,t1,ch1,co1,p1);
+		}
+		catch(NoChunkMemException e)
+		{
+			System.out.println("Map cache too small!");
+			if(!multiplayer) System.exit(1);
 		}
 		catch(NullPointerException e)
 		{

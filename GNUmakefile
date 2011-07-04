@@ -20,7 +20,8 @@ serverjar: server
 clientjar: client
 	@echo [[[ MAKING CLIENT JARs ]]]
 	jar cvfm 64pixels.jar manifests/cli-std.MF common/*.class client/*.class client/rawcga.bin client/*.wav
-	jar cvfm 64px-app.jar manifests/cli-app.MF common/*.class client/*.class	
+	jar cvfm 64px-app.jar manifests/cli-app.MF common/*.class client/*.class client/rawcga.bin client/*.wav
+	
 common:
 	@echo [[[ MAKING COMMON CODE ]]]
 	javac common/*.java

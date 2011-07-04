@@ -527,7 +527,7 @@ public class CraftrServer extends CraftrServerShim
 			clients[id].sendChatMsgAll("&5"+st);
 			return "";
 		}
-		else if((cmd[0].equals("load") || cmd[0].equals("goto") || cmd[0].equals("l") || cmd[0].equals("join")) && id!=255)
+		else if((cmd[0].equals("load") || cmd[0].equals("goto") || cmd[0].equals("l") || cmd[0].equals("join") || cmd[0].equals("world")) && id!=255)
 		{ 
 			CraftrWorld tm = findWorld(cmdz[1]);
 			if(tm==null) return "No such world!";

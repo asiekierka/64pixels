@@ -36,9 +36,13 @@ public class CraftrDungeonGenerator
 		threshold = (width*height*2)/5;
 		cover = 0;
 		drawrect((width/2)-3,(height/2)-3,(width/2)+3,(height/2)+3);
+		System.out.println("scrawling");
 		scrawl();
+		System.out.println("trimming");
 		trim();
+		System.out.println("putting");
 		putOnMap(map);
+		System.out.println("im done");
 		return 0;
 	}
 
