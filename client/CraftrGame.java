@@ -1025,7 +1025,17 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			{
 				// i'm a bit worried that this may thrash the garbage collector a bit too much.
 				// i'll leave it in, though, as i suspect the old thing gets freed immediately. --GM
-				gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
+				//gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
+
+				// in case it thrashes your garbage collector, comment that and uncomment this --asie
+				
+				for(int iy=0;iy<gs.FULLGRID_H;iy++)
+				{
+					for(int ix=0;ix<gs.FULLGRID_W;ix++)
+					{
+						gs.blocks[(iy*gs.FULLGRID_W)+ix] = null;
+					}
+				}
 				
 				// ajf's code. sadly, it's a bit flawed (can see through diagonals) and a bit slow.
 				// this is the Most Obvious Solution(TM), by the way,
@@ -1045,6 +1055,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 							if(gs.blocks[(y*gs.FULLGRID_W)+x] == null)
 							{
 			 					t = map.getBlock(x+sx,y+sy);
+								getblock_count++;
 								gs.blocks[(y*gs.FULLGRID_W)+x] = t;
 								if(!t.isEmpty()) break;
 							}
@@ -1117,7 +1128,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(x >= -15 && x < gs.FULLGRID_W-15 && y >= -12 && y < gs.FULLGRID_H-12)
 				{
 					CraftrBlock t = map.getBlock(x+sx,y+sy);
-					
+
 					// first check: block behind is empty
 					// second check: block is aligned with the axis
 					// third check: block right/left is empty
@@ -1125,7 +1136,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						   map.getBlock(x+sx-dx,y+sy-dy).isEmpty()
 						|| x == 0 || y == 0
 						|| map.getBlock(x+sx-(x < 0 ? -ady : ady),y+sy-(y < 0 ? -adx : adx)).isEmpty();
-					
+
 					//if(antidiagcheck || !t.isEmpty()) // no corners for you - TODO: fix the "flicker"
 					if(antidiagcheck)
 						gs.blocks[((y+12)*gs.FULLGRID_W)+x+15] = t;
@@ -1155,6 +1166,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			y = y1;
 			{
 				CraftrBlock t2 = map.getBlock(x+sx,y+sy);
+
 				if(t2.isEmpty())
 				{
 					x -= ady;
@@ -1162,6 +1174,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					if(x >= -15 && x < gs.FULLGRID_W-15 && y >= -12 && y < gs.FULLGRID_H-12)
 					{
 						CraftrBlock t = map.getBlock(x+sx,y+sy);
+
 						if(!t.isEmpty())
 							gs.blocks[((y+12)*gs.FULLGRID_W)+x+15] = t;	
 					}
@@ -1172,6 +1185,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			y = y2;
 			{
 				CraftrBlock t2 = map.getBlock(x+sx,y+sy);
+
 				if(t2.isEmpty())
 				{
 					x += ady;
@@ -1179,6 +1193,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					if(x >= -15 && x < gs.FULLGRID_W-15 && y >= -12 && y < gs.FULLGRID_H-12)
 					{
 						CraftrBlock t = map.getBlock(x+sx,y+sy);
+
 						if(!t.isEmpty())
 							gs.blocks[((y+12)*gs.FULLGRID_W)+x+15] = t;	
 					}

@@ -73,7 +73,7 @@ public class CraftrDungeonGenerator
 	{
 		for(int y=0;y<h;y++)
 			for(int x=0;x<w;x++)
-				if(types[ind(x,y)]==(byte)0 && ((checkZero(x,y-1) || checkZero(x,y+1)) && (checkZero(x-1,y) || checkZero(x+1,y)))) 
+				if(types[ind(x,y)]==(byte)0 && ((checkZero(x,y-1) && checkZero(x,y+1)) || (checkZero(x-1,y) && checkZero(x+1,y)))) 
 					types[ind(x,y)]=(byte)1;
 	}
 	public Random rand = new Random();
