@@ -51,7 +51,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 			}
 			socket.setTcpNoDelay(true);
 			in = new DataInputStream(socket.getInputStream());
-			out2 = new ByteArrayOutputStream(2048);
+			out2 = new ByteArrayOutputStream(65536);
 			out = new DataOutputStream(out2);
 			ns = new CraftrNetSender(socket.getOutputStream());
 			Thread tns = new Thread(ns);
@@ -349,7 +349,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 				{
 					out.writeByte(0x0F);
 					writeString(nick);
-					writeString("Why do i still have this here? Also HARUHIISM");
+					writeString("eeeeh");
 					out.writeByte(0x00);
 					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE. NEVER. NEVER!!!
 					out.writeInt(CraftrVersion.getProtocolVersion());
@@ -379,19 +379,26 @@ public class CraftrNet implements Runnable, CraftrNetShim
 						{
 							case 0x01:
 							{
-								if(loginStage>=2) break;
-								loginStage=2;
-								game.players[255].px=in.readInt();
-								game.players[255].py=in.readInt();
-								int tx = game.players[255].px>>6;
-								int ty = game.players[255].py>>6;
-								chunkRequest(tx,ty);
-								chunkRequest(tx+1,ty);
-								chunkRequest(tx,ty+1);
-								chunkRequest(tx+1,ty+1);
-								nick = readString();
-								isOp=in.readUnsignedShort()==42;
-								game.players[255].name = nick;
+								if(loginStage>=2)
+								{
+									in.readInt();
+									in.readInt();
+									readString();
+									in.readShort();
+								} else {
+									loginStage=2;
+									game.players[255].px=in.readInt();
+									game.players[255].py=in.readInt();
+									int tx = game.players[255].px>>6;
+									int ty = game.players[255].py>>6;
+									chunkRequest(tx,ty);
+									chunkRequest(tx+1,ty);
+									chunkRequest(tx,ty+1);
+									chunkRequest(tx+1,ty+1);
+									nick = readString();
+									isOp=in.readUnsignedShort()==42;
+									game.players[255].name = nick;
+								}
 								System.out.println("Logged in!");
 								break;
 							}

@@ -605,6 +605,29 @@ public class CraftrPhysics
 					}
 				}
 			} break;
+			case 17: // Pusher
+			{
+				int signalz=0;
+				int val = (int)blockData[1]&0x7E;
+				for(int i=0;i<4;i++)
+				{
+					if(strength[i]>0) { signalz++; }
+				}	
+				if(signalz>0)
+				{
+					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(val|0x01),blockData[2],blockData[3]));
+				}
+				else
+				{
+					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)val,blockData[2],blockData[3]));
+				}
+				for(int i=0;i<4;i++)
+				{
+					int t = surrBlockData[i][0];
+					int str = strength[i];
+					if(isUpdated(t)) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+				}
+			} break;
 			default:
 				break;
 		}

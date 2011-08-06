@@ -1380,7 +1380,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						canvas.draw(mx,my);
 						try{ Thread.sleep(33); } catch(Exception e){}
 					}
-					players[255].pchr = (byte)confChr;
+					if(confChr!=0) players[255].pchr = (byte)confChr;
 					break;
 				case 5:
 					is.toggleWindow(2);
@@ -1389,7 +1389,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						canvas.draw(mx,my);
 						try{ Thread.sleep(33); } catch(Exception e){}
 					}
-					players[255].pcol = (byte)confCol;
+					if(confCol!=0) players[255].pcol = (byte)confCol;
 					break;
 			}
 		}

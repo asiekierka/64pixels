@@ -2,7 +2,7 @@ package common;
 
 public class CraftrVersion
 {
-	private static final int protocolVer = 264;
+	private static final int protocolVer = 263;
 	private static final int releaseVer = 0;
 	private static final int majorVer = 1;
 	private static final int minorVer = 9;

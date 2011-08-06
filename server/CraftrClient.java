@@ -56,7 +56,7 @@ public class CraftrClient implements Runnable
 			y = 0;
 			loginStage = 0;
 			in = new DataInputStream(socket.getInputStream());
-			out2 = new ByteArrayOutputStream(2048);
+			out2 = new ByteArrayOutputStream(65536);
 			out = new DataOutputStream(out2);
 			ns = new CraftrNetSender(socket.getOutputStream());
 			Thread tns = new Thread(ns);
@@ -536,66 +536,77 @@ public class CraftrClient implements Runnable
 						switch((int)(buf[0]&0xFF))
 						{
 							case 0x0F:
-									if(loginStage>=1) break;
-									loginStage = 1;
-									nick = readString();
-									readString();
-									in.readByte();
-									in.readByte();
-									version = in.readInt();
-									chr = in.readByte();
-									col = in.readByte();
-									x=serv.spawnX;
-									y=serv.spawnY;
-									if(serv.anonMode) nick = "User"+id;
-									System.out.println("User " + id + " (IP " + socket.getInetAddress().getHostAddress() + ") connected!");
-									if(nick.length()>20)
+									if(loginStage>=1)
 									{
-										kick("Invalid nickname!");
-									}
-									else if(version!=CraftrVersion.getProtocolVersion())
-									{
-										kick("Invalid protocol/game version!");
-									}
-									else if(serv.isBanned(socket.getInetAddress().getHostAddress()))
-									{
-										kick("You're banned!");
-									}
-									else
-									{
-										if(serv.isOp(socket.getInetAddress().getHostAddress()))
+										readString();
+										readString();
+										in.readByte();
+										in.readByte();
+										in.readInt();
+										in.readByte();
+										in.readByte();
+										break;
+									} else {
+										loginStage = 1;
+										nick = readString();
+										readString();
+										in.readByte();
+										in.readByte();
+										version = in.readInt();
+										chr = in.readByte();
+										col = in.readByte();
+										x=serv.spawnX;
+										y=serv.spawnY;
+										if(serv.anonMode) nick = "User"+id;
+										System.out.println("User " + id + " (IP " + socket.getInetAddress().getHostAddress() + ") connected!");
+										if(nick.length()>20)
 										{
-											op=true;
-											System.out.println("User " + id + " is an Op!");
+											kick("Invalid nickname!");
 										}
-										synchronized(out)
+										else if(version!=CraftrVersion.getProtocolVersion())
 										{
-											out.writeByte(0x01);
-											out.writeInt(x);
-											out.writeInt(y);
-											writeString(nick);
-											out.writeShort(op?42:0);
-
-											sendPacket();
+											kick("Invalid protocol/game version!");
 										}
-										if(serv.passOn)
+										else if(serv.isBanned(socket.getInetAddress().getHostAddress()))
 										{
-											auth = new CraftrAuth(serv.pass);
-											byte[] ae = auth.encrypt();
+											kick("You're banned!");
+										}
+										else
+										{
+											if(serv.isOp(socket.getInetAddress().getHostAddress()))
+											{
+												op=true;
+												System.out.println("User " + id + " is an Op!");
+											}
 											synchronized(out)
 											{
-												out.writeByte(0x50);
-												out.write(ae,0,32);
+												out.writeByte(0x01);
+												out.writeInt(x);
+												out.writeInt(y);
+												writeString(nick);
+												out.writeShort(op?42:0);
+	
 												sendPacket();
 											}
-											passWait=true;
+											if(serv.passOn)
+											{
+												auth = new CraftrAuth(serv.pass);
+												byte[] ae = auth.encrypt();
+												synchronized(out)
+												{
+													out.writeByte(0x50);
+													out.write(ae,0,32);
+													sendPacket();
+												}
+												passWait=true;
+											}
+											sendChatMsgAll(nick + " has joined.");
+											setRaycasting(world.isRaycasted);
+											map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
+											map.setPlayer(x,y,1);
+											spawnPlayer();
+											spawnOthers();
 										}
-										sendChatMsgAll(nick + " has joined.");
-										setRaycasting(world.isRaycasted);
-										map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
-										map.setPlayer(x,y,1);
-										spawnPlayer();
-										spawnOthers();
 									}
 								break;
 							case 0x10:
@@ -636,6 +647,7 @@ public class CraftrClient implements Runnable
 										out.writeShort(pls);
 										out.write(t2,pp-pl,pls);
 										sendPacket();
+										Thread.sleep(1);
 									}
 									pl -= pls;
 								}
