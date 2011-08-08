@@ -1034,12 +1034,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 			else
 			{
-				// i'm a bit worried that this may thrash the garbage collector a bit too much.
-				// i'll leave it in, though, as i suspect the old thing gets freed immediately. --GM
-				//gs.blocks = new CraftrBlock[gs.FULLGRID_W*gs.FULLGRID_H];
-
-				// in case it thrashes your garbage collector, comment that and uncomment this --asie
-				
 				for(int iy=0;iy<gs.FULLGRID_H;iy++)
 				{
 					for(int ix=0;ix<gs.FULLGRID_W;ix++)
@@ -1047,35 +1041,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						gs.blocks[(iy*gs.FULLGRID_W)+ix] = null;
 					}
 				}
-				
-				// ajf's code. sadly, it's a bit flawed (can see through diagonals) and a bit slow.
-				// this is the Most Obvious Solution(TM), by the way,
-				// so if you're ever in a hurry, this should suffice.
-				// i must say, that was a very good attempt. --GM
-				/*
-				for(double angle=0;angle<360;angle+=0.15)
-				{
-					double sin = Math.sin(Math.toRadians(angle));
-					double cos = Math.cos(Math.toRadians(angle));
-					for(double len=0;len<64;len+=0.5)
-					{
-						int x = (int)(15.5+sin*len);
-						int y = (int)(12.5+cos*len);
-						if(x>=0 && y>=0 && x<32 && y<25)
-						{
-							if(gs.blocks[(y*gs.FULLGRID_W)+x] == null)
-							{
-			 					t = map.getBlock(x+sx,y+sy);
-								getblock_count++;
-								gs.blocks[(y*gs.FULLGRID_W)+x] = t;
-								if(!t.isEmpty()) break;
-							}
-							else if(!gs.blocks[(y*gs.FULLGRID_W)+x].isEmpty()) break;
-						}
-						else break;
-					}
-				}
-				*/
 				// this is the recursive route.
 				gs.blocks[(12*gs.FULLGRID_W)+15] = map.getBlock(px,py);
 				castRayPillars(px,py,-1, 0,-1,-1,-1, 1,17);
