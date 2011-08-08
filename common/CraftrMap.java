@@ -477,7 +477,8 @@ public class CraftrMap
 			{
 				try
 				{
-					se.out.writeByte(0xE1);
+					if(pull) se.out.writeByte(0xE2);
+					else se.out.writeByte(0xE1);
 					se.out.writeInt(x);
 					se.out.writeInt(y);
 					se.out.writeShort(xsize);
@@ -566,11 +567,11 @@ public class CraftrMap
 			setPushableNet(x+dx,y+dy,chr,col);
 	}
 
-	public void piston(int x, int y, int dx, int dy, boolean pull)
+	public boolean piston(int x, int y, int dx, int dy, boolean pull)
 	{
-		if((dx!=0 && dy!=0) || (dx==0 && dy==0)) return; // don't do diagonals.
-		if(dx>1 || dx<-1 || dy>1 || dy<-1) return; // no.
-		if(getBlock(x+dx,y+dy).isEmpty()) return;
+		if((dx!=0 && dy!=0) || (dx==0 && dy==0)) return false; // don't do diagonals.
+		if(dx>1 || dx<-1 || dy>1 || dy<-1) return false; // no.
+		if(!pull && !getBlock(x+dx,y+dy).isPistonable()) return false;
 		int posx = x+dx;
 		int posy = y+dy;
 		// we'll have to push unless we see a wall and until we have pushiums
@@ -579,7 +580,7 @@ public class CraftrMap
 			posx+=dx;
 			posy+=dy;
 		}
-		if(!pull && !getBlock(posx,posy).isPistonEmpty()) return;
+		if(!pull && !getBlock(posx,posy).isPistonEmpty()) return false;
 		int tx = posx-(x+dx);
 		int ty = posy-(y+dy);
 		if(tx<0) tx=-tx;
@@ -587,6 +588,7 @@ public class CraftrMap
 		if(tx==0) tx=1;
 		if(ty==0) ty=1;
 		pushMultiple(x+dx,y+dy,tx,ty,dx,dy,pull);
+		return true;
 	}
 
 	public void playSample(int x, int y, int id)

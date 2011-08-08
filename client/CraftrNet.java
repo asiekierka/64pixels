@@ -656,13 +656,14 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								break;
 							}
 							case 0xE1: // push me
+							case 0xE2: // push me
 								int e1x = in.readInt();
 								int e1y = in.readInt();
 								int e1xs = in.readShort();
 								int e1ys = in.readShort();
 								int e1dx = in.readByte();
 								int e1dy = in.readByte();
-								game.map.pushMultiple(e1x,e1y,e1xs,e1ys,e1dx,e1dy);
+								game.map.pushMultiple(e1x,e1y,e1xs,e1ys,e1dx,e1dy,((int)(buf[0]&0xFF)==0xE2));
 								break;
 							case 0xF0:
 								synchronized(out)

@@ -700,7 +700,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				{
 					tmparr[0] = (byte)gs.drawType;
 					tmparr[1] = (byte)0;
-					if(gs.drawType==17 && gs.isSticky) tmparr[1] = (byte)2;
 					tmparr[2] = (byte)gs.gdrawChr();
 					tmparr[3] = (byte)gs.gdrawCol();
 				}

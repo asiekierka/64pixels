@@ -609,8 +609,10 @@ public class CraftrPhysics
 			{
 				int signalz=0;
 				int oldsignalz=(int)blockData[1]&0x01;
-				int val = (int)blockData[1]>>2;
-				int st = (int)blockData[1]&0x02;
+				int val = (int)blockData[1]>>1;
+				int st = 0;
+				//System.out.println("" + (int)blockData[3]);
+				if(((int)blockData[3]) == 46) st=1;
 				int i = 0;
 				for(;i<4;i++)
 				{
@@ -618,22 +620,30 @@ public class CraftrPhysics
 				}
 				if(signalz>0 && oldsignalz==0)
 				{
-					map.piston(x,y,xMovement[i],yMovement[i],false);
-					addBlockToSet(new CraftrBlock(x+xMovement[i],y+yMovement[i],16,(byte)0,(byte)pistonDir[i],(byte)7));
-					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(st | 1 | (i<<2)),blockData[2],blockData[3]));
+					int activ=0;
+					if (map.piston(x,y,xMovement[i],yMovement[i],false))
+						activ=1;
+					if(map.getBlock(x+xMovement[i],y+yMovement[i]).isEmpty())
+					{
+						activ=1;
+						addBlockToSet(new CraftrBlock(x+xMovement[i],y+yMovement[i],16,(byte)0,(byte)pistonDir[i],(byte)7));
+					}
+					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(activ | (i<<1)),blockData[2],blockData[3]));
 				}
-				else if(signalz==0 && oldsignalz>0)
+				else if(signalz==0 && oldsignalz>0 && val<4)
 				{
 					i=val;
 					if(st>0) map.piston(x+xMovement[i],y+yMovement[i],xMovement[i],yMovement[i],true);
 					else addBlockToSet(new CraftrBlock(x+xMovement[i],y+yMovement[i],0,(byte)0,(byte)0,(byte)0));
-					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)st,blockData[2],blockData[3]));
+					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)((4<<1)),blockData[2],blockData[3]));
 				}
+				else if(signalz==0 && oldsignalz==0 && val<4 && surrBlockData[val][0]==16)
+					addBlockToSet(new CraftrBlock(x+xMovement[val],y+yMovement[val],0,(byte)0,(byte)0,(byte)0));
 				for(i=0;i<4;i++)
 				{
 					int t = surrBlockData[i][0];
 					int str = strength[i];
-					if(isUpdated(t)) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+					if(isUpdated(t) && t!=17) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
 				}
 			} break;
 			default:
