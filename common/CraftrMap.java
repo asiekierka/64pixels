@@ -463,8 +463,13 @@ public class CraftrMap
 		}
 	}
 	
+	public void pushMultiple(int x, int y, int xs, int ys, int dx, int dy)
+	{
+		pushMultiple(x,y,xs,ys,dx,dy,false);
+	}
+
 	// this was tricky to merge, so it might still be a bit buggy --GM
-	public void pushMultiple(int x, int y, int xsize, int ysize, int dx, int dy)
+	public void pushMultiple(int x, int y, int xsize, int ysize, int dx, int dy, boolean pull)
 	{
 		synchronized(this)
 		{
@@ -504,14 +509,24 @@ public class CraftrMap
 				{
 					int ix = tx*dx;
 					int arrayPos = (ty*xsize)+tx;
-					if(blocks[arrayPos].isPushable()) setPushable(x+ix+dx,y+iy+dy,
+					int ox = x+ix;
+					int oy = y+iy;
+					if(pull)
+					{
+						ox-=dx;
+						oy-=dy;
+					} else {
+						ox+=dx;
+						oy+=dy;
+					}
+					if(blocks[arrayPos].isPushable()) setPushable(ox,oy,
 		                                                          (byte)blocks[arrayPos].getChar(),
 		                                                          (byte)blocks[arrayPos].getColor());
-					setBlock(x+ix+dx,y+iy+dy,blocks[arrayPos].getBlockData());
-					setPlayer(x+ix+dx,y+iy+dy,1);
+					setBlock(ox,oy,blocks[arrayPos].getBlockData());
+					setPlayer(ox,oy,1);
 					for(int moveDir=0;moveDir<4;moveDir++)
 					{
-						physics.addBlockToCheck(new CraftrBlockPos(x+ix+dx+xMovement[moveDir],y+iy+dy+yMovement[moveDir]));
+						physics.addBlockToCheck(new CraftrBlockPos(ox+xMovement[moveDir],oy+yMovement[moveDir]));
 					}
 				}
 			}
@@ -538,16 +553,14 @@ public class CraftrMap
 			posx+=dx;
 			posy+=dy;
 		}
-		if( !( getBlock(posx,posy).isEmpty() ) ) return;
+		if(!getBlock(posx,posy).isEmpty()) return;
 		int tx = posx-(x+dx);
 		int ty = posy-(y+dy);
 		if(tx<0) tx=-tx;
 		if(ty<0) ty=-ty;
 		if(tx==0) tx=1;
 		if(ty==0) ty=1;
-		int txs = x+dx;
-		int tys = y+dy;
-		pushMultiple(txs,tys,tx,ty,dx,dy);
+		pushMultiple(x+dx,y+dy,tx,ty,dx,dy);
 		setPushable(x+dx,y+dy,chr,col);
 		if(isServer)
 			setPushableNet(x+dx,y+dy,chr,col);
@@ -566,21 +579,14 @@ public class CraftrMap
 			posx+=dx;
 			posy+=dy;
 		}
-		if( !( getBlock(posx,posy).isEmpty() ) ) return;
+		if(!pull && !getBlock(posx,posy).isPistonEmpty()) return;
 		int tx = posx-(x+dx);
 		int ty = posy-(y+dy);
 		if(tx<0) tx=-tx;
 		if(ty<0) ty=-ty;
 		if(tx==0) tx=1;
 		if(ty==0) ty=1;
-		int txs = x+dx;
-		int tys = y+dy;
-		if(pull)
-		{
-			dx=-dx;
-			dy=-dy;
-		}
-		pushMultiple(txs,tys,tx,ty,dx,dy);
+		pushMultiple(x+dx,y+dy,tx,ty,dx,dy,pull);
 	}
 
 	public void playSample(int x, int y, int id)

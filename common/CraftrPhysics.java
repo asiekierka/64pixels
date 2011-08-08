@@ -32,7 +32,7 @@ public class CraftrPhysics
 
 	public boolean isUpdated(int type)
 	{
-		return (type>=2 && type<=4) || type==6 || type==7 || (type>=10 && type<=13) || type==15 || type==17 || type==18;
+		return (type>=2 && type<=4) || type==6 || type==7 || (type>=10 && type<=13) || type==15 || type==17;
 	}
 	
 	public boolean isSent(int type)
@@ -608,20 +608,28 @@ public class CraftrPhysics
 			case 17: // Pusher
 			{
 				int signalz=0;
-				int val = (int)blockData[1]&0x7E;
-				for(int i=0;i<4;i++)
+				int oldsignalz=(int)blockData[1]&0x01;
+				int val = (int)blockData[1]>>2;
+				int st = (int)blockData[1]&0x02;
+				int i = 0;
+				for(;i<4;i++)
 				{
-					if(strength[i]>0) { signalz++; }
-				}	
-				if(signalz>0)
-				{
-					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(val|0x01),blockData[2],blockData[3]));
+					if(strength[i]>0) { signalz++; i=i^1; break;}
 				}
-				else
+				if(signalz>0 && oldsignalz==0)
 				{
-					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)val,blockData[2],blockData[3]));
+					map.piston(x,y,xMovement[i],yMovement[i],false);
+					addBlockToSet(new CraftrBlock(x+xMovement[i],y+yMovement[i],16,(byte)0,(byte)pistonDir[i],(byte)7));
+					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(st | 1 | (i<<2)),blockData[2],blockData[3]));
 				}
-				for(int i=0;i<4;i++)
+				else if(signalz==0 && oldsignalz>0)
+				{
+					i=val;
+					if(st>0) map.piston(x+xMovement[i],y+yMovement[i],xMovement[i],yMovement[i],true);
+					else addBlockToSet(new CraftrBlock(x+xMovement[i],y+yMovement[i],0,(byte)0,(byte)0,(byte)0));
+					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)st,blockData[2],blockData[3]));
+				}
+				for(i=0;i<4;i++)
 				{
 					int t = surrBlockData[i][0];
 					int str = strength[i];

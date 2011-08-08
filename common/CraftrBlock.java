@@ -50,6 +50,11 @@ public class CraftrBlock
 		return false;
 	}
 
+	public boolean isPistonEmpty()
+	{
+		return !(isPushable() || block[0]!=0);
+	}
+
 	public boolean isWiriumNeighbour()
 	{
 		if((block[0]>=2 && block[0]<=7) || (block[0]>=9 && block[0]<=13) || block[0]==15) return true;
@@ -67,7 +72,7 @@ public class CraftrBlock
 	}
 	public boolean isPistonable()
 	{
-		return (isPushable() || !(block[0]==4 || block[0]==16 || block[0]==18 || (block[0]==17 && (0x01&block[1])!=0)));
+		return (isPushable() || !(block[0]==0 || block[0]==15 || block[0]==18 || block[0]==16 || (block[0]==17 && (0x01&block[1])!=0)));
 	}
 
 	public int getBullet()
@@ -173,7 +178,7 @@ public class CraftrBlock
 
 	public static boolean isPlaceable(int t)
 	{
-		return !(t == 16 || t == 18);
+		return !(t == 16);
 	}
 
 	public boolean isPlaceable()
