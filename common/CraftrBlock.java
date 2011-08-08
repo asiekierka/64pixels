@@ -5,8 +5,8 @@ public class CraftrBlock
 	public int x = 0;
 	public int y = 0;
 	private byte[] block = new byte[7];
-	public static final int maxType = 16;
-	public static final int invalidTypes = 1;
+	public static final int maxType = 18;
+	public static final int invalidTypes = 2;
 
 	public CraftrBlock()
 	{
