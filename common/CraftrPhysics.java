@@ -634,7 +634,8 @@ public class CraftrPhysics
 				{
 					i=val;
 					if(st>0) map.piston(x+xMovement[i],y+yMovement[i],xMovement[i],yMovement[i],true);
-					else addBlockToSet(new CraftrBlock(x+xMovement[i],y+yMovement[i],0,(byte)0,(byte)0,(byte)0));
+					CraftrBlock ph = map.getBlock(x+xMovement[i],y+yMovement[i]);
+					if(ph.getType()==16 && ph.getChar()==pistonDir[i]) addBlockToSet(new CraftrBlock(x+xMovement[i],y+yMovement[i],0,(byte)0,(byte)0,(byte)0));
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)((4<<1)),blockData[2],blockData[3]));
 				}
 				else if(signalz==0 && oldsignalz==0 && val<4 && surrBlockData[val][0]==16)

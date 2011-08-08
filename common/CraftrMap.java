@@ -571,7 +571,7 @@ public class CraftrMap
 	{
 		if((dx!=0 && dy!=0) || (dx==0 && dy==0)) return false; // don't do diagonals.
 		if(dx>1 || dx<-1 || dy>1 || dy<-1) return false; // no.
-		if(!pull && !getBlock(x+dx,y+dy).isPistonable()) return false;
+		if(!getBlock(x+dx,y+dy).isPistonable()) return false;
 		int posx = x+dx;
 		int posy = y+dy;
 		// we'll have to push unless we see a wall and until we have pushiums

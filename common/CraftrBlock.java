@@ -5,7 +5,7 @@ public class CraftrBlock
 	public int x = 0;
 	public int y = 0;
 	private byte[] block = new byte[7];
-	public static final int maxType = 18;
+	public static final int maxType = 19;
 	public static final int invalidTypes = 2;
 
 	public CraftrBlock()
@@ -73,7 +73,7 @@ public class CraftrBlock
 	}
 	public boolean isPistonable()
 	{
-		return (isPushable() || !(block[0]==0 || block[0]==4 || block[0]==18 || block[0]==16 || (block[0]==17 && (0x01&block[1])!=0)));
+		return (isPushable() || !(block[0]==0 || block[0]==19 || block[0]==18 || block[0]==16 || (block[0]==17 && (0x01&block[1])!=0)));
 	}
 
 	public int getBullet()
@@ -229,6 +229,8 @@ public class CraftrBlock
 				return "Pusher";
 			case 18:
 				return "PusherH";
+			case 19:
+				return "Stop";
 			case -1:
 				return "Pushium";
 		}
