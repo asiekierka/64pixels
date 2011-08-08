@@ -53,7 +53,7 @@ public class CraftrBlock
 	public boolean isPistonEmpty()
 	{
 		if(block[0]==0) return true;
-		return !isPushable();
+		return isPushable();
 	}
 
 	public boolean isWiriumNeighbour()

@@ -523,8 +523,11 @@ public class CraftrMap
 					if(blocks[arrayPos].isPushable()) setPushable(ox,oy,
 		                                                          (byte)blocks[arrayPos].getChar(),
 		                                                          (byte)blocks[arrayPos].getColor());
-					setBlock(ox,oy,blocks[arrayPos].getBlockData());
-					setPlayer(ox,oy,1);
+					if(blocks[arrayPos].isPlaceable())
+					{
+						setBlock(ox,oy,blocks[arrayPos].getBlockData());
+						setPlayer(ox,oy,1);
+					}
 					for(int moveDir=0;moveDir<4;moveDir++)
 					{
 						physics.addBlockToCheck(new CraftrBlockPos(ox+xMovement[moveDir],oy+yMovement[moveDir]));
@@ -580,7 +583,7 @@ public class CraftrMap
 			posx+=dx;
 			posy+=dy;
 		}
-		if(!pull && !getBlock(posx,posy).isPistonEmpty()) return false;
+		if(!getBlock(posx,posy).isPistonEmpty()) return false;
 		int tx = posx-(x+dx);
 		int ty = posy-(y+dy);
 		if(tx<0) tx=-tx;
