@@ -280,7 +280,7 @@ public class CraftrGameScreen extends CraftrScreen
 		else c.DrawChar(10*16+12,BARPOS_Y,(byte)gdrawChr(),(byte)gdrawCol());
 		c.DrawChar1x(12*16,BARPOS_Y,(byte)179,(byte)15);
 		c.DrawChar1x(12*16,BARPOS_Y+8,(byte)179,(byte)15);
-		if(drawType == 4) barselMode=2;
+		if(drawType == 4 || drawType == 20) barselMode=2;
 		int bsmt = barselMode;
 		if(drawType == 2) bsmt=3;
 		else if(isArrow() && barselMode == 1) bsmt=4;
@@ -288,6 +288,7 @@ public class CraftrGameScreen extends CraftrScreen
 		if(drawType == 3 && (gdrawChr()<24 || gdrawChr()>=28)) sdrawChr(25);
 		else if(drawType == 15 && !(gdrawChr()==30 || gdrawChr()==31 || gdrawChr()==16 || gdrawChr()==17)) sdrawChr(31);
 		else if(drawType==4) sdrawChr(206);
+		else if(drawType==20) sdrawChr(111);
 		else if (drawType == 17)
 		{
 			if(isSticky) sdrawCol(0x2E);
@@ -316,7 +317,7 @@ public class CraftrGameScreen extends CraftrScreen
 			case 2: // color
 				if(hideousPrompts) c.DrawString1x(12*16+8,BARPOS_Y+16,"      Color       ",9);
 				if(isArrow()) c.DrawString1x(8*16+8,BARPOS_Y,"Dir",15);
-				else if (drawType != 4) c.DrawString1x(8*16+8,BARPOS_Y,"Chr",15);
+				else if (drawType != 4 && drawType != 20) c.DrawString1x(8*16+8,BARPOS_Y,"Chr",15);
 				c.DrawString1x(8*16+8,BARPOS_Y+8,"Col",240);
 				for(int j=0;j<16;j++)
 				{

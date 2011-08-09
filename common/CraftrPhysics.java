@@ -32,7 +32,7 @@ public class CraftrPhysics
 
 	public boolean isUpdated(int type)
 	{
-		return (type>=2 && type<=4) || type==6 || type==7 || (type>=10 && type<=13) || type==15 || type==17;
+		return (type>=2 && type<=4) || type==6 || type==7 || (type>=10 && type<=13) || type==15 || type==17 || type==20;
 	}
 	
 	public boolean isSent(int type)
@@ -645,6 +645,32 @@ public class CraftrPhysics
 					int t = surrBlockData[i][0];
 					int str = strength[i];
 					if(isUpdated(t) && t!=17) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
+				}
+			} break;
+			case 20: { // Dupe
+				int signalz=0;
+				int oldsignalz=(int)blockData[1]&0x01;
+				int i = 0;
+				for(;i<4;i++)
+				{
+					if(strength[i]>0) { signalz++; i=i^2; break;}
+				}
+				if(signalz>0 && oldsignalz==0)
+				{
+					byte[] tbl = map.getBlock(x+xMovement[i],y+yMovement[i]).getBlockData();
+					i=i^1;
+					addBlockToSet(new CraftrBlock(x+xMovement[i],y+yMovement[i],tbl));
+					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)1,blockData[2],blockData[3]));
+				}
+				else if(signalz==0 && oldsignalz>0)
+				{
+					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)0,blockData[2],blockData[3]));
+				}
+				for(i=0;i<4;i++)
+				{
+					int t = surrBlockData[i][0];
+					int str = strength[i];
+					if(isUpdated(t) && t!=20) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
 				}
 			} break;
 			default:

@@ -5,7 +5,7 @@ public class CraftrBlock
 	public int x = 0;
 	public int y = 0;
 	private byte[] block = new byte[7];
-	public static final int maxType = 19;
+	public static final int maxType = 20;
 	public static final int invalidTypes = 2;
 
 	public CraftrBlock()
@@ -58,7 +58,7 @@ public class CraftrBlock
 
 	public boolean isWiriumNeighbour()
 	{
-		if((block[0]>=2 && block[0]<=7) || (block[0]>=9 && block[0]<=13) || block[0]==15 || block[0]==17) return true;
+		if((block[0]>=2 && block[0]<=7) || (block[0]>=9 && block[0]<=13) || block[0]==15 || block[0]==17 || block[0]==20) return true;
 		return false;
 	}
 
@@ -231,6 +231,8 @@ public class CraftrBlock
 				return "PusherH";
 			case 19:
 				return "Stop";
+			case 20:
+				return "Dupe";
 			case -1:
 				return "Pushium";
 		}
@@ -248,6 +250,8 @@ public class CraftrBlock
 				return "Gee's linctus";
 			case 18:
 				return "Pusher Head";
+			case 20:
+				return "Duplicator";
 		}
 		return getName(t);
 	}
