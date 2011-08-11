@@ -534,7 +534,8 @@ public class CraftrServer extends CraftrServerShim
 			else
 			{
 				clients[id].changeMap(tm.map);
-				if(!cmd[1].equals("map")) clients[id].sendChatMsgAll("&e" + clients[id].nick + " loaded map &f'" + cmdz[1] + "'!"); 
+				if (cmd[1].startsWith("$")) clients[id].sendChatMsgAll("&e" + clients[id].nick + " loaded a secret map!");
+				else if(!cmd[1].equals("map")) clients[id].sendChatMsgAll("&e" + clients[id].nick + " loaded map &f'" + cmdz[1] + "'!"); 
 				else clients[id].sendChatMsgAll("&e" + clients[id].nick + " loaded the main map!");
 			}
 		}
