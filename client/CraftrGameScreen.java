@@ -261,7 +261,7 @@ public class CraftrGameScreen extends CraftrScreen
 	
 	public boolean isArrow()
 	{
-		return (drawType==3 || drawType==15);
+		return (drawType==3 || drawType==15 || drawType==20);
 	}
 
 	public void DrawBar()
@@ -280,20 +280,33 @@ public class CraftrGameScreen extends CraftrScreen
 		else c.DrawChar(10*16+12,BARPOS_Y,(byte)gdrawChr(),(byte)gdrawCol());
 		c.DrawChar1x(12*16,BARPOS_Y,(byte)179,(byte)15);
 		c.DrawChar1x(12*16,BARPOS_Y+8,(byte)179,(byte)15);
-		if(drawType == 4 || drawType == 20) barselMode=2;
+		if(drawType == 4) barselMode=2;
 		int bsmt = barselMode;
 		if(drawType == 2) bsmt=3;
 		else if(isArrow() && barselMode == 1) bsmt=4;
 		else if(drawType == 17) bsmt=5;
-		if(drawType == 3 && (gdrawChr()<24 || gdrawChr()>=28)) sdrawChr(25);
+		else if(drawType >= 21 && drawType <= 23) bsmt=0;
+		if((drawType == 3 || drawType ==20)&& (gdrawChr()<24 || gdrawChr()>=28)) sdrawChr(25);
 		else if(drawType == 15 && !(gdrawChr()==30 || gdrawChr()==31 || gdrawChr()==16 || gdrawChr()==17)) sdrawChr(31);
 		else if(drawType==4) sdrawChr(206);
-		else if(drawType==20) sdrawChr(111);
 		else if (drawType == 17)
 		{
 			if(isSticky) sdrawCol(0x2E);
 			else sdrawCol(0x7F);
 			sdrawChr(177);
+		}
+		else if (drawType == 21)
+		{
+			sdrawCol(0x06);
+			sdrawChr(153);
+		} else if (drawType == 22)
+		{
+			sdrawCol(0x0D);
+			sdrawChr(5);
+		} else if (drawType == 23)
+		{
+			sdrawCol(0x0B);
+			sdrawChr(227);
 		}
 		switch(bsmt)
 		{
@@ -317,7 +330,7 @@ public class CraftrGameScreen extends CraftrScreen
 			case 2: // color
 				if(hideousPrompts) c.DrawString1x(12*16+8,BARPOS_Y+16,"      Color       ",9);
 				if(isArrow()) c.DrawString1x(8*16+8,BARPOS_Y,"Dir",15);
-				else if (drawType != 4 && drawType != 20) c.DrawString1x(8*16+8,BARPOS_Y,"Chr",15);
+				else if (drawType != 4) c.DrawString1x(8*16+8,BARPOS_Y,"Chr",15);
 				c.DrawString1x(8*16+8,BARPOS_Y+8,"Col",240);
 				for(int j=0;j<16;j++)
 				{
@@ -347,7 +360,7 @@ public class CraftrGameScreen extends CraftrScreen
 			case 4: // p-nand direction
 				c.DrawString1x(8*16+8,BARPOS_Y,"Dir",240);
 				c.DrawString1x(8*16+8,BARPOS_Y+8,"Col",15);
-				if(drawType==3)
+				if(drawType==3 || drawType==20)
 				{
 					for(int j=24;j<28;j++)
 					{

@@ -25,6 +25,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public CraftrPlayer players[] = new CraftrPlayer[256];
 	
 	public boolean isApplet;
+	public boolean hasShot;
 	public boolean blockChange = false;
 	public boolean playerChange = false;
 	public boolean mouseChange = false;
@@ -522,7 +523,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				gs.sdrawCol((mx-(12*16+8))>>4);
 			}
 		}
-		else if (gs.barselMode == 1 && gs.drawType == 3) // p-nand dir
+		else if (gs.barselMode == 1 && (gs.drawType == 3 || gs.drawType == 20)) // p-nand dir
 		{
 			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,64,16))
 			{
@@ -947,7 +948,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		int px = players[255].px+dpx;
 		int py = players[255].py+dpy;
 		CraftrBlock blockMoveTo=map.getBlock(px,py);
-		if(isShift && blockMoveTo.isEmpty())
+		if(isShift && blockMoveTo.isEmpty() && !hasShot)
 		{
 			for(int i=0;i<4;i++)
 			{
@@ -956,6 +957,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(tx==px && ty==py)
 				{
 					shoot(i);
+					hasShot = true;
 					waitTime=9;
 				}
 			}
@@ -1453,6 +1455,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public void runOnce()
 	{
+		hasShot = false;
 		if(isKick) { gt.isRunning=false; realKickOut(); }
 		if(waitTime==0)
 		{
@@ -1514,6 +1517,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			playerChange = players[255].posChanged;
 			players[255].posChanged = false;
 		}
+		if(playerChange)
+			map.physics.players[255] = players[255];
 		if(!multiplayer || net.loginStage > 0)
 		{
 			processMouse();

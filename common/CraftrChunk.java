@@ -229,6 +229,12 @@ public class CraftrChunk {
  			col2[tmp] = aCol;
  		}
 	}
+
+	public void clear(int x, int y)
+	{
+ 		int tmp = x+(y<<6);
+		type[tmp]=0;
+	}
 	
 	public void place(int x, int y, byte aType, byte aChr, byte aCol)
 	{

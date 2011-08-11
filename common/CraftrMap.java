@@ -628,6 +628,25 @@ public class CraftrMap
 		return wiriumChar[wiriumNeighbourInfo];
 	}
 
+	public void clearBlock(int x, int y)
+	{
+		try
+		{ 
+			int px = x&63;
+			int py = y&63;
+			grabChunk((x>>6),(y>>6)).clear(px, py);
+		}
+		catch(NoChunkMemException e)
+		{
+			System.out.println("Map cache too small!");
+			if(!multiplayer) System.exit(1);
+		}
+		catch(NullPointerException e)
+		{
+			if(!multiplayer) System.exit(1);
+		}
+	}
+
 	public void setBlock(int x, int y, byte[] data)
 	{
 		try
@@ -690,7 +709,24 @@ public class CraftrMap
 			if(!multiplayer) System.exit(1);
 		}
 	}
-	
+	public void clearBlockNet(int x, int y)
+	{
+		try
+		{ 
+			int px = x&63;
+			int py = y&63;
+			se.out.writeByte(0x33);
+			se.out.writeInt(x);
+			se.out.writeInt(y);
+			byte[] t = se.getPacket();
+			se.sendAllOnMap(t,t.length,mapName);
+		}
+		catch(Exception e)
+		{
+			System.out.println("[MAP] setBlockNet exception!");
+			e.printStackTrace();
+		}
+	}
 	public void setBlockNet(int x, int y, byte t1, byte ch1, byte co1)
 	{
 		try

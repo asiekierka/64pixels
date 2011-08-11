@@ -7,6 +7,8 @@ public class CraftrPhysics
 {
 	private Set<CraftrBlockPos> blocksToCheck = new HashSet<CraftrBlockPos>();
 	private Set<CraftrBlockPos> blocksToCheckOld = new HashSet<CraftrBlockPos>();
+	private Set<CraftrBlockPos> blocksToClear = new HashSet<CraftrBlockPos>();
+	private Set<CraftrBlockPos> blocksToClearOld = new HashSet<CraftrBlockPos>();
 	private Set<CraftrBlock> blocksToSet = new HashSet<CraftrBlock>();
 	private Set<CraftrBlock> blocksToSetOld = new HashSet<CraftrBlock>();
 	private static final int[] pnandDir = {26,27,25,24};
@@ -15,13 +17,12 @@ public class CraftrPhysics
 	private static final int[] extendDir2 = {17,16,30,31};
 	private static final int[] pistonDir = {198,181,210,208};
 	private static final int[] pistonDir2 = {181,198,208,210};
-	private static final int[] xMovement = { -1, 1, 0, 0 };
-	private static final int[] yMovement = { 0, 0, -1, 1 };
+	private static final int[] xMovement = { -1, 1, 0, 0, 0 };
+	private static final int[] yMovement = { 0, 0, -1, 1, 0 };
 	private boolean isServer;
 	
 	private Date lastBUpdate = new Date();
 	private boolean changeBullets = false;
-
 	public CraftrPlayer[] players = new CraftrPlayer[256];
 	public CraftrPhysics(boolean _isServer)
 	{
@@ -30,12 +31,12 @@ public class CraftrPhysics
 		players = new CraftrPlayer[256];
 	}
 
-	public boolean isUpdated(int type)
+	public static boolean isUpdated(int type)
 	{
 		return (type>=2 && type<=4) || type==6 || type==7 || (type>=10 && type<=13) || type==15 || type==17 || type==20;
 	}
 	
-	public boolean isSent(int type)
+	public static boolean isSent(int type)
 	{
 		return !(type == 5 || type == 6);
 	}
@@ -86,6 +87,19 @@ public class CraftrPhysics
 					else modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
 				}
 			}
+			Set<CraftrBlockPos> tempc;
+			synchronized(blocksToClear)
+			{
+				tempc = blocksToClear;
+				blocksToClear = blocksToClearOld;
+				blocksToClearOld = tempc;
+				blocksToClear.clear();
+			}
+			for (CraftrBlockPos cbp:blocksToClearOld)
+			{
+				modifiedMap.clearBlock(cbp.getX(),cbp.getY());
+				if(isServer) modifiedMap.clearBlockNet(cbp.getX(),cbp.getY());
+			}
 		}
 		blocksToSetOld.clear();
 	}
@@ -95,6 +109,14 @@ public class CraftrPhysics
 		synchronized(blocksToCheck)
 		{
 			blocksToCheck.add(cbp);
+		}
+	}
+
+	public void addBlockToClear(CraftrBlockPos cbp)
+	{
+		synchronized(blocksToClear)
+		{
+			blocksToClear.add(cbp);
 		}
 	}
 	
@@ -635,11 +657,11 @@ public class CraftrPhysics
 					i=val;
 					if(st>0) map.piston(x+xMovement[i],y+yMovement[i],xMovement[i],yMovement[i],true);
 					CraftrBlock ph = map.getBlock(x+xMovement[i],y+yMovement[i]);
-					if(ph.getType()==16 && ph.getChar()==pistonDir[i]) addBlockToSet(new CraftrBlock(x+xMovement[i],y+yMovement[i],0,(byte)0,(byte)0,(byte)0));
+					if(ph.getType()==16 && ph.getChar()==pistonDir[i]) addBlockToClear(new CraftrBlockPos(x+xMovement[val],y+yMovement[val]));
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)((4<<1)),blockData[2],blockData[3]));
 				}
 				else if(signalz==0 && oldsignalz==0 && val<4 && surrBlockData[val][0]==16)
-					addBlockToSet(new CraftrBlock(x+xMovement[val],y+yMovement[val],0,(byte)0,(byte)0,(byte)0));
+					addBlockToClear(new CraftrBlockPos(x+xMovement[val],y+yMovement[val]));
 				for(i=0;i<4;i++)
 				{
 					int t = surrBlockData[i][0];
@@ -650,11 +672,15 @@ public class CraftrPhysics
 			case 20: { // Dupe
 				int signalz=0;
 				int oldsignalz=(int)blockData[1]&0x01;
+				int chr = (int)blockData[2]&0xFF;
 				int i = 0;
+				int j = 1;
 				for(;i<4;i++)
 				{
-					if(strength[i]>0) { signalz++; i=i^2; break;}
+					if(strength[i]>0) { signalz++;}
+					if(chr==pnandDir[i]) { j = i; }
 				}
+				i = j;
 				if(signalz>0 && oldsignalz==0)
 				{
 					byte[] tbl = map.getBlock(x+xMovement[i],y+yMovement[i]).getBlockData();
@@ -673,6 +699,64 @@ public class CraftrPhysics
 					if(isUpdated(t) && t!=20) addBlockToCheck(new CraftrBlockPos(x+xMovement[i],y+yMovement[i]));
 				}
 			} break;
+			case 21: { // Bear
+				if (!changeBullets)
+				{
+					addBlockToCheck(new CraftrBlockPos(x,y));	
+					break;
+				}
+				int move = 4;
+				//int intelligence = (int)blockData[1]&0x0F;
+				int intelligence = 11;
+				int pli = 256;
+				int plx = 0;
+				int ply = 0;
+				for(int i=0;i<256;i++)
+				{
+					if(players[i] != null)
+					{
+						pli = i;
+						plx = players[i].px;
+						ply = players[i].py;
+						if (players[i].px == x && Math.abs(y - players[i].py) <= intelligence+2)
+						{
+							int dist = y - players[i].py;
+							if(dist<0)
+							{
+								move = 3;
+								i = 256;
+							} else if (dist>0)
+							{
+								move = 2;
+								i = 256;
+							}
+						}
+						else if (players[i].py == y && Math.abs(x - players[i].px) <= intelligence+2)
+						{
+							int dist = x - players[i].px;
+							if(dist<0)
+							{
+								move = 1;
+								i = 256;
+							} else if (dist>0)
+							{
+								move = 0;
+								i = 256;
+							}
+						}
+					}
+				}
+				if(move<4)
+				{
+					addBlockToSet(new CraftrBlock(x+xMovement[move], y+yMovement[move], blockData[0], blockData[1], blockData[2], blockData[3]));
+					addBlockToClear(new CraftrBlockPos(x,y));
+					if(x+xMovement[move] == plx && y+yMovement[move] == ply)
+					{
+						//kill(pli);
+					}
+				}
+				addBlockToCheck(new CraftrBlockPos(x+xMovement[move], y+yMovement[move]));
+			}
 			default:
 				break;
 		}

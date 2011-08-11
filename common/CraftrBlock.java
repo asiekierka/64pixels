@@ -5,7 +5,7 @@ public class CraftrBlock
 	public int x = 0;
 	public int y = 0;
 	private byte[] block = new byte[7];
-	public static final int maxType = 20;
+	public static final int maxType = 23;
 	public static final int invalidTypes = 2;
 
 	public CraftrBlock()
@@ -46,7 +46,7 @@ public class CraftrBlock
 	public boolean isEmpty()
 	{
 		if(isPushable()) return false;
-		if(block[0]==0 || block[0]==2 || block[0]==5 || (block[0]==6 && (0x80&(int)block[1])!=0) || block[0]==8) return true;
+		if(block[0]==0 || block[0]==2 || block[0]==5 || (block[0]==6 && (0x80&(int)block[1])!=0) || block[0]==8 || (block[0]>=21 && block[0]<=23)) return true;
 		return false;
 	}
 
@@ -233,6 +233,12 @@ public class CraftrBlock
 				return "Stop";
 			case 20:
 				return "Dupe";
+			case 21:
+				return "Bear";
+			case 22:
+				return "Ruffian";
+			case 23:
+				return "Tiger";
 			case -1:
 				return "Pushium";
 		}

@@ -603,6 +603,10 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								}
 								game.blockChange=true;
 								break;
+							case 0x34:
+								int lol2x = in.readInt();
+								int lol2y = in.readInt();
+								game.map.clearBlock(lol2x,lol2y);
 							case 0x41:
 								int ta41 = in.readUnsignedByte();
 								String tmp3 = readString();
