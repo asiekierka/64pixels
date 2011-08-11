@@ -182,9 +182,9 @@ public class CraftrPhysics
 			{
 				if(players[i]!=null && players[i].px==blockO.x && players[i].py==blockO.y)
 				{
-					synchronized(map.se)
+					synchronized(map)
 					{
-						map.se.kill(i);
+						map.kill(i);
 					}
 					bshot = true;
 				}
@@ -208,9 +208,9 @@ public class CraftrPhysics
 					{
 						if(players[i]!=null && players[i].px==blockO.x+xMovement[blockData[6]-1] && players[i].py==blockO.y+yMovement[blockData[6]-1])
 						{
-							synchronized(map.se)
+							synchronized(map)
 							{
-								map.se.kill(i);
+								map.kill(i);
 							}
 							bshot = true;
 						}
@@ -752,7 +752,7 @@ public class CraftrPhysics
 					addBlockToClear(new CraftrBlockPos(x,y));
 					if(x+xMovement[move] == plx && y+yMovement[move] == ply)
 					{
-						//kill(pli);
+						map.kill(pli);
 					}
 				}
 				addBlockToCheck(new CraftrBlockPos(x+xMovement[move], y+yMovement[move]));

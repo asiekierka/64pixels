@@ -79,6 +79,16 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	private static final byte[] extendDir = { 30, 31, 16, 17 };
 	private CraftrGameThread gt;
 
+	public void kill()
+	{
+		if(multiplayer) return;
+		map.setPlayer(players[255].px,players[255].py,0);
+		map.setPlayer(0,0,1);
+		oldmx=-1;
+		oldmy=-1;
+		players[255].move(0,0);
+		playerChange = true;
+	}
 	public void playSound(int tx, int ty, int val)
 	{
 		if(muted) return;

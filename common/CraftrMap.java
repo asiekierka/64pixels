@@ -61,6 +61,17 @@ public class CraftrMap
 		}
 	}
 	
+	public void kill(int id)
+	{
+		if(isServer)
+			synchronized(se)
+			{
+				se.kill(id);
+			}
+		else if (id==255)
+			game.kill();
+	}
+
 	public void resizeChunks(int _cachesize)
 	{
 		chunks = new CraftrChunk[_cachesize];
