@@ -36,6 +36,11 @@ public class CraftrPhysics
 		return (type>=2 && type<=4) || type==6 || type==7 || (type>=10 && type<=13) || type==15 || type==17 || type==20;
 	}
 	
+	public static boolean isReloaded(int type)
+	{
+		return (type>=21 && type<=23);
+	}
+
 	public static boolean isSent(int type)
 	{
 		return !(type == 5 || type == 6);
