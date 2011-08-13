@@ -22,6 +22,8 @@ public class CraftrGameScreen extends CraftrScreen
 	public int camX = 0;
 	public int camY = 0;
 	public int frames = 0;
+	public int health = 3;
+	public boolean showHealthBar = true;
 	public int mx = 0;
 	public int my = 0;
 	public ArrayList<CraftrWindow> windows;
@@ -162,6 +164,7 @@ public class CraftrGameScreen extends CraftrScreen
 		}
 		DrawMouse();
 		DrawChatMsg();
+		DrawHealthBar();
 		for(int i=0;i<256;i++)
 		{
 			if(players[i] != null)
@@ -224,7 +227,17 @@ public class CraftrGameScreen extends CraftrScreen
 			c.DrawChar1x(tx+((i-offs)<<3),ty,(byte)msg.message[i],col);
 		}
 	}
-	
+	public void DrawHealthBar()
+	{
+		if(!showHealthBar) return;
+		int startX = WIDTH-42;
+		int startY = BARPOS_Y-9;
+		for(int i=0;i<5;i++)
+			if(health>i)
+				c.DrawChar1x(startX+(i<<3),startY,(byte)3,(byte)0x0C);
+			else
+				c.DrawChar1x(startX+(i<<3),startY,(byte)3,(byte)0x08);
+	}
 	public void DrawChatMsg()
 	{
 		if(chatlen>0)

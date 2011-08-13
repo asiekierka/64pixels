@@ -35,6 +35,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public CraftrMapThread cmt;
 	public int cmtsp=30;
 	public int overhead=0;
+	public int health=5;
 	public CraftrConfig config;
 	public CraftrNet net;
 	public CraftrGameScreen gs;
@@ -82,12 +83,19 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public void kill()
 	{
 		if(multiplayer) return;
-		map.setPlayer(players[255].px,players[255].py,0);
-		map.setPlayer(0,0,1);
-		oldmx=-1;
-		oldmy=-1;
-		players[255].move(0,0);
-		playerChange = true;
+		health--;
+		gs.health = health;
+		if(health==0)
+		{
+			health=5;
+			gs.health=5;
+			map.setPlayer(players[255].px,players[255].py,0);
+			map.setPlayer(0,0,1);
+			oldmx=-1;
+			oldmy=-1;
+			players[255].move(0,0);
+			playerChange = true;
+		}
 	}
 	public void playSound(int tx, int ty, int val)
 	{
@@ -1435,6 +1443,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		else if (skipConfig && !isApplet) multiplayer=false;
 		else thost = configure();
 		isConfig=false;
+		health = 5;
+		gs.health = 5;
 		if(!multiplayer)
 		{
 			gs.addChatMsg("you're running 64pixels " + getVersion());

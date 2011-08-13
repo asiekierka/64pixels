@@ -729,8 +729,8 @@ public class CraftrPhysics
 					break;
 				}
 				int move = 4;
-				//int intelligence = (int)blockData[1]&0x0F;
-				int intelligence = 11;
+				int intelligence = (int)blockData[1]&0x0F;
+				//int intelligence = 11;
 				int pli = 256;
 				int plx = 0;
 				int ply = 0;
@@ -792,10 +792,10 @@ public class CraftrPhysics
 				int ply = 0;
 				boolean shot = false;
 				int shotDir = 4;
-				//int intel = (int)blockData[1]&0x0F;
-				//int intel2 = (int)(blockData[1]>>4)&0x07;
-				int intel = 6;
-				int intel2 = 4;
+				int intel = (int)blockData[1]&0x0F;
+				int intel2 = (int)(blockData[1]>>4)&0x07;
+				//int intel = 6;
+				//int intel2 = 4;
 				int move = 4;
 				if(intel > rand.nextInt(15))
 					for(int i=0;i<256;i++)
