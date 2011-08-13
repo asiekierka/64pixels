@@ -22,8 +22,8 @@ public class CraftrKickScreen extends CraftrScreen
 	
 	public void paint(int mmx, int mmy)
 	{
-		c.FillRect(bgcolor,0,0,WIDTH,HEIGHT);
-		c.DrawString((WIDTH/2)-(mName.length()<<3),(HEIGHT/2)-16-2,mName,15);
-		c.DrawString1x((WIDTH-(name.length()<<3))/2,(HEIGHT/2)+2,name,15);
+		c.FillRect(bgcolor,0,0,c.WIDTH,c.HEIGHT);
+		c.DrawString((c.WIDTH/2)-(mName.length()<<3),(c.HEIGHT/2)-16-2,mName,15);
+		c.DrawString1x((c.WIDTH-(name.length()<<3))/2,(c.HEIGHT/2)+2,name,15);
 	}
 }

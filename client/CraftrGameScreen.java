@@ -8,8 +8,8 @@ import java.util.*;
 public class CraftrGameScreen extends CraftrScreen
 {
 	public int CHATBOTTOM_X = 11;
-	public int CHATBOTTOM_Y = (GRID_H*16)-17;
-	public int BARPOS_Y = (GRID_H*16);
+	public int CHATBOTTOM_Y;
+	public int BARPOS_Y;
 	public int drawType;
 	public int[] drawChrA = new int[256];
 	public int[] drawColA = new int[256];
@@ -43,7 +43,12 @@ public class CraftrGameScreen extends CraftrScreen
 	{
 		c = cc;
 		windows = new ArrayList<CraftrWindow>();
-		blocks = new CraftrBlock[FULLGRID_W*FULLGRID_H];
+		if(c!=null)
+		{
+			blocks = new CraftrBlock[c.FULLGRID_W*c.FULLGRID_H];
+			CHATBOTTOM_Y = (c.GRID_H*16)-17;
+			BARPOS_Y = (c.GRID_H*16);
+		}
 		chatarr = new CraftrChatMsg[20];
 		chatlen = 0;
 		for(int i=0;i<256;i++) drawColA[i] = 15;
@@ -86,6 +91,17 @@ public class CraftrGameScreen extends CraftrScreen
 				if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3)) return true;
 		}
 		return false;
+	}
+
+	public void setCanvas(CraftrCanvas canvas)
+	{
+		c=canvas;
+		if(c!=null)
+		{
+			blocks = new CraftrBlock[c.FULLGRID_W*c.FULLGRID_H];
+			CHATBOTTOM_Y = (c.GRID_H*16)-17;
+			BARPOS_Y = (c.GRID_H*16);
+		}
 	}
 
 	public CraftrWindow getWindow(int type)
@@ -135,11 +151,11 @@ public class CraftrGameScreen extends CraftrScreen
 		my = mmy;
 		c.FillRect(0x000000,0,0,c.sizeX,c.sizeY);
 		CraftrBlock t;
-		for(int iy=0;iy<FULLGRID_H-1;iy++)
+		for(int iy=0;iy<c.FULLGRID_H-1;iy++)
 		{
-			for(int ix=0;ix<FULLGRID_W;ix++)
+			for(int ix=0;ix<c.FULLGRID_W;ix++)
 			{
-			    t = blocks[ix+(iy*FULLGRID_W)];
+			    t = blocks[ix+(iy*c.FULLGRID_W)];
 			    if(t != null)
 			    {
 				    c.DrawChar(ix<<4,iy<<4,(byte)t.getDrawnChar(),(byte)t.getDrawnColor());
@@ -230,7 +246,7 @@ public class CraftrGameScreen extends CraftrScreen
 	public void DrawHealthBar()
 	{
 		if(!showHealthBar) return;
-		int startX = WIDTH-42;
+		int startX = c.WIDTH-42;
 		int startY = BARPOS_Y-9;
 		for(int i=0;i<5;i++)
 			if(health>i)
@@ -258,7 +274,7 @@ public class CraftrGameScreen extends CraftrScreen
 	
 	public void DrawMouse()
 	{
-		if(mx >= 0 && mx < WIDTH && my >= 0 && my < (GRID_H<<4))
+		if(mx >= 0 && mx < c.WIDTH && my >= 0 && my < (c.GRID_H<<4))
 		{
 			String tstr=CraftrBlock.getName(hov_type);
 			c.DrawRect(0xAAAAAA,(mx&(~15)),(my&(~15)),15,15);
@@ -268,7 +284,7 @@ public class CraftrGameScreen extends CraftrScreen
 	
 	public void DrawChatBar()
 	{
-		c.FillRect(0x000000,0,BARPOS_Y,WIDTH,16);
+		c.FillRect(0x000000,0,BARPOS_Y,c.WIDTH,16);
 		c.DrawString1x(0,BARPOS_Y,">" + chatMsg, 15);
 	}
 	
@@ -279,7 +295,7 @@ public class CraftrGameScreen extends CraftrScreen
 
 	public void DrawBar()
 	{
-		c.FillRect(0x000000,0,BARPOS_Y,WIDTH,16);
+		c.FillRect(0x000000,0,BARPOS_Y,c.WIDTH,16);
 		if(hideousPrompts) c.DrawString1x(0,BARPOS_Y+16,"      Type       ",9);
 		c.DrawString(0,BARPOS_Y,CraftrBlock.getName(drawType),15);
 		c.DrawChar1x(7*16,BARPOS_Y+8,(byte)'T',(byte)10);

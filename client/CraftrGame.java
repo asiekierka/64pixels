@@ -154,7 +154,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		gs = new CraftrGameScreen(null);	
 		loadConfig();
 		canvas = new CraftrCanvas();
-		gs.c=canvas;
+		gs.setCanvas(canvas);
 		canvas.cs = (CraftrScreen)gs;
 		if(cmtsp>0) cmt.speed=(1000/cmtsp);
 		else cmt.speed=0;
@@ -678,11 +678,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	{
 		mx=(int)(umx/canvas.scaleX);
 		my=(int)(umy/canvas.scaleY);
-		if(!isConfig && (mx >= 0 && mx < gs.WIDTH && my >= 0 && my < (gs.GRID_H<<4)))
+		if(!isConfig && (mx >= 0 && mx < canvas.WIDTH && my >= 0 && my < (canvas.GRID_H<<4)))
 		{
-			int tx = (players[255].px+(mx>>4))-15;
-
-			int ty = (players[255].py+(my>>4))-12;
+			int tx = (players[255].px+(mx>>4))-(canvas.FULLGRID_W/2)-1;
+			int ty = (players[255].py+(my>>4))-(canvas.FULLGRID_H/2)-1;
 			gs.hov_type=map.getBlock(tx,ty).getTypeWithVirtual();
 		}
 		if(isDragging)
@@ -727,7 +726,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					if(gs.players[i] != null && gs.players[i].px == mx>>4 && gs.players[i].py == my>>4) return;
 				}
 				byte[] tmparr = new byte[4];
-				CraftrBlock capturedBlock = map.getBlock(players[255].px-15+(mx>>4),players[255].py-12+(my>>4));
+				CraftrBlock capturedBlock = map.getBlock(players[255].px-(canvas.FULLGRID_W/2)-1+(mx>>4),players[255].py-(canvas.FULLGRID_H/2)-1+(my>>4));
 				if(!capturedBlock.isPlaceable()) return;
 				if(mb == ev_1)
 				{
@@ -751,8 +750,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					oldmx = mx;
 					oldmy = my;
 					oldmb = mb;
-					int ttx = players[255].px-15+(mx>>4);
-					int tty = players[255].py-12+(my>>4);
+					int ttx = players[255].px-(canvas.FULLGRID_W/2)-1+(mx>>4);
+					int tty = players[255].py-(canvas.FULLGRID_H/2)-1+(my>>4);
 					if(!multiplayer) synchronized(map.physics)
 					{
 						map.physics.addBlockToCheck(new CraftrBlockPos(ttx,tty));
@@ -1051,32 +1050,32 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	{
 		int px = players[255].px;
 		int py = players[255].py;
-		int sx = px-15;
-		int sy = py-12;
+		int sx = px-(canvas.FULLGRID_W/2)-1;
+		int sy = py-(canvas.FULLGRID_H/2)-1;
 		CraftrBlock t;
 		try
 		{
 			if (!raycasting)
 			{
-				for(int iy=0;iy<gs.FULLGRID_H;iy++)
+				for(int iy=0;iy<canvas.FULLGRID_H;iy++)
 				{
-					for(int ix=0;ix<gs.FULLGRID_W;ix++)
+					for(int ix=0;ix<canvas.FULLGRID_W;ix++)
 					{
-						gs.blocks[(iy*gs.FULLGRID_W)+ix] = map.getBlock(ix+sx,iy+sy);
+						gs.blocks[(iy*canvas.FULLGRID_W)+ix] = map.getBlock(ix+sx,iy+sy);
 					}
 				}
 			}
 			else
 			{
-				for(int iy=0;iy<gs.FULLGRID_H;iy++)
+				for(int iy=0;iy<canvas.FULLGRID_H;iy++)
 				{
-					for(int ix=0;ix<gs.FULLGRID_W;ix++)
+					for(int ix=0;ix<canvas.FULLGRID_W;ix++)
 					{
-						gs.blocks[(iy*gs.FULLGRID_W)+ix] = null;
+						gs.blocks[(iy*canvas.FULLGRID_W)+ix] = null;
 					}
 				}
 				// this is the recursive route.
-				gs.blocks[(12*gs.FULLGRID_W)+15] = map.getBlock(px,py);
+				gs.blocks[(((canvas.FULLGRID_H/2)-1)*canvas.FULLGRID_W)+(canvas.FULLGRID_W/2)-1] = map.getBlock(px,py);
 				castRayPillars(px,py,-1, 0,-1,-1,-1, 1,17);
 				castRayPillars(px,py, 1, 0, 1,-1, 1, 1,17);
 				castRayPillars(px,py, 0,-1,-1,-1, 1,-1,13);
@@ -1089,10 +1088,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					gs.removePlayer(i);
 					continue;
 				}
-				int tx = (players[i].px-players[255].px)+15;
-				int ty = (players[i].py-players[255].py)+12;
+				int tx = (players[i].px-players[255].px)+(canvas.FULLGRID_W/2)-1;
+				int ty = (players[i].py-players[255].py)+(canvas.FULLGRID_H/2)-1;
 				gs.removePlayer(i);
-				if(tx>=0 && ty>=0 && tx<32 && ty<25 && gs.blocks[(ty*gs.FULLGRID_W)+tx] != null)
+				if(tx>=0 && ty>=0 && tx<32 && ty<25 && gs.blocks[(ty*canvas.FULLGRID_W)+tx] != null)
 				{
 					CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
 					if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
@@ -1135,7 +1134,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			while(x <= x2 && y <= y2)
 			{
 				// RANGE CHECK!
-				if(x >= -15 && x < gs.FULLGRID_W-15 && y >= -12 && y < gs.FULLGRID_H-12)
+				if(x >= 0-(canvas.FULLGRID_W/2)+1 && x < canvas.FULLGRID_W-((canvas.FULLGRID_W/2)-1) && y >= 0-(canvas.FULLGRID_H/2)+1 && y < canvas.FULLGRID_H-((canvas.FULLGRID_H/2)-1))
 				{
 					CraftrBlock t = map.getBlock(x+sx,y+sy);
 
@@ -1149,7 +1148,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 
 					//if(antidiagcheck || !t.isEmpty()) // no corners for you - TODO: fix the "flicker"
 					if(antidiagcheck)
-						gs.blocks[((y+12)*gs.FULLGRID_W)+x+15] = t;
+						gs.blocks[((y+((canvas.FULLGRID_H/2)-1))*canvas.FULLGRID_W)+x+((canvas.FULLGRID_W/2)-1)] = t;
 					
 					if(!(t.isEmpty() && antidiagcheck))
 					{
@@ -1181,12 +1180,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				{
 					x -= ady;
 					y -= adx;
-					if(x >= -15 && x < gs.FULLGRID_W-15 && y >= -12 && y < gs.FULLGRID_H-12)
+					if(x >= 0-(canvas.FULLGRID_W/2)+1 && x < canvas.FULLGRID_W-((canvas.FULLGRID_W/2)-1) && y >= 0-(canvas.FULLGRID_H/2)+1 && y < canvas.FULLGRID_H-((canvas.FULLGRID_H/2)-1))
 					{
 						CraftrBlock t = map.getBlock(x+sx,y+sy);
 
 						if(!t.isEmpty())
-							gs.blocks[((y+12)*gs.FULLGRID_W)+x+15] = t;	
+							gs.blocks[((y+((canvas.FULLGRID_H/2)-1))*canvas.FULLGRID_W)+x+((canvas.FULLGRID_W/2)-1)] = t;		
 					}
 				}
 			}
@@ -1200,12 +1199,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				{
 					x += ady;
 					y += adx;
-					if(x >= -15 && x < gs.FULLGRID_W-15 && y >= -12 && y < gs.FULLGRID_H-12)
+					if(x >= 0-(canvas.FULLGRID_W/2)+1 && x < canvas.FULLGRID_W-((canvas.FULLGRID_W/2)-1) && y >= 0-(canvas.FULLGRID_H/2)+1 && y < canvas.FULLGRID_H-((canvas.FULLGRID_H/2)-1))
 					{
 						CraftrBlock t = map.getBlock(x+sx,y+sy);
 
 						if(!t.isEmpty())
-							gs.blocks[((y+12)*gs.FULLGRID_W)+x+15] = t;	
+							gs.blocks[((y+((canvas.FULLGRID_H/2)-1))*canvas.FULLGRID_W)+x+((canvas.FULLGRID_W/2)-1)] = t;		
 					}
 				}
 			}

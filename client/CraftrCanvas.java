@@ -11,12 +11,12 @@ import javax.swing.*;
 
 public class CraftrCanvas extends JComponent
 {
-	public static final int GRID_W = 32;
-	public static final int GRID_H = 25;
-	public static final int FULLGRID_W = GRID_W+1;
-	public static final int FULLGRID_H = GRID_H+1;
-	public static final int WIDTH = ((FULLGRID_W-1)*16);
-	public static final int HEIGHT = (FULLGRID_H*16)+8;
+	public int GRID_W = 32;
+	public int GRID_H = 25;
+	public int FULLGRID_W = GRID_W+1;
+	public int FULLGRID_H = GRID_H+1;
+	public int WIDTH = ((FULLGRID_W-1)*16);
+	public int HEIGHT = (FULLGRID_H*16)+8;
 	// Constants.
 	public static Random rand = new Random();
 	public int mx, my;
