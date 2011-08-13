@@ -769,18 +769,18 @@ public class CraftrPhysics
 						}
 					}
 				}
-				if(move<4)
+				if(move<4 && map.getBlock(x+xMovement[move],y+yMovement[move]).isEmpty())
 				{
 					if(pli<256 && x+xMovement[move] == plx && y+yMovement[move] == ply) map.kill(pli);
 					else addBlockToSet(new CraftrBlock(x+xMovement[move], y+yMovement[move], blockData[0], blockData[1], blockData[2], blockData[3]));
 					addBlockToClear(new CraftrBlockPos(x,y));
 				}
+				addBlockToCheck(new CraftrBlockPos(x,y));
 				addBlockToCheck(new CraftrBlockPos(x+xMovement[move], y+yMovement[move]));
 			} break;
 			case 22: { // Ruffian
 				// I don't feel like adding in Ruffians. For Now.
 			} break;
-
 			case 23: { // Tiger
 				if (!changeBullets)
 				{
@@ -861,13 +861,14 @@ public class CraftrPhysics
 						}
 					}
 				else move = rand.nextInt(4);
-				if(move<4 && move!=shotDir)
+				CraftrBlock tb = map.getBlock(x+xMovement[move],y+yMovement[move]);
+				if(move<4 && move!=shotDir && tb.isEmpty() && !tb.isBullet())
 				{
 					if(pli<256 && x+xMovement[move] == plx && y+yMovement[move] == ply) map.kill(pli);
 					else addBlockToSet(new CraftrBlock(x+xMovement[move], y+yMovement[move], blockData[0], blockData[1], blockData[2], blockData[3]));
 					addBlockToClear(new CraftrBlockPos(x,y));
 				}
-				else if (move<4) addBlockToCheck(new CraftrBlockPos(x,y));
+				addBlockToCheck(new CraftrBlockPos(x,y));
 				addBlockToCheck(new CraftrBlockPos(x+xMovement[move], y+yMovement[move]));	
 			} break;
 			default:
