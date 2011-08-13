@@ -701,6 +701,20 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			if(mb != ev_1) isDragging = false;
 		}
 	}	
+
+	public int getParam(int type)
+	{
+		switch(type)
+		{
+			case 21:
+				return rand.nextInt(10);
+			case 23:
+				return (rand.nextInt(7)<<4)|rand.nextInt(12);
+			default:
+				return 0;
+		}
+	}
+
 	public void processMouse()
 	{
 		if(mb != ev_no && canMousePress && !isDragging)
@@ -718,7 +732,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(mb == ev_1)
 				{
 					tmparr[0] = (byte)gs.drawType;
-					tmparr[1] = (byte)0;
+					tmparr[1] = (byte)getParam(gs.drawType);
 					tmparr[2] = (byte)gs.gdrawChr();
 					tmparr[3] = (byte)gs.gdrawCol();
 				}
