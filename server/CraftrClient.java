@@ -52,6 +52,7 @@ public class CraftrClient implements Runnable
 			nick = "anonymous"; // ah yeah, default values
 			chr = 2;
 			col = 31;
+			health = 5;
 			x = 0;
 			y = 0;
 			loginStage = 0;
@@ -82,9 +83,15 @@ public class CraftrClient implements Runnable
 	public void kill()
 	{
 		if(!world.isPvP) return;
-		deaths++;
-		sendChatMsgAll("&c" + nick + "&c was killed!");
-		teleport(world.spawnX,world.spawnY);
+		health--;
+		if(health<=0)
+		{
+			health = 5;
+			deaths++;
+			sendChatMsgAll("&c" + nick + "&c was killed!");
+			teleport(world.spawnX,world.spawnY);
+		}
+		setHealth(health);
 	}
 	public void resetPvP()
 	{
@@ -136,6 +143,7 @@ public class CraftrClient implements Runnable
 				sendPacket();
 			}
 			setRaycasting(world.isRaycasted);
+			setPvP(world.isPvP);
 			sendChatMsgSelf("&aMap changed to &f" + nmap.mapName);
 		}
 		catch(Exception e)
@@ -492,6 +500,42 @@ public class CraftrClient implements Runnable
 		}
 	}
 
+	public void setHealth(int h)
+	{
+		health = h;
+		try
+		{
+			synchronized(out)
+			{
+				out.writeByte(0x91);
+				out.writeByte((byte)h);
+				sendPacket();
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Non-fatal setHealth error");
+		}
+	}
+
+	public void setPvP(boolean mpvp)
+	{
+		try
+		{
+			synchronized(out)
+			{
+				out.writeByte(0x92);
+				if(mpvp) out.writeByte(1);
+				else out.writeByte(0);
+				sendPacket();
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Non-fatal setPvP error");
+		}
+	}
+
 	public void despawnOthers()
 	{
 		try
@@ -536,78 +580,79 @@ public class CraftrClient implements Runnable
 						switch((int)(buf[0]&0xFF))
 						{
 							case 0x0F:
-									if(loginStage>=1)
+								if(loginStage>=1)
+						
+		{
+									readString();
+									readString();
+									in.readByte();
+									in.readByte();
+									in.readInt();
+									in.readByte();
+									in.readByte();
+									break;
+								} else {
+									loginStage = 1;
+									nick = readString();
+									readString();
+									in.readByte();
+									in.readByte();
+									version = in.readInt();
+									chr = in.readByte();
+									col = in.readByte();
+									x=serv.spawnX;
+									y=serv.spawnY;
+									if(serv.anonMode) nick = "User"+id;
+									System.out.println("User " + id + " (IP " + socket.getInetAddress().getHostAddress() + ") connected!");
+									if(nick.length()>20)
 									{
-										readString();
-										readString();
-										in.readByte();
-										in.readByte();
-										in.readInt();
-										in.readByte();
-										in.readByte();
-										break;
-									} else {
-										loginStage = 1;
-										nick = readString();
-										readString();
-										in.readByte();
-										in.readByte();
-										version = in.readInt();
-										chr = in.readByte();
-										col = in.readByte();
-										x=serv.spawnX;
-										y=serv.spawnY;
-										if(serv.anonMode) nick = "User"+id;
-										System.out.println("User " + id + " (IP " + socket.getInetAddress().getHostAddress() + ") connected!");
-										if(nick.length()>20)
+										kick("Invalid nickname!");
+									}
+									else if(version!=CraftrVersion.getProtocolVersion())
+									{
+										kick("Invalid protocol/game version!");
+									}
+									else if(serv.isBanned(socket.getInetAddress().getHostAddress()))
+									{
+										kick("You're banned!");
+									}
+									else
+									{
+										if(serv.isOp(socket.getInetAddress().getHostAddress()))
 										{
-											kick("Invalid nickname!");
+											op=true;
+											System.out.println("User " + id + " is an Op!");
 										}
-										else if(version!=CraftrVersion.getProtocolVersion())
+										synchronized(out)
 										{
-											kick("Invalid protocol/game version!");
+											out.writeByte(0x01);
+											out.writeInt(x);
+											out.writeInt(y);
+											writeString(nick);
+											out.writeShort(op?42:0);
+	
+											sendPacket();
 										}
-										else if(serv.isBanned(socket.getInetAddress().getHostAddress()))
+										if(serv.passOn)
 										{
-											kick("You're banned!");
-										}
-										else
-										{
-											if(serv.isOp(socket.getInetAddress().getHostAddress()))
-											{
-												op=true;
-												System.out.println("User " + id + " is an Op!");
-											}
+											auth = new CraftrAuth(serv.pass);
+											byte[] ae = auth.encrypt();
 											synchronized(out)
 											{
-												out.writeByte(0x01);
-												out.writeInt(x);
-												out.writeInt(y);
-												writeString(nick);
-												out.writeShort(op?42:0);
-	
+												out.writeByte(0x50);
+												out.write(ae,0,32);
 												sendPacket();
 											}
-											if(serv.passOn)
-											{
-												auth = new CraftrAuth(serv.pass);
-												byte[] ae = auth.encrypt();
-												synchronized(out)
-												{
-													out.writeByte(0x50);
-													out.write(ae,0,32);
-													sendPacket();
-												}
-												passWait=true;
-											}
-											sendChatMsgAll(nick + " has joined.");
-											setRaycasting(world.isRaycasted);
-											map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
-											map.setPlayer(x,y,1);
-											spawnPlayer();
-											spawnOthers();
+											passWait=true;
 										}
+										sendChatMsgAll(nick + " has joined.");
+										setRaycasting(world.isRaycasted);
+										map.physics.players[id] = new CraftrPlayer(x,y,chr,col,nick);
+										map.setPlayer(x,y,1);
+										spawnPlayer();
+										spawnOthers();
 									}
+								}
 								break;
 							case 0x10:
 								rcX = in.readInt();
@@ -688,8 +733,6 @@ public class CraftrClient implements Runnable
 									map.setPlayer(world.spawnX,world.spawnY,1);
 									teleport(world.spawnX,world.spawnY);
 								}
-								break;
-							case 0x26:
 								break;
 							case 0x28:
 								int x29 = in.readInt();
@@ -796,6 +839,7 @@ public class CraftrClient implements Runnable
 									t33[0] = at;
 									t33[3] = aco;
 									t33[2] = ach;
+									t33[1] = (byte)CraftrBlock.getParam(tat);
 									while(map.maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
 									map.modlock=true;
 	 								synchronized(map)

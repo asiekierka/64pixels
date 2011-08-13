@@ -227,6 +227,8 @@ public class CraftrPhysics
 					}
 				} else
 				{
+					int tmpt = surrBlockO[blockData[6]-1].getType();
+					if(tmpt == 23 || tmpt == 21) addBlockToClear(new CraftrBlockPos(x+xMovement[blockData[6]-1],y+yMovement[blockData[6]-1]));
 					for(int i=0;i<256;i++)
 					{
 						if(players[i]!=null && players[i].px==blockO.x+xMovement[blockData[6]-1] && players[i].py==blockO.y+yMovement[blockData[6]-1])

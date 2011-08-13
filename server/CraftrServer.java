@@ -656,6 +656,7 @@ public class CraftrServer extends CraftrServerShim
 			{
 				String tmap = "(map " + clients[id].world.name + ")";
 				if(clients[id].map==map) tmap = "(main map)";
+				else if (clients[id].world.name.startsWith("$")) tmap = "(secret map)";
 				if(clients[id].world.isPvP)
 				{
 					clients[id].world.isPvP=false;
@@ -666,6 +667,7 @@ public class CraftrServer extends CraftrServerShim
 						if(clients[i] != null && clients[i].dc == 0 && clients[i].map == clients[id].map)
 						{
 							clients[id].sendChatMsgAll("&c" + clients[i].nick + "&7 - &e" + clients[i].deaths + " times");
+							clients[i].setPvP(false);
 						}
 					}
 				}
@@ -675,7 +677,11 @@ public class CraftrServer extends CraftrServerShim
 					clients[id].sendChatMsgAll("&ePvP mode ON! &f" + tmap);
 					for(int i=0;i<255;i++)
 					{
-						if(clients[i] != null && clients[i].dc == 0) clients[i].resetPvP();
+						if(clients[i] != null && clients[i].dc == 0)
+						{
+							clients[i].resetPvP();
+							if(clients[i].map == clients[id].map) clients[i].setPvP(true);
+						}
 					}
 				}
 				return "";

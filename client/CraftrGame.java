@@ -80,13 +80,18 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	private static final byte[] extendDir = { 30, 31, 16, 17 };
 	private CraftrGameThread gt;
 
+	public void setHealth(int h)
+	{
+		health = h;
+		gs.health = health;
+	}
 	public void kill()
 	{
 		if(multiplayer) return;
-		health--;
-		gs.health = health;
+		setHealth(health-1);
 		if(health==0)
 		{
+			gs.addChatMsg("&cYou were killed!");
 			health=5;
 			gs.health=5;
 			map.setPlayer(players[255].px,players[255].py,0);
@@ -711,19 +716,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		}
 	}	
 
-	public int getParam(int type)
-	{
-		switch(type)
-		{
-			case 21:
-				return rand.nextInt(10);
-			case 23:
-				return (rand.nextInt(7)<<4)|rand.nextInt(12);
-			default:
-				return 0;
-		}
-	}
-
 	public void processMouse()
 	{
 		if(mb != ev_no && canMousePress && !isDragging)
@@ -741,7 +733,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(mb == ev_1)
 				{
 					tmparr[0] = (byte)gs.drawType;
-					tmparr[1] = (byte)getParam(gs.drawType);
+					tmparr[1] = (byte)CraftrBlock.getParam(gs.drawType);
 					tmparr[2] = (byte)gs.gdrawChr();
 					tmparr[3] = (byte)gs.gdrawCol();
 				}
@@ -986,10 +978,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	}
 	public int movePlayer(int dpx, int dpy)
 	{
+		if(hasShot) return waitTime;
 		int px = players[255].px+dpx;
 		int py = players[255].py+dpy;
 		CraftrBlock blockMoveTo=map.getBlock(px,py);
-		if(isShift && blockMoveTo.isEmpty() && !hasShot)
+		if(isShift && blockMoveTo.isEmpty())
 		{
 			for(int i=0;i<4;i++)
 			{
@@ -1489,6 +1482,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			net.connect(CraftrConvert.getHost(thost),CraftrConvert.getPort(thost), nagle);
 			System.out.println("Connected! Logging in...");
 			canvas.cs = (CraftrScreen)gs;
+			gs.showHealthBar = false;
 			map.net = net;
 			net.gaa = this;
 			map.multiplayer = true;

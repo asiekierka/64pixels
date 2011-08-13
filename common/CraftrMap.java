@@ -731,7 +731,7 @@ public class CraftrMap
 		{ 
 			int px = x&63;
 			int py = y&63;
-			se.out.writeByte(0x33);
+			se.out.writeByte(0x34);
 			se.out.writeInt(x);
 			se.out.writeInt(y);
 			byte[] t = se.getPacket();

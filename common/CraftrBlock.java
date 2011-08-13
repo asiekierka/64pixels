@@ -1,5 +1,7 @@
 package common;
 
+import java.util.Random;
+
 public class CraftrBlock
 {
 	public int x = 0;
@@ -7,6 +9,7 @@ public class CraftrBlock
 	private byte[] block = new byte[7];
 	public static final int maxType = 23;
 	public static final int invalidTypes = 3;
+	public static Random rand = new Random();
 
 	public CraftrBlock()
 	{
@@ -41,6 +44,19 @@ public class CraftrBlock
 		x=ax;
 		y=ay;
 		block=bd;
+	}
+	
+	public static int getParam(int type)
+	{
+		switch(type)
+		{
+			case 21:
+				return rand.nextInt(10);
+			case 23:
+				return (rand.nextInt(7)<<4)|rand.nextInt(12);
+			default:
+				return 0;
+		}
 	}
 
 	public boolean isEmpty()

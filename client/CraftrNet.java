@@ -415,6 +415,11 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								}
 								if(loadChunkID < 0) isLoadingChunk = false; // haha! take that, silly servers
 								chunkPacketsLeft=in.readInt();
+								if(chunkPacketsLeft<0 || chunkPacketsLeft>131072)
+								{
+									isLoadingChunk=false;
+									break;
+								}
 								chunkSize=chunkPacketsLeft;
 								cbuffer = new byte[chunkPacketsLeft];
 								break;
@@ -475,7 +480,9 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								}
 								break;
 							case 0x22:
-								game.players[in.readUnsignedByte()] = null;
+								int t22 = in.readUnsignedByte();
+								if(t22==255) break;
+								game.players[t22] = null;
 								break;
 							case 0x24:
 								int ta1 = in.readUnsignedByte();
@@ -607,6 +614,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								int lol2x = in.readInt();
 								int lol2y = in.readInt();
 								game.map.clearBlock(lol2x,lol2y);
+								break;
 							case 0x41:
 								int ta41 = in.readUnsignedByte();
 								String tmp3 = readString();
@@ -659,6 +667,21 @@ public class CraftrNet implements Runnable, CraftrNetShim
 								game.raycasting=true;
 								break;
 							}
+							case 0x90: // die
+							{
+								game.kill();
+								break;
+							}
+							case 0x91: // set health
+							{
+								game.setHealth(in.readUnsignedByte()%6);
+								break;
+							}
+							case 0x92: // toggle health bar
+							{
+								game.gs.showHealthBar = (in.readByte()==1);
+								break;
+							}
 							case 0xE1: // push me
 							case 0xE2: // push me
 								int e1x = in.readInt();
@@ -687,7 +710,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
 					}
 				}
 				frames++;
-				if(frames%130==0) // every 2 seconds, less twempowawy measuwe
+				if(frames%130==0 && game.players[255]!=null) // every 2 seconds, less twempowawy measuwe
 				{
 					synchronized(out)
 					{
