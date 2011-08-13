@@ -1079,10 +1079,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 				// this is the recursive route.
 				gs.blocks[(((canvas.FULLGRID_H/2)-1)*canvas.FULLGRID_W)+(canvas.FULLGRID_W/2)-1] = map.getBlock(px,py);
-				castRayPillars(px,py,-1, 0,-1,-1,-1, 1,17);
-				castRayPillars(px,py, 1, 0, 1,-1, 1, 1,17);
-				castRayPillars(px,py, 0,-1,-1,-1, 1,-1,13);
-				castRayPillars(px,py, 0, 1,-1, 1, 1, 1,13);
+				castRayPillars(px,py,-1, 0,-1,-1,-1, 1,(canvas.FULLGRID_W/2)+2);
+				castRayPillars(px,py, 1, 0, 1,-1, 1, 1,(canvas.FULLGRID_W/2)+2);
+				castRayPillars(px,py, 0,-1,-1,-1, 1,-1,(canvas.FULLGRID_H/2)+2);
+				castRayPillars(px,py, 0, 1,-1, 1, 1, 1,(canvas.FULLGRID_H/2)+2);
 			}
 			for (int i=0;i<256;i++)
 			{
