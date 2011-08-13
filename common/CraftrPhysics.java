@@ -20,6 +20,7 @@ public class CraftrPhysics
 	private static final int[] xMovement = { -1, 1, 0, 0, 0 };
 	private static final int[] yMovement = { 0, 0, -1, 1, 0 };
 	private boolean isServer;
+	private Random rand;
 	
 	private Date lastBUpdate = new Date();
 	private boolean changeBullets = false;
@@ -29,6 +30,7 @@ public class CraftrPhysics
 		System.out.println("[MAP] [PHYSICS] Initializing...");
 		isServer = _isServer;
 		players = new CraftrPlayer[256];
+		rand = new Random();
 	}
 
 	public static boolean isUpdated(int type)
@@ -44,6 +46,22 @@ public class CraftrPhysics
 	public static boolean isSent(int type)
 	{
 		return !(type == 5 || type == 6);
+	}
+
+	public boolean shoot(int x, int y, int dir, CraftrMap map)
+	{
+		if(dir>3 || dir<0) return false;
+		int nx = x+xMovement[dir];
+		int ny = y+yMovement[dir];
+		CraftrBlock nb = map.getBlock(nx,ny);
+		if(nb.isEmpty())
+		{
+			nb.setBullet((byte)(dir+1));
+			addBlockToSet(nb);
+			addBlockToCheck(new CraftrBlockPos(nx,ny));
+			return true;
+		}
+		else return false;
 	}
 
 	public void tick(CraftrMap modifiedMap)
@@ -224,7 +242,7 @@ public class CraftrPhysics
 			}
 			if(surrBlockO[blockData[6]-1].getType()==14)
 			{
-				addBlockToSet(new CraftrBlock(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y)); // this makes an empty block.
+				addBlockToClear(new CraftrBlockPos(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y)); // this makes an empty block.
 			}
 			blockO.setBullet((byte)0);
 			addBlockToSet(blockO);
@@ -753,15 +771,105 @@ public class CraftrPhysics
 				}
 				if(move<4)
 				{
-					addBlockToSet(new CraftrBlock(x+xMovement[move], y+yMovement[move], blockData[0], blockData[1], blockData[2], blockData[3]));
+					if(pli<256 && x+xMovement[move] == plx && y+yMovement[move] == ply) map.kill(pli);
+					else addBlockToSet(new CraftrBlock(x+xMovement[move], y+yMovement[move], blockData[0], blockData[1], blockData[2], blockData[3]));
 					addBlockToClear(new CraftrBlockPos(x,y));
-					if(x+xMovement[move] == plx && y+yMovement[move] == ply)
-					{
-						map.kill(pli);
-					}
 				}
 				addBlockToCheck(new CraftrBlockPos(x+xMovement[move], y+yMovement[move]));
-			}
+			} break;
+			case 22: { // Ruffian
+				// I don't feel like adding in Ruffians. For Now.
+			} break;
+
+			case 23: { // Tiger
+				if (!changeBullets)
+				{
+					addBlockToCheck(new CraftrBlockPos(x,y));	
+					break;
+				}
+				int pli = 256;
+				int plx = 0;
+				int ply = 0;
+				boolean shot = false;
+				int shotDir = 4;
+				//int intel = (int)blockData[1]&0x0F;
+				//int intel2 = (int)(blockData[1]>>4)&0x07;
+				int intel = 6;
+				int intel2 = 4;
+				int move = 4;
+				if(intel > rand.nextInt(15))
+					for(int i=0;i<256;i++)
+					{
+						if(players[i] != null)
+						{
+							if(!shot && Math.abs(y - players[i].py) <= 3)
+								if((x - players[i].px) < 0)
+								{
+									shotDir = 1;
+									shot = shoot(x,y,1,map);
+								} else if((x - players[i].px) > 0)
+								{
+									shotDir = 0;
+									shot = shoot(x,y,0,map);
+								}
+							else if (!shot && Math.abs(x - players[i].px) <= 3)
+								if((y - players[i].py) < 0)
+								{
+									shot = shoot(x,y,3,map);
+									shotDir = 3;
+								} else if((y - players[i].py) > 0)
+								{
+									shotDir = 2;
+									shot = shoot(x,y,2,map);
+								}
+						}
+					}
+				if(intel2 > rand.nextInt(8))
+					for(int i=0;i<256;i++)
+					{
+						if(players[i] != null)
+						{
+							pli = i;
+							plx = players[i].px;
+							ply = players[i].py;
+							if (Math.abs(x - players[i].px) < Math.abs(y - players[i].py))
+							{
+								int dist = y - players[i].py;
+								if(dist<0)
+								{
+									move = 3;
+									i = 256;
+								} else if (dist>0)
+								{
+									move = 2;
+									i = 256;
+								}
+							}
+							else if (Math.abs(x - players[i].px) > Math.abs(y - players[i].py))
+							{
+								int dist = x - players[i].px;
+								if(dist<0)
+								{
+									move = 1;
+									i = 256;
+								} else if (dist>0)
+								{
+									move = 0;
+									i = 256;
+								}
+							}
+						}
+					}
+				else move = rand.nextInt(4);
+				if(move<4 && move!=shotDir)
+				{
+					if(pli<256 && x+xMovement[move] == plx && y+yMovement[move] == ply) map.kill(pli);
+					else addBlockToSet(new CraftrBlock(x+xMovement[move], y+yMovement[move], blockData[0], blockData[1], blockData[2], blockData[3]));
+					addBlockToClear(new CraftrBlockPos(x,y));
+				}
+				else if (move<4) addBlockToCheck(new CraftrBlockPos(x,y));
+				addBlockToCheck(new CraftrBlockPos(x+xMovement[move], y+yMovement[move]));	
+			} break;
 			default:
 				break;
 		}

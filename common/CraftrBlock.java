@@ -6,7 +6,7 @@ public class CraftrBlock
 	public int y = 0;
 	private byte[] block = new byte[7];
 	public static final int maxType = 23;
-	public static final int invalidTypes = 2;
+	public static final int invalidTypes = 3;
 
 	public CraftrBlock()
 	{
@@ -179,7 +179,7 @@ public class CraftrBlock
 
 	public static boolean isPlaceable(int t)
 	{
-		return !(t == 16 || t==18);
+		return !(t == 16 || t==18 || t==22);
 	}
 
 	public boolean isPlaceable()
