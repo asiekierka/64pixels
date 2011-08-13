@@ -27,16 +27,17 @@ public class CraftrCanvas extends JComponent
 	public Dimension size;
 	public int sizeX = WIDTH;
 	public int sizeY = HEIGHT;
-	
+	public boolean resizePlayfield = true;
+
 	public BufferedImage img;
 	
-	public static byte cga[];
-	public static int palette[];
-	public static IndexColorModel globpal;
-	public static IndexColorModel tmppal;
-	public static BufferedImage charsetImage[][];
-	public static BufferedImage charsetImage2[][];
-	public static int pixelchrn[];
+	public byte cga[];
+	public int palette[];
+	public IndexColorModel globpal;
+	public IndexColorModel tmppal;
+	public BufferedImage charsetImage[][];
+	public BufferedImage charsetImage2[][];
+	public int pixelchrn[];
 
 	private Graphics g;
 	// CONSTRUCTORS
@@ -47,18 +48,12 @@ public class CraftrCanvas extends JComponent
 	}
 	public CraftrCanvas(int hq)
 	{
-		charsetImage = new BufferedImage[256][16];
-		RedrawCharset();
 		Dimension d = new Dimension(WIDTH, HEIGHT);
 		setSize(d);
 		setPreferredSize(d);
 		size = d;
 		scaleX = 1;
 		scaleY = 1;
-	}
-	
-	static
-	{
 		palette = new int[] {	0x000000, 0x0000AA, 0x00AA00, 0x00AAAA,
 								0xAA0000, 0xAA00AA, 0xAAAA00, 0xAAAAAA,
 								0x555555, 0x5555FF, 0x55FF55, 0x55FFFF,
@@ -117,8 +112,8 @@ public class CraftrCanvas extends JComponent
 			System.out.println("[CANVAS] Couldn't load charset/palette! " + e.getMessage());
 			System.exit(1);
 		}
-		//charsetImage = new BufferedImage[256][16];
-		//RedrawCharset();
+		charsetImage = new BufferedImage[256][16];
+		RedrawCharset();
 	}
 
 	public void scale(int newX, int newY)
@@ -128,11 +123,26 @@ public class CraftrCanvas extends JComponent
 		size = new Dimension(newX,newY);
 		sizeX = newX;
 		sizeY = newY;
+		if(resizePlayfield) remakeVariables();
+		scaleX = (double)newX/WIDTH;
+		scaleY = (double)newY/HEIGHT;
 		setSize(size);
 		setPreferredSize(size);
 	}
 
-	public static void RedrawCharset()
+	public void remakeVariables()
+	{
+		WIDTH = sizeX-(sizeX%16);
+		HEIGHT = sizeY-(sizeY%16)+8;
+		if(sizeY < HEIGHT) HEIGHT-=16;
+		GRID_W = (WIDTH>>4);
+		FULLGRID_W = GRID_W+1;
+		FULLGRID_H = ((HEIGHT-8)>>4);
+		GRID_H = FULLGRID_H-1;
+		if(cs!=null) cs.setCanvas(this);
+	}
+
+	public void RedrawCharset()
 	{
 		pixelchrn = new int[256];
 		charsetImage = new BufferedImage[256][16];

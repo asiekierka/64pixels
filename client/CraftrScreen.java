@@ -16,4 +16,8 @@ public abstract class CraftrScreen
 	
 	}
 	public abstract void paint(int mmx, int mmy);
+	public void setCanvas(CraftrCanvas canvas)
+	{
+		c=canvas;
+	}
 }

@@ -359,6 +359,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				out.write(s,0,s.length());
 				out.newLine();
 			}
+			if(!canvas.resizePlayfield)
+			{
+				s = "resize-playfield=false";
+				out.write(s,0,s.length());
+				out.newLine();
+			}
 			s = "player-x=" + lpx;
 			out.write(s,0,s.length());
 			out.newLine();
@@ -459,6 +465,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				else if(key.contains("hideous-prompts"))
 				{
 					if(nf.parse(val).intValue()>0) gs.hideousPrompts=true;
+				}
+				else if(key.contains("resize-playfield"))
+				{
+					if(val.contains("false")) canvas.resizePlayfield = false;
 				}
 			}
 		}
@@ -680,8 +690,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		my=(int)(umy/canvas.scaleY);
 		if(!isConfig && (mx >= 0 && mx < canvas.WIDTH && my >= 0 && my < (canvas.GRID_H<<4)))
 		{
-			int tx = (players[255].px+(mx>>4))-(canvas.FULLGRID_W/2)-1;
-			int ty = (players[255].py+(my>>4))-(canvas.FULLGRID_H/2)-1;
+			int tx = (players[255].px+(mx>>4))-(canvas.FULLGRID_W/2)+1;
+			int ty = (players[255].py+(my>>4))-(canvas.FULLGRID_H/2)+1;
 			gs.hov_type=map.getBlock(tx,ty).getTypeWithVirtual();
 		}
 		if(isDragging)
@@ -726,7 +736,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					if(gs.players[i] != null && gs.players[i].px == mx>>4 && gs.players[i].py == my>>4) return;
 				}
 				byte[] tmparr = new byte[4];
-				CraftrBlock capturedBlock = map.getBlock(players[255].px-(canvas.FULLGRID_W/2)-1+(mx>>4),players[255].py-(canvas.FULLGRID_H/2)-1+(my>>4));
+				CraftrBlock capturedBlock = map.getBlock(players[255].px-(canvas.FULLGRID_W/2)+1+(mx>>4),players[255].py-(canvas.FULLGRID_H/2)+1+(my>>4));
 				if(!capturedBlock.isPlaceable()) return;
 				if(mb == ev_1)
 				{
@@ -750,8 +760,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					oldmx = mx;
 					oldmy = my;
 					oldmb = mb;
-					int ttx = players[255].px-(canvas.FULLGRID_W/2)-1+(mx>>4);
-					int tty = players[255].py-(canvas.FULLGRID_H/2)-1+(my>>4);
+					int ttx = players[255].px-(canvas.FULLGRID_W/2)+1+(mx>>4);
+					int tty = players[255].py-(canvas.FULLGRID_H/2)+1+(my>>4);
 					if(!multiplayer) synchronized(map.physics)
 					{
 						map.physics.addBlockToCheck(new CraftrBlockPos(ttx,tty));
@@ -1050,8 +1060,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	{
 		int px = players[255].px;
 		int py = players[255].py;
-		int sx = px-(canvas.FULLGRID_W/2)-1;
-		int sy = py-(canvas.FULLGRID_H/2)-1;
+		int sx = px-(canvas.FULLGRID_W/2)+1;
+		int sy = py-(canvas.FULLGRID_H/2)+1;
 		CraftrBlock t;
 		try
 		{
@@ -1091,7 +1101,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				int tx = (players[i].px-players[255].px)+(canvas.FULLGRID_W/2)-1;
 				int ty = (players[i].py-players[255].py)+(canvas.FULLGRID_H/2)-1;
 				gs.removePlayer(i);
-				if(tx>=0 && ty>=0 && tx<32 && ty<25 && gs.blocks[(ty*canvas.FULLGRID_W)+tx] != null)
+				if(tx>=0 && ty>=0 && tx<canvas.FULLGRID_W && ty<canvas.FULLGRID_H && gs.blocks[(ty*canvas.FULLGRID_W)+tx] != null)
 				{
 					CraftrBlock blockAtPlayer = map.getBlock(players[i].px,players[i].py);
 					if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
@@ -1285,7 +1295,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	{
 		boolean inconf = true;
 		is = new CraftrInScreen(canvas,2,"Main menu");
-		String[] modes = new String[6];
+		String[] modes = new String[7];
 		modes[0] = "Singleplayer";
 		modes[1] = "Multiplayer";
 		modes[4] = "Change player char ->";
@@ -1297,6 +1307,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			is.isRunning=true;
 			modes[2] = "Key mode: " + ((kim>0)?"WSAD":"Arrows");
 			modes[3] = "Hideous prompts: " + ((gs.hideousPrompts)?"On":"Off");
+			modes[6] = "Resize mode: " + ((canvas.resizePlayfield)?"Playfield":"Scale");
 			is.addStrings(modes);
 			canvas.cs = (CraftrScreen)is;
 			loopInScreen();
@@ -1389,6 +1400,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					}
 					if(confCol!=0) players[255].pcol = (byte)confCol;
 					break;
+				case 6:
+					canvas.resizePlayfield=!canvas.resizePlayfield;
+					break;
 			}
 		}
 		canvas.cs = (CraftrScreen)gs;
@@ -1470,7 +1484,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			System.out.println("Connecting...");
 			CraftrKickScreen cks = new CraftrKickScreen(canvas,"Wait a second...");
 			cks.mName="CONNECTING...";
-
 			cks.bgcolor = 0x808080;
 			canvas.cs = (CraftrScreen)cks;
 			net.connect(CraftrConvert.getHost(thost),CraftrConvert.getPort(thost), nagle);
@@ -1485,6 +1498,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		}
 		Thread t2 = new Thread(gt);
 		t2.start();
+		gs.setCanvas(canvas);
 	}
 	public void runOnce()
 	{
