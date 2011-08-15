@@ -155,13 +155,28 @@ public class CraftrGameScreen extends CraftrScreen
 		{
 			for(int ix=0;ix<c.FULLGRID_W;ix++)
 			{
-			    t = blocks[ix+(iy*c.FULLGRID_W)];
-			    if(t != null)
-			    {
-				    c.DrawChar(ix<<4,iy<<4,(byte)t.getDrawnChar(),(byte)t.getDrawnColor());
-				    if(t.isBullet()) c.DrawChar(ix<<4,iy<<4,(byte)248,(byte)15);
+				t = blocks[ix+(iy*c.FULLGRID_W)];
+				if(t != null)
+				{
+					c.DrawChar(ix<<4,iy<<4,(byte)t.getDrawnChar(),(byte)t.getDrawnColor());
+					if(t.isBullet())
+						switch(t.getBullet())
+						{
+							case 1:
+							case 2:
+							case 3:
+							case 4:
+								c.DrawChar(ix<<4,iy<<4,(byte)248,(byte)15);
+								break;
+							case 5:
+								c.DrawChar(ix<<4,iy<<4,(byte)153,(byte)6);
+								break;
+							case 6:
+								c.DrawChar(ix<<4,iy<<4,(byte)227,(byte)0x0B);
+								break;
+						}
 				}else{
-				    c.DrawChar(ix<<4,iy<<4,(byte)177,(byte)0x08);
+					c.DrawChar(ix<<4,iy<<4,(byte)177,(byte)0x08);
 				}
 			}
 		}
@@ -314,7 +329,7 @@ public class CraftrGameScreen extends CraftrScreen
 		if(drawType == 2) bsmt=3;
 		else if(isArrow() && barselMode == 1) bsmt=4;
 		else if(drawType == 17) bsmt=5;
-		else if(drawType >= 21 && drawType <= 23) bsmt=0;
+		else if(drawType >= 21 && drawType <= 22) bsmt=0;
 		if((drawType == 3 || drawType ==20)&& (gdrawChr()<24 || gdrawChr()>=28)) sdrawChr(25);
 		else if(drawType == 15 && !(gdrawChr()==30 || gdrawChr()==31 || gdrawChr()==16 || gdrawChr()==17)) sdrawChr(31);
 		else if(drawType==4) sdrawChr(206);
@@ -329,10 +344,6 @@ public class CraftrGameScreen extends CraftrScreen
 			sdrawCol(0x06);
 			sdrawChr(153);
 		} else if (drawType == 22)
-		{
-			sdrawCol(0x0D);
-			sdrawChr(5);
-		} else if (drawType == 23)
 		{
 			sdrawCol(0x0B);
 			sdrawChr(227);

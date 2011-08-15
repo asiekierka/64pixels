@@ -198,7 +198,7 @@ public class CraftrPhysics
 			}
 		}
 		// Bullet code
-		if(changeBullets && blockData[6]!=0)
+		if(changeBullets && blockData[6]>0 && blockData[6]<=4)
 		{
 			boolean bshot = false;
 			for(int i=0;i<256;i++)
@@ -249,6 +249,10 @@ public class CraftrPhysics
 			blockO.setBullet((byte)0);
 			addBlockToSet(blockO);
 			addBlockToCheck(new CraftrBlockPos(blockO.x,blockO.y));
+		}
+		else if(!changeBullets && blockData[6]==5)
+		{
+
 		}
 		else if(!changeBullets && blockData[6]!=0)
 		{

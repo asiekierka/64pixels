@@ -12,6 +12,7 @@ public class CraftrChunk {
 	public byte[] colp;
 	public byte[] chr2;
 	public byte[] col2;
+	public byte[] bullpar;
 	public byte[] mapinfo;
 
 	public int w;
@@ -37,6 +38,7 @@ public class CraftrChunk {
 		col2 = new byte[64*64];
 		chrp = new byte[64*64];
 		colp = new byte[64*64];
+		bullpar = new byte[64*64];
 		mapinfo = new byte[4096];
 		w = 64;
 		h = 64;
@@ -51,17 +53,21 @@ public class CraftrChunk {
 	{
 		// i love arraycopy, and all its mysteries!
 		// boom de yada, boom de yada...
+		int ver = rawdata[0];
+		int dec = 0;
 		System.arraycopy(rawdata,1+hdrsize,type,0,4096);
 		System.arraycopy(rawdata,1+hdrsize+4096,param,0,8192);
 		System.arraycopy(rawdata,1+hdrsize+(4096*3),chr,0,8192);
 		System.arraycopy(rawdata,1+hdrsize+(4096*5),col,0,8192);
  		System.arraycopy(rawdata,1+hdrsize+(4096*7),chrp,0,4096);
  		System.arraycopy(rawdata,1+hdrsize+(4096*8),colp,0,4096);
+ 		if(ver == 5) System.arraycopy(rawdata,1+hdrsize+(4096*9),bullpar,0,4096);
+		else dec = 4096;
 		byte[] tmp = new byte[2];
 		System.arraycopy(rawdata,4,tmp,0,2);
 		mapinfo_len = CraftrConvert.arrShort(tmp);
 		mapinfo_type = rawdata[3];
-		if(mapinfo_len > 0 && mapinfo_type > 0) System.arraycopy(rawdata,1+hdrsize+(4096*9),mapinfo,0,mapinfo_len);
+		if(mapinfo_len > 0 && mapinfo_type > 0) System.arraycopy(rawdata,1+hdrsize+(4096*10)-dec,mapinfo,0,mapinfo_len);
 		spawnX = rawdata[1];
 		spawnY = rawdata[2];
 		fixDisplay();
@@ -74,15 +80,16 @@ public class CraftrChunk {
 
 	public byte[] saveByte()
 	{
-		byte[] out = new byte[(4096*10)+1+hdrsize];
+		byte[] out = new byte[(4096*11)+1+hdrsize];
 		System.arraycopy(type,0,out,1+hdrsize,4096);
 		System.arraycopy(param,0,out,4096+1+hdrsize,8192);
 		System.arraycopy(chr,0,out,(4096*3)+1+hdrsize,8192);
 		System.arraycopy(col,0,out,(4096*5)+1+hdrsize,8192);
  		System.arraycopy(chrp,0,out,(4096*7)+1+hdrsize,4096);
  		System.arraycopy(colp,0,out,(4096*8)+1+hdrsize,4096);
-		System.arraycopy(mapinfo,0,out,(4096*9)+1+hdrsize,4096);
-		out[0] = 4; // version
+ 		System.arraycopy(bullpar,0,out,(4096*9)+1+hdrsize,4096);
+		System.arraycopy(mapinfo,0,out,(4096*10)+1+hdrsize,4096);
+		out[0] = 5; // version
 		out[1] = (byte)spawnX;
 		out[2] = (byte)spawnY;
 		out[3] = (byte)mapinfo_type;
@@ -141,7 +148,7 @@ public class CraftrChunk {
 	}
 	public byte[] getBlock(int x, int y)
 	{
-		byte[] data = new byte[7];
+		byte[] data = new byte[8];
 		int p = x+(y<<6);
 		data[0] = type[p];
 		data[1] = param[p];
@@ -150,6 +157,7 @@ public class CraftrChunk {
 		data[4] = chrp[p];
 		data[5] = colp[p];
 		data[6] = getBullet(x,y);
+		data[7] = bullpar[p];
 		return data;
 	}
 	public byte getBlockType(int x, int y)
@@ -185,10 +193,19 @@ public class CraftrChunk {
 	public byte getBullet(int x, int y)
 	{
 		return param[4096+x+(y<<6)];
-	}	
+	}
+	public byte getBulletParam(int x, int y)
+	{
+		return bullpar[x+(y<<6)];
+	}		
 	public void placeBullet(int x, int y, byte aType)
 	{
+		placeBullet(x,y,aType,(byte)0);
+	}	
+	public void placeBullet(int x, int y, byte aType, byte aPar)
+	{
 		param[4096+x+(y<<6)]=aType;
+		bullpar[x+(y<<6)]=aPar;
 	}
 	public void place(int x, int y, byte aType, byte aChr, byte aCol, byte aPar)
 	{

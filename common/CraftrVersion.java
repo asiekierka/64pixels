@@ -7,7 +7,7 @@ public class CraftrVersion
 	private static final int majorVer = 2;
 	private static final int minorVer = 0;
 	private static final int patchVer = 0;
-	private static final String addon = "-b0-git";
+	private static final String addon = "-beta1";
 	//private static final String addon = "";
 	public CraftrVersion()
 	{

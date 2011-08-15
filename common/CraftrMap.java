@@ -237,23 +237,8 @@ public class CraftrMap
 			int hdrsize = CraftrChunk.hdrsize;
 			switch(buf[0])
 			{
-				case 3:
-					out = new byte[1+(4096*10)+hdrsize];
-					while(i<(1+(4096*8)+hdrsize) && i>-1) i += gin.read(out,i,(1+(4096*8)+hdrsize)-i);
-					gin.close();
-					for(int ri=0;ri<4096;ri++)
-					{
-						if(out[1+ri+hdrsize]==5 && (0x80&(int)out[1+ri+hdrsize+4096])>0)
-						{
-							out[1+ri+hdrsize+4096]=(byte)1;
-							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
-						}
-						else if(physics.isReloaded(out[1+ri+hdrsize]))
-							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
-					}
-					return out;
 				case 4:
-					out = new byte[1+(4096*10)+hdrsize];
+					out = new byte[1+(4096*11)+hdrsize];
 					while(i<(1+(4096*10)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
 					gin.close();
 					for(int ri=0;ri<4096;ri++)
@@ -263,9 +248,23 @@ public class CraftrMap
 							out[1+ri+hdrsize+4096]=(byte)1;
 							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
 						}
-						else if(physics.isReloaded(out[1+ri+hdrsize]))
+						else if(physics.isReloaded(out[1+ri+hdrsize]) || out[1+ri+(4096*9)+hdrsize] != 0)
 							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
-
+					}
+					return out;
+				case 5:
+					out = new byte[1+(4096*11)+hdrsize];
+					while(i<(1+(4096*11)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
+					gin.close();
+					for(int ri=0;ri<4096;ri++)
+					{
+						if(out[1+ri+hdrsize]==5 && (0x80&(int)out[1+ri+hdrsize+4096])>0)
+						{
+							out[1+ri+hdrsize+4096]=(byte)1;
+							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
+						}
+						else if(physics.isReloaded(out[1+ri+hdrsize]) || out[1+ri+(4096*9)+hdrsize] != 0)
+							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
 					}
 					return out;
 				default:
@@ -403,14 +402,17 @@ public class CraftrMap
  			if(!multiplayer) System.exit(1);
 		}
 	}
-
  	public void setBullet(int x, int y, byte aType)
+	{
+		setBullet(x,y,aType,(byte)0);
+	}
+ 	public void setBullet(int x, int y, byte aType, byte aPar)
  	{
  		try
  		{ 
  			int px = x&63;
  			int py = y&63;
- 			grabChunk((x>>6),(y>>6)).placeBullet(px,py,aType);
+ 			grabChunk((x>>6),(y>>6)).placeBullet(px,py,aType, aPar);
  		}
 		catch(Exception e)
 		{
@@ -419,7 +421,10 @@ public class CraftrMap
  			if(!multiplayer) System.exit(1);
 		}
 	}
-
+	public void setBulletNet(int x, int y, byte aType, byte aPar)
+	{
+		setBulletNet(x,y,aType);
+	}
 	public void setBulletNet(int x, int y, byte aType)
 	{
 		try

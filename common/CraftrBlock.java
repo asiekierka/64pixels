@@ -6,9 +6,9 @@ public class CraftrBlock
 {
 	public int x = 0;
 	public int y = 0;
-	private byte[] block = new byte[7];
-	public static final int maxType = 23;
-	public static final int invalidTypes = 3;
+	private byte[] block = new byte[8];
+	public static final int maxType = 22;
+	public static final int invalidTypes = 2;
 	public static Random rand = new Random();
 
 	public CraftrBlock()
@@ -102,6 +102,16 @@ public class CraftrBlock
 		block[6]=t;
 	}
 
+	public int getBulletParam()
+	{
+		return 0xFF&(int)block[7];
+	}
+
+	public void setBulletParam(byte t)
+	{
+		block[7] = t;
+	}
+
 	public int getType()
 	{
 		return 0xFF&(int)block[0];
@@ -185,7 +195,7 @@ public class CraftrBlock
 
 	public static int getBDSize()
 	{
-		return 7;
+		return 8;
 	}
 
 	public byte[] getBlockData()
@@ -195,7 +205,7 @@ public class CraftrBlock
 
 	public static boolean isPlaceable(int t)
 	{
-		return !(t == 16 || t==18 || t==22);
+		return !(t == 16 || t==18);
 	}
 
 	public boolean isPlaceable()
@@ -252,8 +262,6 @@ public class CraftrBlock
 			case 21:
 				return "Bear";
 			case 22:
-				return "Ruffian";
-			case 23:
 				return "Tiger";
 			case -1:
 				return "Pushium";
