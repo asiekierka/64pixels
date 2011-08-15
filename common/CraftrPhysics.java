@@ -163,6 +163,10 @@ public class CraftrPhysics
 		for(int i=0;i<4;i++)
 		{
 			surrBlockO[i]=map.getBlock(x+xMovement[i],y+yMovement[i]);
+			if(surrBlockO[i] == null)
+			{
+				surrBlockO[i] = new CraftrBlock(x+xMovement[i],y+yMovement[i]);
+			}
 			surrBlockPre[i] = surrBlockO[i].getBlockData();
 			for(int j=0;j<CraftrBlock.getBDSize();j++)
 			{

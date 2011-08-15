@@ -248,7 +248,7 @@ public class CraftrMap
 							out[1+ri+hdrsize+4096]=(byte)1;
 							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
 						}
-						else if(physics.isReloaded(out[1+ri+hdrsize]) || out[1+ri+(4096*9)+hdrsize] != 0)
+						else if(physics.isReloaded(out[1+ri+hdrsize]) || out[1+ri+(4096*2)+hdrsize] != 0)
 							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
 					}
 					return out;
@@ -263,7 +263,7 @@ public class CraftrMap
 							out[1+ri+hdrsize+4096]=(byte)1;
 							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
 						}
-						else if(physics.isReloaded(out[1+ri+hdrsize]) || out[1+ri+(4096*9)+hdrsize] != 0)
+						else if(physics.isReloaded(out[1+ri+hdrsize]) || out[1+ri+(4096*2)+hdrsize] != 0)
 							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
 					}
 					return out;
