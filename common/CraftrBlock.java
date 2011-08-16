@@ -52,7 +52,7 @@ public class CraftrBlock
 		{
 			case 21:
 				return rand.nextInt(10);
-			case 23:
+			case 22:
 				return (rand.nextInt(7)<<4)|rand.nextInt(12);
 			default:
 				return 0;
@@ -62,6 +62,7 @@ public class CraftrBlock
 	public boolean isEmpty()
 	{
 		if(isPushable()) return false;
+		if(getBullet()==5 || getBullet()==6) return false;
 		if(block[0]==0 || block[0]==2 || block[0]==5 || (block[0]==6 && (0x80&(int)block[1])!=0) || block[0]==8 || (block[0]>=21 && block[0]<=23)) return true;
 		return false;
 	}

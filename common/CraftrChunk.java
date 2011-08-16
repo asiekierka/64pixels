@@ -53,21 +53,18 @@ public class CraftrChunk {
 	{
 		// i love arraycopy, and all its mysteries!
 		// boom de yada, boom de yada...
-		int ver = rawdata[0];
-		int dec = 0;
 		System.arraycopy(rawdata,1+hdrsize,type,0,4096);
 		System.arraycopy(rawdata,1+hdrsize+4096,param,0,8192);
 		System.arraycopy(rawdata,1+hdrsize+(4096*3),chr,0,8192);
 		System.arraycopy(rawdata,1+hdrsize+(4096*5),col,0,8192);
  		System.arraycopy(rawdata,1+hdrsize+(4096*7),chrp,0,4096);
  		System.arraycopy(rawdata,1+hdrsize+(4096*8),colp,0,4096);
- 		if(ver == 5) System.arraycopy(rawdata,1+hdrsize+(4096*9),bullpar,0,4096);
-		else dec = 4096;
+ 		System.arraycopy(rawdata,1+hdrsize+(4096*9),bullpar,0,4096);
 		byte[] tmp = new byte[2];
 		System.arraycopy(rawdata,4,tmp,0,2);
 		mapinfo_len = CraftrConvert.arrShort(tmp);
 		mapinfo_type = rawdata[3];
-		if(mapinfo_len > 0 && mapinfo_type > 0) System.arraycopy(rawdata,1+hdrsize+(4096*10)-dec,mapinfo,0,mapinfo_len);
+		if(mapinfo_len > 0 && mapinfo_type > 0) System.arraycopy(rawdata,1+hdrsize+(4096*10),mapinfo,0,mapinfo_len);
 		spawnX = rawdata[1];
 		spawnY = rawdata[2];
 		fixDisplay();
