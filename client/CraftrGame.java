@@ -17,14 +17,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 {
 	public CraftrCanvas canvas;
 	public JFrame window;
-	public JApplet applet;
 	public boolean gameOn;
 	public static Random rand = new Random();
 
 	public CraftrMap map;
 	public CraftrPlayer players[] = new CraftrPlayer[256];
 	
-	public boolean isApplet;
 	public boolean hasShot;
 	public boolean blockChange = false;
 	public boolean playerChange = false;
@@ -144,7 +142,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public CraftrGame()
 	{
 		audio = new CraftrSound();
-		isApplet = false;
 		File sdchk = new File(System.getProperty("user.home") + "/.64pixels");
 		if(!sdchk.exists()) sdchk.mkdir();
 		window = new JFrame("64pixels " + getVersion());
@@ -165,43 +162,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		else cmt.speed=0;
 		keyHeld = new boolean[4];
 	}
-	public CraftrGame(JApplet ja)
-	{
-		audio = new CraftrSound();
-		isApplet = true;
-		applet = ja;
-		map = new CraftrMap(false,64);
-		map.game = this;
-		try
-		{
-			File sdchk = new File(System.getProperty("user.home") + "/.64pixels");
-			if(!sdchk.exists()) sdchk.mkdir();
-			map.saveDir = System.getProperty("user.home") + "/.64pixels/";
-		}
-		catch(Exception e)
-		{
-			System.out.println("Cannot use default saveDir due to exception stuff");
-			map.saveDir = "";
-		}
-		gameOn = true;
-		players[255] = new CraftrPlayer(0,0);
-		canMousePress = true;
-		config = new CraftrConfig(map.saveDir + "config.txt");
-		cmt = new CraftrMapThread(map);
-		gs = new CraftrGameScreen(null);
-		loadConfig();
-		canvas = new CraftrCanvas();
-		gs.c=canvas;
-		canvas.cs = (CraftrScreen)gs;
-		if(cmtsp>0) cmt.speed=(1000/cmtsp);
-		else cmt.speed=0;
-		keyHeld = new boolean[4];
-		String t3 = ja.getParameter("nick");
-		String t4 = ja.getParameter("skip");
-		if(t4!=null && !t4.equals("")) skipConfig = true;
-		if(t3!=null && !t3.equals("")) players[255].name = t3;
-	} 
-	
 	public void kickOut(String why)
 	{
 		isKick=true;
@@ -1246,16 +1206,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	
 	public void init()
 	{
-		if(isApplet)
-		{
-			applet.getContentPane().add(canvas);
-		} else
-		{
-			window.add(canvas);
-			window.pack(); // makes everything a nice size
-			window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			window.setVisible(true);
-		}
+		window.add(canvas);
+		window.pack(); // makes everything a nice size
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		window.setVisible(true);
 		tnew = new Date(told.getTime() + 1000L);
 	}
 	
@@ -1347,7 +1301,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						cks.bgcolor = 0xAA0000;
 						cks.mName="SERVERLIST NOT FOUND";
 						cks.name="PLEASE DON'T PANIC, ONE SECOND...";
-						if(isApplet) cks.name="DON'T PANIC (does the applet have proper permissions?)";
 						canvas.draw(mx,my);
 						try{Thread.sleep(1800);}catch(Exception e){}
 					}
@@ -1418,49 +1371,19 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public void start(String[] args)
 	{
 		ev_1=65535;
-		if(!isApplet)
-		{
-			window.getRootPane().addComponentListener(this);
-			window.addFocusListener(this);
-			window.addKeyListener(this);
-			addKeyListener(this);
-			addComponentListener(this);
-		}
-		else
-		{
-			applet.setFocusable(true);
-			applet.addKeyListener(this);
-		}
+		window.getRootPane().addComponentListener(this);
+		window.addFocusListener(this);
+		window.addKeyListener(this);
+		addKeyListener(this);
+		addComponentListener(this);
 		net = new CraftrNet();
 		gt = new CraftrGameThread(this);
-		if(!isApplet)
-		{
-			window.getRootPane().addMouseListener(this);
-			window.getRootPane().addMouseMotionListener(this);
-			addMouseListener(this);
-			addMouseMotionListener(this);
-		}
-		else
-		{
-			applet.getRootPane().addMouseListener(this);
-			applet.getRootPane().addMouseMotionListener(this);
-		}
+		window.getRootPane().addMouseListener(this);
+		window.getRootPane().addMouseMotionListener(this);
+		addMouseListener(this);
+		addMouseMotionListener(this);
 		String thost = "127.0.0.1";
-		if(skipConfig && isApplet)
-		{
-			String t1 = applet.getParameter("ip");
-			String t2 = applet.getParameter("port");
-			if(t1!=null && !t1.equals(""))
-			{
-				multiplayer=true;
-				thost=t1;
-				if(t2!=null && !t1.equals("")) thost+= ":" + t2;
-				else thost+=":25566";
-				net.nick = players[255].name;
-			}
-			else multiplayer=false;
-		}
-		else if (skipConfig && !isApplet) multiplayer=false;
+		if (skipConfig) multiplayer=false;
 		else thost = configure();
 		isConfig=false;
 		health = 5;
