@@ -143,7 +143,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		audio = new CraftrSound();
 		File sdchk = new File(System.getProperty("user.home") + "/.64pixels");
 		if(!sdchk.exists()) sdchk.mkdir();
-		window = new JFrame("64pixels " + getVersion());
+		window = new JFrame("64pixels^2 " + getVersion());
 		gameOn = true;
 		map = new CraftrMap(false,64);
 		map.game = this;
@@ -1294,7 +1294,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		gs.health = 5;
 		if(!multiplayer)
 		{
-			gs.addChatMsg("you're running 64pixels " + getVersion());
+			gs.addChatMsg("you're running 64pixels^2 " + getVersion());
 			gs.addChatMsg("created by asiekierka and GreaseMonkey.");
 			Thread tmap = new Thread(cmt);
 			tmap.start();
