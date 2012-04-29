@@ -261,10 +261,6 @@ public class CraftrBlock
 				return "Stop";
 			case 20:
 				return "Dupe";
-			case 21:
-				return "Bear";
-			case 22:
-				return "Tiger";
 			case -1:
 				return "Pushium";
 		}
