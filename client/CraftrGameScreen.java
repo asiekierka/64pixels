@@ -4,6 +4,7 @@ import common.*;
 import java.awt.*;
 import java.awt.image.*;
 import java.util.*;
+import java.awt.event.*;
 
 public class CraftrGameScreen extends CraftrScreen
 {
@@ -57,6 +58,108 @@ public class CraftrGameScreen extends CraftrScreen
 		barselMode = 1; // char
 		chatMsg = "";
 		barType = 0;
+	}
+
+	public boolean mousePressed(MouseEvent ev)
+	{
+		int mb = ev.getButton();
+		if (insideRect(mx,my,7*16+8,BARPOS_Y,8,8)) // type, up
+		{
+			drawType-=1;
+			while(!CraftrBlock.isPlaceable(drawType)) drawType-=1;
+			if(drawType < -1) drawType = CraftrBlock.maxType;
+			while(!CraftrBlock.isPlaceable(drawType)) drawType-=1;
+		} else if (insideRect(mx,my,7*16+8,BARPOS_Y+8,8,8)) // type, down
+		{
+			drawType+=1;
+			while(!CraftrBlock.isPlaceable(drawType)) drawType+=1;
+			if(drawType > CraftrBlock.maxType) drawType = -1;
+			while(!CraftrBlock.isPlaceable(drawType)) drawType+=1;
+		}
+		else if (insideRect(mx,my,7*16,BARPOS_Y+8,8,8)) // T
+		{
+			toggleWindow(4);
+		}
+		 else if (insideRect(mx,my,8*16+8,BARPOS_Y,24,8)) // mode, chr
+		{
+			barselMode = 1;
+		} else if (insideRect(mx,my,8*16+8,BARPOS_Y+8,24,8)) // mode, col
+		{
+			barselMode = 2;
+		} else if(insideRect(mx,my,30*16,BARPOS_Y,16,16))
+		{
+			toggleWindow(1);
+		}
+		else if(insideRect(mx,my,31*16,BARPOS_Y,16,16))
+		{
+			toggleWindow(2);
+		}
+		else if (drawType == 17)
+		{
+			if(insideRect(mx,my,12*16+8,BARPOS_Y,48,8))
+			{
+				isSticky=false;
+			}
+			else if(insideRect(mx,my,12*16+8,BARPOS_Y+8,48,8))
+			{
+				isSticky=true;
+			}
+		}
+		else if (drawType == 2)
+		{
+			if(insideRect(mx,my,12*16+8,BARPOS_Y,128,16))
+			{
+				sdrawCol((mx-(12*16+8))>>4);
+			}
+		}
+		else if (barselMode == 1 && (drawType == 3 || drawType == 20)) // p-nand dir
+		{
+			if(insideRect(mx,my,12*16+8,BARPOS_Y,64,16))
+			{
+				sdrawChr(24+((mx-(12*16+8))>>4));
+			}
+		}
+		else if (barselMode == 1 && drawType == 15) // extend dir
+		{
+			if(insideRect(mx,my,12*16+8,BARPOS_Y,64,16))
+			{
+				sdrawChr(CraftrBlock.extendDir[((mx-(12*16+8))>>4)]);
+			}
+		}
+		else if (barselMode == 1) // checkings, chr
+		{
+			if(insideRect(mx,my,13*16,BARPOS_Y,256,16))
+			{
+				sdrawChr(((mx-(13*16))>>4)+chrBarOff);
+			}
+			else if(mb==ev.BUTTON3 && insideRect(mx,my,12*16+8,BARPOS_Y+1,8,14))
+			{
+				chrBarOff -= 16;
+				if(chrBarOff<0) chrBarOff += 256;
+				return true;
+			}
+			else if(mb==ev.BUTTON3 && insideRect(mx,my,29*16,BARPOS_Y+1,8,14))
+			{
+				chrBarOff += 16;
+				if(chrBarOff>255) chrBarOff -= 256;
+				return true;
+			}
+		} else if (barselMode == 2) // checkings, col
+		{
+			if(insideRect(mx,my,12*16+8,BARPOS_Y,128,16))
+			{
+				int colChoose = (mx-(12*16+8))>>3;
+				int colMode = my-BARPOS_Y;
+				if(colMode>7) // FG
+				{
+					sdrawCol((gdrawCol()&240)|(colChoose&15));
+				} else // BG
+				{
+					sdrawCol((gdrawCol()&15)|((colChoose&15)<<4));
+				}
+			}
+		}
+		return false;
 	}
 
 	public boolean insideRect(int mx, int my, int x, int y, int w, int h)

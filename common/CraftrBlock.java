@@ -10,6 +10,7 @@ public class CraftrBlock
 	public static final int maxType = 22;
 	public static final int invalidTypes = 2;
 	public static Random rand = new Random();
+	public static final byte[] extendDir = { 30, 31, 16, 17 };
 
 	public CraftrBlock()
 	{

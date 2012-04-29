@@ -75,7 +75,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	private int key_left = KeyEvent.VK_LEFT;
 	private int key_right = KeyEvent.VK_RIGHT;
 	private int key_down = KeyEvent.VK_DOWN;
-	private static final byte[] extendDir = { 30, 31, 16, 17 };
 	private CraftrGameThread gt;
 
 	public void setHealth(int h)
@@ -467,102 +466,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			return;
 		}
 		if(isKick) return;
-		if (insideRect(mx,my,7*16+8,gs.BARPOS_Y,8,8)) // type, up
-		{
-			gs.drawType-=1;
-			while(!CraftrBlock.isPlaceable(gs.drawType)) gs.drawType-=1;
-			if(gs.drawType < -1) gs.drawType = CraftrBlock.maxType;
-			while(!CraftrBlock.isPlaceable(gs.drawType)) gs.drawType-=1;
-		} else if (insideRect(mx,my,7*16+8,gs.BARPOS_Y+8,8,8)) // type, down
-		{
-			gs.drawType+=1;
-			while(!CraftrBlock.isPlaceable(gs.drawType)) gs.drawType+=1;
-			if(gs.drawType > CraftrBlock.maxType) gs.drawType = -1;
-			while(!CraftrBlock.isPlaceable(gs.drawType)) gs.drawType+=1;
-		}
-		else if (insideRect(mx,my,7*16,gs.BARPOS_Y+8,8,8)) // T
-		{
-			gs.toggleWindow(4);
-		}
-		 else if (insideRect(mx,my,8*16+8,gs.BARPOS_Y,24,8)) // mode, chr
-		{
-			gs.barselMode = 1;
-		} else if (insideRect(mx,my,8*16+8,gs.BARPOS_Y+8,24,8)) // mode, col
-		{
-			gs.barselMode = 2;
-		} else if(insideRect(mx,my,30*16,gs.BARPOS_Y,16,16))
-		{
-			gs.toggleWindow(1);
-		}
-		else if(insideRect(mx,my,31*16,gs.BARPOS_Y,16,16))
-		{
-			gs.toggleWindow(2);
-		}
-		else if (gs.drawType == 17)
-		{
-			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,48,8))
-			{
-				gs.isSticky=false;
-			}
-			else if(insideRect(mx,my,12*16+8,gs.BARPOS_Y+8,48,8))
-			{
-				gs.isSticky=true;
-			}
-		}
-		else if (gs.drawType == 2)
-		{
-			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,128,16))
-			{
-				gs.sdrawCol((mx-(12*16+8))>>4);
-			}
-		}
-		else if (gs.barselMode == 1 && (gs.drawType == 3 || gs.drawType == 20)) // p-nand dir
-		{
-			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,64,16))
-			{
-				gs.sdrawChr(24+((mx-(12*16+8))>>4));
-			}
-		}
-		else if (gs.barselMode == 1 && gs.drawType == 15) // extend dir
-		{
-			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,64,16))
-			{
-				gs.sdrawChr(extendDir[((mx-(12*16+8))>>4)]);
-			}
-		}
-		else if (gs.barselMode == 1) // checkings, chr
-		{
-			if(insideRect(mx,my,13*16,gs.BARPOS_Y,256,16))
-			{
-				gs.sdrawChr(((mx-(13*16))>>4)+gs.chrBarOff);
-			}
-			else if(mb==ev_3 && insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
-			{
-				gs.chrBarOff -= 16;
-				mouseChange=true;
-				if(gs.chrBarOff<0) gs.chrBarOff += 256;
-			}
-			else if(mb==ev_3 && insideRect(mx,my,29*16,gs.BARPOS_Y+1,8,14))
-			{
-				gs.chrBarOff += 16;
-				mouseChange=true;
-				if(gs.chrBarOff>255) gs.chrBarOff -= 256;
-			}
-		} else if (gs.barselMode == 2) // checkings, col
-		{
-			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y,128,16))
-			{
-				int colChoose = (mx-(12*16+8))>>3;
-				int colMode = my-gs.BARPOS_Y;
-				if(colMode>7) // FG
-				{
-					gs.sdrawCol((gs.gdrawCol()&240)|(colChoose&15));
-				} else // BG
-				{
-					gs.sdrawCol((gs.gdrawCol()&15)|((colChoose&15)<<4));
-				}
-			}
-		}
+		mouseChange = gs.mousePressed(ev);
 		processWindows();
 		processMouse();
 	}
