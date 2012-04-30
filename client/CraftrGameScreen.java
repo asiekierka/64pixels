@@ -292,12 +292,6 @@ public class CraftrGameScreen extends CraftrScreen
 							case 4:
 								c.DrawChar(ix<<4,iy<<4,(byte)248,(byte)15);
 								break;
-							case 5:
-								c.DrawChar(ix<<4,iy<<4,(byte)153,(byte)6);
-								break;
-							case 6:
-								c.DrawChar(ix<<4,iy<<4,(byte)227,(byte)0x0B);
-								break;
 						}
 				}else{
 					c.DrawChar(ix<<4,iy<<4,(byte)177,(byte)0x08);
