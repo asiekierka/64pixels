@@ -60,17 +60,26 @@ public class CraftrGameScreen extends CraftrScreen
 		barType = 0;
 	}
 
+	public void invokeHelp(String t)
+	{
+		toggleWindow(5);
+		getWindow(5).text=t;
+		getWindow(5).resize();
+	}
+
 	public boolean mousePressed(MouseEvent ev)
 	{
 		int mb = ev.getButton();
 		if (insideRect(mx,my,7*16+8,BARPOS_Y,8,8)) // type, up
 		{
+			if(mb==ev.BUTTON3) { invokeHelp("Choose the type."); return false; }
 			drawType-=1;
 			while(!CraftrBlock.isPlaceable(drawType)) drawType-=1;
 			if(drawType < -1) drawType = CraftrBlock.maxType;
 			while(!CraftrBlock.isPlaceable(drawType)) drawType-=1;
 		} else if (insideRect(mx,my,7*16+8,BARPOS_Y+8,8,8)) // type, down
 		{
+			if(mb==ev.BUTTON3) { invokeHelp("Choose the type."); return false; }
 			drawType+=1;
 			while(!CraftrBlock.isPlaceable(drawType)) drawType+=1;
 			if(drawType > CraftrBlock.maxType) drawType = -1;
@@ -78,30 +87,37 @@ public class CraftrGameScreen extends CraftrScreen
 		}
 		else if (insideRect(mx,my,7*16,BARPOS_Y+8,8,8)) // T
 		{
+			if(mb==ev.BUTTON3) { invokeHelp("Open type selection window."); return false; }
 			toggleWindow(4);
 		}
 		 else if (insideRect(mx,my,8*16+8,BARPOS_Y,24,8)) // mode, chr
 		{
+			if(mb==ev.BUTTON3) { invokeHelp("Set the bar mode to choosing characters."); return false; }
 			barselMode = 1;
 		} else if (insideRect(mx,my,8*16+8,BARPOS_Y+8,24,8)) // mode, col
 		{
+			if(mb==ev.BUTTON3) { invokeHelp("Set the bar mode to choosing colors."); return false; }
 			barselMode = 2;
 		} else if(insideRect(mx,my,30*16,BARPOS_Y,16,16))
 		{
+			if(mb==ev.BUTTON3) { invokeHelp("Open the character selection window."); return false; }
 			toggleWindow(1);
 		}
 		else if(insideRect(mx,my,31*16,BARPOS_Y,16,16))
 		{
+			if(mb==ev.BUTTON3) { invokeHelp("Open the color selection window."); return false; }
 			toggleWindow(2);
 		}
 		else if (drawType == 17)
 		{
 			if(insideRect(mx,my,12*16+8,BARPOS_Y,48,8))
 			{
+				if(mb==ev.BUTTON3) { invokeHelp("Unstickify piston."); return false; }
 				isSticky=false;
 			}
 			else if(insideRect(mx,my,12*16+8,BARPOS_Y+8,48,8))
 			{
+				if(mb==ev.BUTTON3) { invokeHelp("Stickify piston."); return false; }
 				isSticky=true;
 			}
 		}
@@ -109,6 +125,7 @@ public class CraftrGameScreen extends CraftrScreen
 		{
 			if(insideRect(mx,my,12*16+8,BARPOS_Y,128,16))
 			{
+				if(mb==ev.BUTTON3) { invokeHelp("Select color."); return false; }
 				sdrawCol((mx-(12*16+8))>>4);
 			}
 		}
@@ -116,6 +133,7 @@ public class CraftrGameScreen extends CraftrScreen
 		{
 			if(insideRect(mx,my,12*16+8,BARPOS_Y,64,16))
 			{
+				if(mb==ev.BUTTON3) { invokeHelp("Select block output direction."); return false; }
 				sdrawChr(24+((mx-(12*16+8))>>4));
 			}
 		}
@@ -123,6 +141,7 @@ public class CraftrGameScreen extends CraftrScreen
 		{
 			if(insideRect(mx,my,12*16+8,BARPOS_Y,64,16))
 			{
+				if(mb==ev.BUTTON3) { invokeHelp("Select block output direction."); return false; }
 				sdrawChr(CraftrBlock.extendDir[((mx-(12*16+8))>>4)]);
 			}
 		}
@@ -130,6 +149,7 @@ public class CraftrGameScreen extends CraftrScreen
 		{
 			if(insideRect(mx,my,13*16,BARPOS_Y,256,16))
 			{
+				if(mb==ev.BUTTON3) { invokeHelp("Select character."); return false; }
 				sdrawChr(((mx-(13*16))>>4)+chrBarOff);
 			}
 			else if(mb==ev.BUTTON3 && insideRect(mx,my,12*16+8,BARPOS_Y+1,8,14))
@@ -148,6 +168,7 @@ public class CraftrGameScreen extends CraftrScreen
 		{
 			if(insideRect(mx,my,12*16+8,BARPOS_Y,128,16))
 			{
+				if(mb==ev.BUTTON3) { invokeHelp("Select colour."); return false; }
 				int colChoose = (mx-(12*16+8))>>3;
 				int colMode = my-BARPOS_Y;
 				if(colMode>7) // FG

@@ -12,6 +12,7 @@ public class CraftrWindow
 	public int w,h;
 	public boolean isMelodium = false;
 	public String title;
+	public String text;
 	public static int[] linechr; 
 	public int x,y;
 	public int charChosen, colorChosen, typeChosen;
@@ -74,6 +75,11 @@ public class CraftrWindow
 				w = 16;
 				h = CraftrBlock.maxType+4-CraftrBlock.invalidTypes;
 				title = "Types";
+				break;
+			case 5: // help screen
+				w = 26;
+				h = text.length()/24+5;
+				title = "Help";
 				break;
 			default:
 				w = 8;
@@ -209,6 +215,15 @@ public class CraftrWindow
 						cc.DrawString1x(((x<<3)+(w<<2))-(t.length()<<2),(y+1+i)<<3,t,col);
 						i++;
 					}
+				}
+				break;
+			case 5: // help
+				int j = 0;
+				for(;j<text.length();j+=24)
+				{
+					int k = j+24;
+					if(text.length()<k) k=text.length();
+					cc.DrawString1x(fx,fy+8+((j/24)<<3),text.substring(j,k),143);
 				}
 				break;
 			default:
