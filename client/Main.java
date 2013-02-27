@@ -8,7 +8,7 @@ public class Main {
 	private static CraftrGame game;
 	public static void main(String[] args)
 	{
-		System.out.println("loading 64pixels...");
+		System.out.println("Loading 64pixels...");
 		CraftrShutdownHook hook = new CraftrShutdownHook();
 		Runtime.getRuntime().addShutdownHook( hook );
 		game = new CraftrGame();
