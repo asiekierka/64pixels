@@ -1145,6 +1145,10 @@ public class CraftrServer extends CraftrServerShim
 	{
 		sendOthers(256,arr,arr.length);
 	}
+	public void sendAllOnMap(int mapPlayerID, byte[] arr)
+	{
+		sendAllOnMap(arr,arr.length,clients[mapPlayerID].map.mapName);
+	}
 	public void sendAllOnMap(byte[] arr, String map_name)
 	{
 		sendAllOnMap(arr,arr.length,map_name);

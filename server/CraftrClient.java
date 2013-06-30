@@ -866,7 +866,12 @@ public class CraftrClient implements Runnable
 										out.writeByte(t33[0]);
 										out.writeByte(t33[2]);
 										out.writeByte(t33[3]);
-										serv.sendOthersOnMap(id,getPacket());
+										if(map.physics.isUpdated(0xFF&(int)t33[0]) &&
+										   map.physics.isSent(0xFF&(int)t33[0])) {
+											serv.sendAllOnMap(id, getPacket()); // Wirium reappear fix
+										} else {
+											serv.sendOthersOnMap(id,getPacket());
+										}
 	 									if(at != -1 && zc[5] != 0)
 	 									{
 	 										out.writeByte(0x31);

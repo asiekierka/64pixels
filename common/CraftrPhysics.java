@@ -117,7 +117,7 @@ public class CraftrPhysics
 					modifiedMap.setBullet(cb.x,cb.y,(byte)cb.getBullet(),(byte)cb.getBulletParam());
 					if(isServer) modifiedMap.setBulletNet(cb.x,cb.y,(byte)cb.getBullet());
 				}
-				if(isServer && isSent(cb.getTypeWithVirtual()))
+				if(cbo.getType() == cb.getType() && isServer && isSent(cb.getTypeWithVirtual()))
 				{
 					if(cb.isPushable()) modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)cb.getChar(),(byte)cb.getColor());
 					else modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
