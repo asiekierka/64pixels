@@ -22,12 +22,12 @@ clientjar: client
 	
 common:
 	@echo [[[ MAKING COMMON CODE ]]]
-	javac common/*.java
+	javac -source 1.5 -target 1.5 -cp . common/*.java
 	
 client: common
 	@echo [[[ MAKING CLIENT CODE ]]]
-	javac client/*.java
+	javac -source 1.5 -target 1.5 -cp . client/*.java
 	
 server: common
 	@echo [[[ MAKING SERVER CODE ]]]
-	javac server/*.java
+	javac -source 1.5 -target 1.5 -cp . server/*.java
