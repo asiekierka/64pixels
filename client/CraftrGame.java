@@ -1302,7 +1302,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		else
 		{
 			System.out.println("Connecting...");
-			CraftrKickScreen cks = new CraftrKickScreen(canvas,"Wait a second...");
+			CraftrKickScreen cks = new CraftrKickScreen(canvas,"Please wait");
 			cks.mName="CONNECTING...";
 			cks.bgcolor = 0x808080;
 			canvas.cs = (CraftrScreen)cks;
@@ -1411,7 +1411,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			fold = frame;
 			fps = (int)gt.fps;
 			gt.fps=0;
-			System.out.println(fps + " fps, physics runs at " + (cmt.wps-wpso) + "checks a second");
+			System.out.println("SPEED: " + fps + " fps (physics: " + (cmt.wps-wpso) + " fps)");
 			wpso = cmt.wps;
 		}
 		gt.isRunning=gameOn;
