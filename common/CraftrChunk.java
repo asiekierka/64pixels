@@ -8,13 +8,13 @@ public class CraftrChunk {
 	public byte[] param;
 	public byte[] chr;
 	public byte[] col;
-	public byte[] chrp;
-	public byte[] colp;
-	public byte[] chr2;
-	public byte[] col2;
-	public byte[] bullpar;
-	public byte[] mapinfo;
-
+	public byte[] chrPushable;
+	public byte[] colPushable;
+	public byte[] chrDisplay;
+	public byte[] colDisplay;
+	public byte[] bulletParam;
+	public byte[] mapInfo;
+	public ArrayList<byte[]> extendedBlocks;
 	public int w;
 	public int h;
 	public int xpos;
@@ -24,8 +24,8 @@ public class CraftrChunk {
 	public boolean isUsed;
 	public boolean isSet;
 	public boolean isReUsed;
-	public int mapinfo_len;
-	public int mapinfo_type;
+	public int mapInfoLength;
+	public int mapInfoType;
 	public static final int hdrsize = 5;
 
 	public CraftrChunk(int xp, int yp, boolean used)
@@ -34,12 +34,13 @@ public class CraftrChunk {
 		param = new byte[64*64*2];
 		chr = new byte[64*64*2];
 		col = new byte[64*64*2];
-		chr2 = new byte[64*64];
-		col2 = new byte[64*64];
-		chrp = new byte[64*64];
-		colp = new byte[64*64];
-		bullpar = new byte[64*64];
-		mapinfo = new byte[4096];
+		chrDisplay = new byte[64*64];
+		colDisplay = new byte[64*64];
+		chrPushable = new byte[64*64];
+		colPushable = new byte[64*64];
+		bulletParam = new byte[64*64];
+		mapInfo = new byte[4096];
+		extendedBlocks = new ArrayList<byte[]>();
 		w = 64;
 		h = 64;
 		xpos = xp;
@@ -48,7 +49,7 @@ public class CraftrChunk {
 		isReUsed = false;
 		isSet = true;
 	}
-	
+
 	public void loadByte(byte[] rawdata)
 	{
 		// i love arraycopy, and all its mysteries!
@@ -57,19 +58,19 @@ public class CraftrChunk {
 		System.arraycopy(rawdata,1+hdrsize+4096,param,0,8192);
 		System.arraycopy(rawdata,1+hdrsize+(4096*3),chr,0,8192);
 		System.arraycopy(rawdata,1+hdrsize+(4096*5),col,0,8192);
- 		System.arraycopy(rawdata,1+hdrsize+(4096*7),chrp,0,4096);
- 		System.arraycopy(rawdata,1+hdrsize+(4096*8),colp,0,4096);
- 		System.arraycopy(rawdata,1+hdrsize+(4096*9),bullpar,0,4096);
+ 		System.arraycopy(rawdata,1+hdrsize+(4096*7),chrPushable,0,4096);
+ 		System.arraycopy(rawdata,1+hdrsize+(4096*8),colPushable,0,4096);
+ 		System.arraycopy(rawdata,1+hdrsize+(4096*9),bulletParam,0,4096);
 		byte[] tmp = new byte[2];
 		System.arraycopy(rawdata,4,tmp,0,2);
-		mapinfo_len = CraftrConvert.arrShort(tmp);
-		mapinfo_type = rawdata[3];
-		if(mapinfo_len > 0 && mapinfo_type > 0) System.arraycopy(rawdata,1+hdrsize+(4096*10),mapinfo,0,mapinfo_len);
+		mapInfoLength = CraftrConvert.arrShort(tmp);
+		mapInfoType = rawdata[3];
+		if(mapInfoLength > 0 && mapInfoType > 0) System.arraycopy(rawdata,1+hdrsize+(4096*10),mapInfo,0,mapInfoLength);
 		spawnX = rawdata[1];
 		spawnY = rawdata[2];
 		fixDisplay();
 	}
-	
+
 	public void loadByteNet(byte[] rawdata)
 	{
 		loadByte(rawdata);
@@ -82,15 +83,15 @@ public class CraftrChunk {
 		System.arraycopy(param,0,out,4096+1+hdrsize,8192);
 		System.arraycopy(chr,0,out,(4096*3)+1+hdrsize,8192);
 		System.arraycopy(col,0,out,(4096*5)+1+hdrsize,8192);
- 		System.arraycopy(chrp,0,out,(4096*7)+1+hdrsize,4096);
- 		System.arraycopy(colp,0,out,(4096*8)+1+hdrsize,4096);
- 		System.arraycopy(bullpar,0,out,(4096*9)+1+hdrsize,4096);
-		System.arraycopy(mapinfo,0,out,(4096*10)+1+hdrsize,4096);
+ 		System.arraycopy(chrPushable,0,out,(4096*7)+1+hdrsize,4096);
+ 		System.arraycopy(colPushable,0,out,(4096*8)+1+hdrsize,4096);
+ 		System.arraycopy(bulletParam,0,out,(4096*9)+1+hdrsize,4096);
+		System.arraycopy(mapInfo,0,out,(4096*10)+1+hdrsize,4096);
 		out[0] = 5; // version
 		out[1] = (byte)spawnX;
 		out[2] = (byte)spawnY;
-		out[3] = (byte)mapinfo_type;
-		byte[] tmp = CraftrConvert.shortArray((short)mapinfo_len);
+		out[3] = (byte)mapInfoType;
+		byte[] tmp = CraftrConvert.shortArray((short)mapInfoLength);
 		System.arraycopy(tmp,0,out,4,2);
 		return out;
 	}
@@ -102,20 +103,20 @@ public class CraftrChunk {
 	{
 		for(int i=0;i<4096;i++)
 		{
- 			if(colp[i] != 0)
+ 			if(colPushable[i] != 0)
  			{
- 				chr2[i] = chrp[i];
- 				col2[i] = colp[i];
+ 				chrDisplay[i] = chrPushable[i];
+ 				colDisplay[i] = colPushable[i];
  			}
  			else if(type[i] == 0)
 			{
-				chr2[i] = chr[4096+i];
-				col2[i] = col[4096+i];
+				chrDisplay[i] = chr[4096+i];
+				colDisplay[i] = col[4096+i];
 			}
 			else
 			{
-				chr2[i] = chr[i];
-				col2[i] = col[i];
+				chrDisplay[i] = chr[i];
+				colDisplay[i] = col[i];
 			}
 		}
 	}
@@ -151,10 +152,10 @@ public class CraftrChunk {
 		data[1] = param[p];
 		data[2] = getBlockChar(x,y);
 		data[3] = getBlockColor(x,y);
-		data[4] = chrp[p];
-		data[5] = colp[p];
+		data[4] = chrPushable[p];
+		data[5] = colPushable[p];
 		data[6] = getBullet(x,y);
-		data[7] = bullpar[p];
+		data[7] = bulletParam[p];
 		return data;
 	}
 	public byte getBlockType(int x, int y)
@@ -181,11 +182,11 @@ public class CraftrChunk {
 	}
 	public byte getPushableChar(int x, int y)
  	{
- 		return chrp[x+(y<<6)];
+ 		return chrPushable[x+(y<<6)];
  	}
  	public byte getPushableColor(int x, int y)
  	{
- 		return colp[x+(y<<6)];
+ 		return colPushable[x+(y<<6)];
  	}
 	public byte getBullet(int x, int y)
 	{
@@ -193,7 +194,7 @@ public class CraftrChunk {
 	}
 	public byte getBulletParam(int x, int y)
 	{
-		return bullpar[x+(y<<6)];
+		return bulletParam[x+(y<<6)];
 	}		
 	public void placeBullet(int x, int y, byte aType)
 	{
@@ -202,7 +203,7 @@ public class CraftrChunk {
 	public void placeBullet(int x, int y, byte aType, byte aPar)
 	{
 		param[4096+x+(y<<6)]=aType;
-		bullpar[x+(y<<6)]=aPar;
+		bulletParam[x+(y<<6)]=aPar;
 	}
 	public void place(int x, int y, byte aType, byte aChr, byte aCol, byte aPar)
 	{
@@ -217,30 +218,30 @@ public class CraftrChunk {
 			chr[4096+tmp]=aChr;
 			col[4096+tmp]=aCol;
 		}
- 		if(colp[tmp] == 0)
+ 		if(colPushable[tmp] == 0)
  		{
- 			chr2[tmp] = aChr;
- 			col2[tmp] = aCol;
+ 			chrDisplay[tmp] = aChr;
+ 			colDisplay[tmp] = aCol;
 		}
 	}
  	public void placePushable(int x, int y, byte aChr, byte aCol)
  	{
  		int tmp = x+(y<<6);
- 		chrp[tmp] = aChr;
- 		colp[tmp] = aCol;
+ 		chrPushable[tmp] = aChr;
+ 		colPushable[tmp] = aCol;
  		if(aCol == 0)
  		{
  			if(type[tmp] != 0)
  			{
- 				chr2[tmp] = chr[tmp];
- 				col2[tmp] = col[tmp];
+ 				chrDisplay[tmp] = chr[tmp];
+ 				colDisplay[tmp] = col[tmp];
  			} else {
- 				chr2[tmp] = chr[4096+tmp];
- 				col2[tmp] = col[4096+tmp];
+ 				chrDisplay[tmp] = chr[4096+tmp];
+ 				colDisplay[tmp] = col[4096+tmp];
  			}
  		} else {
- 			chr2[tmp] = aChr;
- 			col2[tmp] = aCol;
+ 			chrDisplay[tmp] = aChr;
+ 			colDisplay[tmp] = aCol;
  		}
 	}
 
