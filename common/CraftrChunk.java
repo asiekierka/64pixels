@@ -14,7 +14,7 @@ public class CraftrChunk {
 	public byte[] colDisplay;
 	public byte[] bulletParam;
 	public byte[] mapInfo;
-	public ArrayList<byte[]> extendedBlocks;
+	public ArrayList<CraftrExtendedBlock> extendedBlocks;
 	public int w;
 	public int h;
 	public int xpos;
@@ -40,7 +40,7 @@ public class CraftrChunk {
 		colPushable = new byte[64*64];
 		bulletParam = new byte[64*64];
 		mapInfo = new byte[4096];
-		extendedBlocks = new ArrayList<byte[]>();
+		extendedBlocks = new ArrayList<CraftrExtendedBlock>();
 		w = 64;
 		h = 64;
 		xpos = xp;
@@ -48,6 +48,25 @@ public class CraftrChunk {
 		isUsed = used;
 		isReUsed = false;
 		isSet = true;
+	}
+
+	public CraftrExtendedBlock getExtendedBlock(int x, int y) {
+		for(CraftrExtendedBlock eb: extendedBlocks) {
+			if(eb.getX()==x && eb.getY()==y) return eb;
+		}
+		return null;
+	}
+
+	public void setExtendedBlock(int x, int y, CraftrExtendedBlock block) {
+		int replaceIndex = -1;
+		for(CraftrExtendedBlock eb: extendedBlocks) {
+			if(eb.getX()==x && eb.getY()==y) {
+				replaceIndex = extendedBlocks.indexOf(eb);
+			}
+		}
+		if(replaceIndex >= 0) {
+			extendedBlocks.set(replaceIndex, block);
+		} else extendedBlocks.add(block);
 	}
 
 	public void loadByte(byte[] rawdata)
