@@ -91,10 +91,10 @@ public class CraftrMap
 		for (int i=0;i<cachesize;i++) if(chunks[i].xpos == x && chunks[i].ypos == y && chunks[i].isSet == true) { chunks[i].isUsed = true; return chunks[i]; }
 		
 		// No, is there any empty chunk?
-		for (int i=0;i<cachesize;i++) if(!chunks[i].isSet) { chunks[i] = new CraftrChunk(x,y,true); chunks[i].isUsed = true; chunks[i].loadByte(readChunkFile(x,y,true)); return chunks[i]; }
+		for (int i=0;i<cachesize;i++) if(!chunks[i].isSet) { chunks[i] = new CraftrChunk(x,y,true); chunks[i].isUsed = true; readChunkFile(x,y,chunks[i]); return chunks[i]; }
 		
 		// No, is there any chunk that isn't in the closest area of players'?
-		for (int i=0;i<cachesize;i++) if(!chunks[i].isUsed) { chunks[i] = new CraftrChunk(x,y,true); chunks[i].isUsed = true; chunks[i].loadByte(readChunkFile(x,y,true)); return chunks[i]; }
+		for (int i=0;i<cachesize;i++) if(!chunks[i].isUsed) { chunks[i] = new CraftrChunk(x,y,true); chunks[i].isUsed = true; readChunkFile(x,y,chunks[i]); return chunks[i]; }
 		
 		if(isServer)
 		{
@@ -103,7 +103,7 @@ public class CraftrMap
 			saveChunkFile(i);
 			chunks[i] = new CraftrChunk(x,y,true);
 			chunks[i].isUsed = true;
-			chunks[i].loadByte(readChunkFile(x,y,true));
+			readChunkFile(x,y,chunks[i]);
 			return chunks[i];
 		} else {
 			// Are you kidding me!? 9 chunks are (should be) used and you can't find a free space in SIXTY-FOUR!?
@@ -191,25 +191,7 @@ public class CraftrMap
 	}
 	
 	// LOADING
-	public CraftrChunk readChunkFromFile(int x, int y)
-	{
-		byte[] tmp = readChunkFile(x,y,false);
-		if(tmp != null) {
-			CraftrChunk n = new CraftrChunk(x,y,false);
-			n.loadByte(tmp);
-			return n;
-		}
-		else return null;
-	}
-	public void readChunkFile(int x, int y, int cid)
-	{
-		if (cid >= 0)
-		{
-			chunks[cid] = new CraftrChunk(x,y,true);
-			chunks[cid].loadByte(readChunkFile(x,y,true));
-		}
-	}
-	public byte[] readChunkFile(int x, int y, boolean genNew)
+	public void readChunkFile(int x, int y, CraftrChunk target)
 	{
 		if(multiplayer)
 		{
@@ -217,19 +199,22 @@ public class CraftrMap
 			if(!isServer)
 				net.chunkRequest(x,y);
 			CraftrChunk nout = new CraftrChunk(x,y,true);
-			return nout.saveByte();
+			target = nout;
+			return;
 		}
 		else
 		{
 		// Init variables
 		FileInputStream in = null;
 		GZIPInputStream gin = null;
+		DataInputStream din = null;
 		byte[] out = new byte[16384];
 		try	// The code proper
 		{
 			// Load file
 			in = new FileInputStream(saveDir + mapName + "/" + CraftrChunk.getFilename(x,y));
 			gin = new GZIPInputStream(in);
+			din = new DataInputStream(gin);
 			// Create buffer, check version
 			byte[] buf = new byte[256];
 			gin.read(buf,0,1);
@@ -240,7 +225,6 @@ public class CraftrMap
 				case 5:
 					out = new byte[1+(4096*11)+hdrsize];
 					while(i<(1+(4096*11)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
-					gin.close();
 					for(int ri=0;ri<4096;ri++)
 					{
 						if(out[1+ri+hdrsize]==5 && (0x80&(int)out[1+ri+hdrsize+4096])>0)
@@ -251,7 +235,17 @@ public class CraftrMap
 						else if(physics.isReloaded(out[1+ri+hdrsize]) || out[1+ri+(4096*2)+hdrsize] != 0)
 							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
 					}
-					return out;
+					/*
+					int extendedBlocks = din.readUnsignedShort();
+					for(int eBi = 0; eBi < extendedBlocks; eBi++) {
+						int x = din.readUnsignedByte();
+						int y = din.readUnsignedByte();
+					}
+					*/
+					target.loadByte(out);
+					din.close();
+					gin.close();
+					return;
 				default:
 					System.out.println("[MAP] ReadChunkFile: unknown version: " + buf[0]);
 					break;
@@ -260,27 +254,26 @@ public class CraftrMap
 		catch (FileNotFoundException e)
 		{
 			// FileInputStream - file was not found.
-			CraftrChunk nout = null;
-			if(genNew) nout = generateChunk(x, y,false);
-			else return null;
-			saveChunkFile(x,y,nout.saveByte());
-			return nout.saveByte();
+			CraftrChunk nout = generateChunk(x,y,false);
+			saveChunkFile(x,y,nout);
+			target = nout;
+			return;
 		}
 		catch (Exception e)
 		{
 			// Something else happened!
 			System.out.println("[MAP] ReadChunkFile: exception: " + e.getMessage());
-			return out;
+			return;
 		}
 		finally
 		{
 			try
 			{
-				if(gin != null && in != null) {gin.close(); in.close();}
+				if(din != null && gin != null && in != null) {din.close(); gin.close(); in.close();}
 			}
 			catch (Exception e) { System.out.println("ReadChunkFile: warning - file in streams didn't close"); }
 		}
-		return out;
+		return;
 		}
 	}
 	
@@ -290,7 +283,7 @@ public class CraftrMap
 		CraftrChunk cin = chunks[cid];
 		if (cin != null)
 		{
-			saveChunkFile(cin.xpos,cin.ypos,cin.saveByte());
+			saveChunkFile(cin.xpos,cin.ypos);
 		}
 	}
 	public void saveChunkFile(int x, int y)
@@ -298,12 +291,13 @@ public class CraftrMap
 		CraftrChunk cin = findCachedChunk(x,y);
 		if (cin != null)
 		{
-			saveChunkFile(x,y,cin.saveByte());
+			saveChunkFile(x,y,cin);
 		}
 	}
-	public void saveChunkFile(int x, int y, byte[] data)
+	public void saveChunkFile(int x, int y, CraftrChunk chunk)
 	{
 		if(multiplayer) return;
+		byte[] data = chunk.saveByte();
 		FileOutputStream fout = null;
 		GZIPOutputStream gout = null;
 		try
