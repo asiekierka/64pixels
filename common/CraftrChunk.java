@@ -142,7 +142,6 @@ public class CraftrChunk {
 			catch (Exception e) { System.out.println("[CHUNK] ReadChunk: warning - streams did not close"); }
 		}
 	}
-
 	public byte[] saveByte()
 	{
 		byte[] out = new byte[(4096*10)+1+hdrsize];

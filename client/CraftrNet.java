@@ -442,18 +442,9 @@ public class CraftrNet implements Runnable, CraftrNetShim
 									isLoadingChunk=false;
 									if(chunkType==1)
 									{
-										GZIPInputStream gin = new GZIPInputStream(new ByteArrayInputStream(cbuffer,0,lcP));
-										byte[] tmp1 = new byte[65536];
-										int ttp = 0;
-										int rp = 0;
-										while(rp >= 0)
-										{
-											ttp+=rp;
-											rp = gin.read(tmp1,ttp,65536-ttp);
-										}
 										synchronized(game.map)
 										{
-											game.map.chunks[loadChunkID].loadByteNet(tmp1);
+											game.map.chunks[loadChunkID].readChunk(new ByteArrayInputStream(cbuffer, 0, lcP), game.map);
 										}
 									}
 									game.netChange=true;
