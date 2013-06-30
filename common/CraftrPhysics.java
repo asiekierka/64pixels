@@ -270,8 +270,8 @@ public class CraftrPhysics
 				int oldmSi=((0xFF&(int)blockData[1])>>4)&7;
 				for(int i=0;i<4;i++)
 				{
-					int ty = surrBlockData[i][0];
 					int str = strength[i];
+					if(surrBlockData[i][0] == 2 && ((surrBlockData[i][3]&7) != (blockData[3]&7))) continue; // Same color check
 					if(oldmSi<4 && (oldmSi^1)==i) continue;
 					if(str>maxSignal && str>lowParam) { maxSignal=str; mSi=i;}
 				}

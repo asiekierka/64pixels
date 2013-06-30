@@ -74,10 +74,16 @@ public class CraftrBlock
 		return isPushable();
 	}
 
-	public boolean isWiriumNeighbour()
+	public boolean isWiriumNeighbour(byte[] checked)
 	{
-		if((block[0]>=2 && block[0]<=7) || (block[0]>=9 && block[0]<=13) || block[0]==15 || block[0]==17 || block[0]==20) return true;
+		if((block[0]>=3 && block[0]<=7) || (block[0]>=9 && block[0]<=13) || block[0]==15 || block[0]==17 || block[0]==20) return true;
+		if(block[0] == 2) { // Wirium-Wirium connection check
+			if((block[3]&7) == (checked[3]&7)) return true;
+		}
 		return false;
+	}
+	public boolean isWiriumNeighbour(CraftrBlock block) {
+		return isWiriumNeighbour(block.getBlockData());
 	}
 
 	public boolean isPushable()

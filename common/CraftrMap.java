@@ -629,7 +629,7 @@ public class CraftrMap
 		for(int moveDir=0;moveDir<4;moveDir++)
 		{
 			surroundingBlock=getBlock(block.x+xMovement[moveDir],block.y+yMovement[moveDir]);
-			if(surroundingBlock.isWiriumNeighbour()) wiriumNeighbourInfo|=(1<<(3-moveDir));
+			if(surroundingBlock.isWiriumNeighbour(block)) wiriumNeighbourInfo|=(1<<(3-moveDir));
 		}
 		return wiriumChar[wiriumNeighbourInfo];
 	}
