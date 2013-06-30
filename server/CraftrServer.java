@@ -612,8 +612,8 @@ public class CraftrServer extends CraftrServerShim
 				NumberFormat nf = NumberFormat.getNumberInstance();
 				try
 				{
-					CraftrDungeonThread cdt = new CraftrDungeonThread(this,id,cdg,w.map,nf.parse(cmdz[2]).intValue(),nf.parse(cmdz[3]).intValue());
-					Thread dt = new Thread(cdt);
+					CraftrGenerationThread genThread = new CraftrGenerationThread(this,id,cdg,w.map,nf.parse(cmdz[2]).intValue(),nf.parse(cmdz[3]).intValue());
+					Thread dt = new Thread(genThread);
 					dt.start();
 				}
 				catch(Exception e)

@@ -1,9 +1,8 @@
-package server;
-import common.*;
+package common;
 
 import java.util.*;
 
-public class CraftrDungeonGenerator
+public class CraftrDungeonGenerator extends CraftrMapGenerator
 {
 	private byte[] types;
 	private int threshold;
@@ -27,9 +26,9 @@ public class CraftrDungeonGenerator
 		}
 
 	}
-	public int generate(CraftrMap map, int width, int height)
+	public boolean generate(CraftrMap map, int width, int height)
 	{
-		if(width<32 || height<32) return -1;
+		if(width<32 || height<32) return false;
 		w=width;
 		h=height;
 		types = new byte[width*height];
@@ -39,7 +38,7 @@ public class CraftrDungeonGenerator
 		scrawl();
 		trim();
 		putOnMap(map);
-		return 0;
+		return true;
 	}
 
 	public void putOnMap(CraftrMap map)
