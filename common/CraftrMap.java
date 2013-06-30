@@ -176,7 +176,7 @@ public class CraftrMap
 	// NEW CHUNK GENERATION
 	public CraftrChunk generateChunk(int cx, int cy, boolean used)
 	{
-		CraftrChunk out = new CraftrChunk(0,0,used);
+		CraftrChunk out = new CraftrChunk(cx,cy,used);
 		out.generate(genMode);
 		return out;
 	}
@@ -200,80 +200,25 @@ public class CraftrMap
 				net.chunkRequest(x,y);
 			CraftrChunk nout = new CraftrChunk(x,y,true);
 			target = nout;
-			return;
 		}
 		else
 		{
-		// Init variables
-		FileInputStream in = null;
-		GZIPInputStream gin = null;
-		DataInputStream din = null;
-		byte[] out = new byte[16384];
-		try	// The code proper
-		{
-			// Load file
-			in = new FileInputStream(saveDir + mapName + "/" + CraftrChunk.getFilename(x,y));
-			gin = new GZIPInputStream(in);
-			din = new DataInputStream(gin);
-			// Create buffer, check version
-			byte[] buf = new byte[256];
-			gin.read(buf,0,1);
-			int i = 1;
-			int hdrsize = CraftrChunk.hdrsize;
-			switch(buf[0])
-			{
-				case 5:
-					out = new byte[1+(4096*11)+hdrsize];
-					while(i<(1+(4096*11)+hdrsize) && i>-1) i += gin.read(out,i,out.length-i);
-					for(int ri=0;ri<4096;ri++)
-					{
-						if(out[1+ri+hdrsize]==5 && (0x80&(int)out[1+ri+hdrsize+4096])>0)
-						{
-							out[1+ri+hdrsize+4096]=(byte)1;
-							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
-						}
-						else if(physics.isReloaded(out[1+ri+hdrsize]) || out[1+ri+(4096*2)+hdrsize] != 0)
-							physics.addBlockToCheck(new CraftrBlockPos(x*64+(ri&63),y*64+(ri>>6)));
-					}
-					/*
-					int extendedBlocks = din.readUnsignedShort();
-					for(int eBi = 0; eBi < extendedBlocks; eBi++) {
-						int x = din.readUnsignedByte();
-						int y = din.readUnsignedByte();
-					}
-					*/
-					target.loadByte(out);
-					din.close();
-					gin.close();
-					return;
-				default:
-					System.out.println("[MAP] ReadChunkFile: unknown version: " + buf[0]);
-					break;
+			try {
+				FileInputStream in = new FileInputStream(saveDir + mapName + "/" + CraftrChunk.getFilename(x,y));
+				target.readChunk(in, this);
 			}
-		}
-		catch (FileNotFoundException e)
-		{
-			// FileInputStream - file was not found.
-			CraftrChunk nout = generateChunk(x,y,false);
-			saveChunkFile(x,y,nout);
-			target = nout;
-			return;
-		}
-		catch (Exception e)
-		{
-			// Something else happened!
-			System.out.println("[MAP] ReadChunkFile: exception: " + e.getMessage());
-			return;
-		}
-		finally
-		{
-			try
+			catch (FileNotFoundException e)
 			{
-				if(din != null && gin != null && in != null) {din.close(); gin.close(); in.close();}
+				System.out.println("GEN");
+				target.generate(genMode);
+				target.isSet = true;
+				saveChunkFile(x,y,target);
 			}
-			catch (Exception e) { System.out.println("ReadChunkFile: warning - file in streams didn't close"); }
-		}
-		return;
+			catch (Exception e)
+			{
+				// Something else happened!
+				System.out.println("[MAP] ReadChunkFile: exception: " + e.getMessage());
+			}
 		}
 	}
 	

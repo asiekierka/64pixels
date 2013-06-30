@@ -1,6 +1,8 @@
 package common;
 
+import java.io.*;
 import java.util.*;
+import java.util.zip.*;
 
 public class CraftrChunk {
 
@@ -13,7 +15,6 @@ public class CraftrChunk {
 	public byte[] chrDisplay;
 	public byte[] colDisplay;
 	public byte[] bulletParam;
-	public byte[] mapInfo;
 	public ArrayList<CraftrExtendedBlock> extendedBlocks;
 	public int w;
 	public int h;
@@ -24,9 +25,8 @@ public class CraftrChunk {
 	public boolean isUsed;
 	public boolean isSet;
 	public boolean isReUsed;
-	public int mapInfoLength;
-	public int mapInfoType;
-	public static final int hdrsize = 5;
+	public static final int hdrsize = 2;
+	public static final int LATEST_CHUNK_VERSION = 6;
 
 	public CraftrChunk(int xp, int yp, boolean used)
 	{
@@ -39,7 +39,6 @@ public class CraftrChunk {
 		chrPushable = new byte[64*64];
 		colPushable = new byte[64*64];
 		bulletParam = new byte[64*64];
-		mapInfo = new byte[4096];
 		extendedBlocks = new ArrayList<CraftrExtendedBlock>();
 		w = 64;
 		h = 64;
@@ -68,36 +67,85 @@ public class CraftrChunk {
 			extendedBlocks.set(replaceIndex, block);
 		} else extendedBlocks.add(block);
 	}
-
-	public void loadByte(byte[] rawdata)
-	{
-		// i love arraycopy, and all its mysteries!
-		// boom de yada, boom de yada...
-		System.arraycopy(rawdata,1+hdrsize,type,0,4096);
-		System.arraycopy(rawdata,1+hdrsize+4096,param,0,8192);
-		System.arraycopy(rawdata,1+hdrsize+(4096*3),chr,0,8192);
-		System.arraycopy(rawdata,1+hdrsize+(4096*5),col,0,8192);
- 		System.arraycopy(rawdata,1+hdrsize+(4096*7),chrPushable,0,4096);
- 		System.arraycopy(rawdata,1+hdrsize+(4096*8),colPushable,0,4096);
- 		System.arraycopy(rawdata,1+hdrsize+(4096*9),bulletParam,0,4096);
-		byte[] tmp = new byte[2];
-		System.arraycopy(rawdata,4,tmp,0,2);
-		mapInfoLength = CraftrConvert.arrShort(tmp);
-		mapInfoType = rawdata[3];
-		if(mapInfoLength > 0 && mapInfoType > 0) System.arraycopy(rawdata,1+hdrsize+(4096*10),mapInfo,0,mapInfoLength);
-		spawnX = rawdata[1];
-		spawnY = rawdata[2];
-		fixDisplay();
+	public byte[] readByteArray(InputStream is, int length) {
+		byte[] array = new byte[length];
+		int i = 0;
+		try {
+			while(i<length && i>-1) i += is.read(array, i, array.length-i);
+		}
+		catch(Exception e) {
+			System.out.println("[CHUNK] ReadByteArray: " + e.getMessage() + " ("+i+"/"+length+" bytes read)");
+		}
+		return array;
 	}
-
-	public void loadByteNet(byte[] rawdata)
-	{
-		loadByte(rawdata);
+	public void readChunk(InputStream in, CraftrMap map) {
+		GZIPInputStream gin = null;
+		DataInputStream din = null;
+		try
+		{
+			gin = new GZIPInputStream(in);
+			din = new DataInputStream(gin);
+			int version = din.readUnsignedByte();
+			spawnX = din.readUnsignedByte();
+			spawnY = din.readUnsignedByte();
+			switch(version)
+			{
+				case LATEST_CHUNK_VERSION:
+					type = readByteArray(gin, 4096);
+					param = readByteArray(gin, 4096 * 2); // Second half stores bullet.
+					chr = readByteArray(gin, 4096 * 2); // Second half stores display char & colour
+					col = readByteArray(gin, 4096 * 2);
+					chrPushable = readByteArray(gin, 4096);
+					colPushable = readByteArray(gin, 4096);
+					bulletParam = readByteArray(gin, 4096);
+					for(int i=0;i<4096;i++)
+					{
+						// Plate refresh
+						if(type[i]==5 && (0x80&(int)param[i])>0)
+						{
+							param[i]=(byte)1;
+							map.physics.addBlockToCheck(new CraftrBlockPos(xpos*64+(i&63),ypos*64+(i>>6)));
+						}
+						else if(map.physics.isReloaded(type[i])) // Physics refresh
+							map.physics.addBlockToCheck(new CraftrBlockPos(xpos*64+(i&63),ypos*64+(i>>6)));
+						else if(param[i+4096] != 0) // Bullet refresh
+							map.physics.addBlockToCheck(new CraftrBlockPos(xpos*64+(i&63),ypos*64+(i>>6)));
+					}
+					fixDisplay();
+					/*
+					int extendedBlocks = din.readUnsignedShort();
+					for(int eBi = 0; eBi < extendedBlocks; eBi++) {
+						int x = din.readUnsignedByte();
+						int y = din.readUnsignedByte();
+					}
+					*/
+					din.close();
+					gin.close();
+					return;
+				default:
+					System.out.println("[CHUNK] ReadChunk: unknown version: " + version);
+					break;
+			}
+		}
+		catch (Exception e)
+		{
+			// Something else happened!
+			System.out.println("[CHUNK] ReadChunk: exception: " + e.getMessage());
+			return;
+		}
+		finally
+		{
+			try
+			{
+				if(din != null && gin != null && in != null) {din.close(); gin.close(); in.close();}
+			}
+			catch (Exception e) { System.out.println("[CHUNK] ReadChunk: warning - streams did not close"); }
+		}
 	}
 
 	public byte[] saveByte()
 	{
-		byte[] out = new byte[(4096*11)+1+hdrsize];
+		byte[] out = new byte[(4096*10)+1+hdrsize];
 		System.arraycopy(type,0,out,1+hdrsize,4096);
 		System.arraycopy(param,0,out,4096+1+hdrsize,8192);
 		System.arraycopy(chr,0,out,(4096*3)+1+hdrsize,8192);
@@ -105,13 +153,9 @@ public class CraftrChunk {
  		System.arraycopy(chrPushable,0,out,(4096*7)+1+hdrsize,4096);
  		System.arraycopy(colPushable,0,out,(4096*8)+1+hdrsize,4096);
  		System.arraycopy(bulletParam,0,out,(4096*9)+1+hdrsize,4096);
-		System.arraycopy(mapInfo,0,out,(4096*10)+1+hdrsize,4096);
-		out[0] = 5; // version
+		out[0] = LATEST_CHUNK_VERSION; // version
 		out[1] = (byte)spawnX;
 		out[2] = (byte)spawnY;
-		out[3] = (byte)mapInfoType;
-		byte[] tmp = CraftrConvert.shortArray((short)mapInfoLength);
-		System.arraycopy(tmp,0,out,4,2);
 		return out;
 	}
 	public byte[] saveByteNet()
