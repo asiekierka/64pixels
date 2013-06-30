@@ -90,6 +90,10 @@ public class CraftrChunk {
 			spawnY = din.readUnsignedByte();
 			switch(version)
 			{
+				case 4:
+				case 5:
+					din.readUnsignedByte();
+					din.readUnsignedShort(); // skip 3 bytes of now-missing information
 				case LATEST_CHUNK_VERSION:
 					type = readByteArray(gin, 4096);
 					param = readByteArray(gin, 4096 * 2); // Second half stores bullet.
