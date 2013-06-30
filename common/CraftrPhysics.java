@@ -258,29 +258,29 @@ public class CraftrPhysics
 		{
 			addBlockToCheck(new CraftrBlockPos(x,y));
 		}
-		byte oldd3 = blockData[3];
-		byte oldd1 = blockData[1];
+		byte oldColour = blockData[3];
+		byte oldParam = blockData[1];
 		int maxSignal = 0;
 		int lowParam = blockData[1]&15;
 		switch(blockData[0])
 		{
 			case 2:
 			{
-				int mSi=4;
-				int oldmSi=((0xFF&(int)blockData[1])>>4)&7;
+				int maxSignalDir=4;
+				int oldMaxSignalDir=((0xFF&(int)blockData[1])>>4)&7;
 				for(int i=0;i<4;i++)
 				{
 					int str = strength[i];
 					if(surrBlockData[i][0] == 2 && ((surrBlockData[i][3]&7) != (blockData[3]&7))) continue; // Same color check
-					if(oldmSi<4 && (oldmSi^1)==i) continue;
-					if(str>maxSignal && str>lowParam) { maxSignal=str; mSi=i;}
+					if(oldMaxSignalDir<4 && (oldMaxSignalDir^1)==i) continue;
+					if(str>maxSignal && str>lowParam) { maxSignal=str; maxSignalDir=i;}
 				}
 				if(maxSignal<=1)
 				{
 					if(lowParam>0) blockData[3]=(byte)(blockData[3]&7);
-					if(oldd1!=((byte)(mSi<<4)))
+					if(oldColour!=((byte)(maxSignalDir<<4)))
 					{
-						addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(mSi<<4),blockData[2],blockData[3]));
+						addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(maxSignalDir<<4),blockData[2],blockData[3]));
 						addBlockToCheck(new CraftrBlockPos(x,y));
 						for(int i=0;i<4;i++)
 						{
@@ -292,9 +292,9 @@ public class CraftrPhysics
 				else
 				{
 					if(lowParam==0) blockData[3]=(byte)((blockData[3]&7)|8);
-					if(oldd1!=((byte)((maxSignal-1) | (mSi<<4))))
+					if(oldColour!=((byte)((maxSignal-1) | (maxSignalDir<<4))))
 					{
-						addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)((maxSignal-1) | (mSi<<4)),blockData[2],blockData[3]));
+						addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)((maxSignal-1) | (maxSignalDir<<4)),blockData[2],blockData[3]));
 						addBlockToCheck(new CraftrBlockPos(x,y));
 						for(int i=0;i<4;i++)
 						{
@@ -303,47 +303,45 @@ public class CraftrPhysics
 						}
 					}
 				}
-				if(oldd1!=blockData[1])
-				{
-				}
 			} break;
 			case 3:
 			{
-				int pnps = 3;
+				int outputDirection = 3;
 				if (blockData[2]>=24 && blockData[2]<28)
 				{
 					for(int i=0;i<4;i++)
 					{
-						if(pnandDir2[i]==blockData[2]) { pnps=i; break; }
+						if(pnandDir2[i]==blockData[2]) { outputDirection=i; break; }
 					}
-				} 
-				int signals=0;
+				}
+				int signalCount=0;
 				for(int i=0;i<4;i++)
 				{
-					if(i==pnps) continue;
-					int ty = surrBlockData[i][0];
-					int str = strength[i];
-					if((ty==1) || str>0) { signals++; }
+					if(i==outputDirection) continue;
+					int type = surrBlockData[i][0];
+					if((type==1) || strength[i]>0) { signalCount++; }
 				}
-				if(signals==1 || signals==2)
+				if(signalCount==1 || signalCount==2)
 				{
 					if(lowParam==0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)15,blockData[2],blockData[3]));
-					int ty = surrBlockData[pnps][0];
+					int type = surrBlockData[outputDirection][0];
 					blockData[1]=15;
-					int str = strength[pnps];
-					if(oldd1!=15 && isUpdated(ty)) { addBlockToCheck(new CraftrBlockPos(x+xMovement[pnps],y+yMovement[pnps])); }
+					if(oldColour!=15 && isUpdated(type)) {
+						addBlockToCheck(new CraftrBlockPos(x+xMovement[outputDirection],y+yMovement[outputDirection]));
+					}
 				}
 				else
 				{
 					if(lowParam>0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)0,blockData[2],blockData[3]));
-					int ty = surrBlockData[pnps][0];
+					int type = surrBlockData[outputDirection][0];
 					blockData[1]=0;
-					int str = strength[pnps];
-					if(oldd1!=0 && isUpdated(ty)) { addBlockToCheck(new CraftrBlockPos(x+xMovement[pnps],y+yMovement[pnps])); }
+					if(oldColour!=0 && isUpdated(type)) {
+						addBlockToCheck(new CraftrBlockPos(x+xMovement[outputDirection],y+yMovement[outputDirection]));
+					}
 				}
-				if(oldd1!=blockData[1])
+				if(oldColour!=blockData[1])
 				{
 					for(int i=0;i<4;i++)
 					{
@@ -356,8 +354,7 @@ public class CraftrPhysics
 			case 4:
 			{
 				int newParam=0;
-				int oldparam = 0xFF&(int)blockData[1];
-				//int maxSignal=0;
+				int oldParamInt = 0xFF&(int)blockData[1];
 				for(int i=0;i<4;i++)
 				{
 					// SETUP
@@ -365,8 +362,8 @@ public class CraftrPhysics
 					int str = strength[i];
 					int rstr = strength[i^1];
 					// PARAM CONFIGURATION
-					boolean t1 = ((oldparam>>i)&1)>0; // was it sending in that direction?
-					boolean t3 = ((oldparam>>(i^1))&1)>0; // was it sending opposite?
+					boolean t1 = ((oldParamInt>>i)&1)>0; // was it sending in that direction?
+					boolean t3 = ((oldParamInt>>(i^1))&1)>0; // was it sending opposite?
 					boolean t2 = false; // should it be sending in that direction?
 					if(!t3 && rstr>1)
 					{
@@ -380,7 +377,7 @@ public class CraftrPhysics
 				{
 					newParam |= ((maxSignal-1)<<4);
 				}
-				if(oldd1!=newParam)
+				if(oldColour!=newParam)
 				{
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)newParam,blockData[2],blockData[3]));
 					for(int i=0;i<4;i++)
@@ -410,15 +407,15 @@ public class CraftrPhysics
 			} break;
 			case 6:
 			{
-				int signalz=0;
+				int signalCount=0;
 				int counter = (int)blockData[1]&0x7F;
 				int prevon = 0x80&(int)blockData[1];
 				if(counter>0) counter-=1;
 				for(int i=0;i<4;i++)
 				{
-					if(strength[i]>0) { signalz++; }
-				}	
-				if(signalz>0)
+					if(strength[i]>0) { signalCount++; }
+				}
+				if(signalCount>0)
 				{
 					if(prevon==0)
 					{
@@ -452,16 +449,16 @@ public class CraftrPhysics
 			} break;
 			case 7:
 			{
-				int sig=0;
+				int signalCount=0;
 				for(int i=0;i<4;i++)
 				{
-					if(strength[i]>0) { sig++; }
+					if(strength[i]>0) { signalCount++; }
 				}
-				if(sig>0 && (blockData[1]&1)==0)
+				if(signalCount>0 && (blockData[1]&1)==0)
 				{
 					synchronized(map) { map.playSound(x,y,(0xFF&(int)blockData[2])%248); }
 				}
-				int np=sig>0?1:0;
+				int np=signalCount>0?1:0;
 				if((blockData[1]&1)!=np) addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)np,blockData[2],blockData[3]));
 			} break;
 			case 9: // Pensor
@@ -619,33 +616,33 @@ public class CraftrPhysics
 			} break;
 			case 15: // Extend
 			{
-				int pnps = 3;
+				int outputDirection = 3;
 				for(int i=0;i<4;i++)
 				{
-					if(extendDir2[i]==blockData[2]) { pnps=i; break; }
+					if(extendDir2[i]==blockData[2]) { outputDirection=i; break; }
 				}
-				int signals=0;
+				int signalCount=0;
 				for(int i=0;i<4;i++)
 				{
-					if(i==pnps) continue;
+					if(i==outputDirection) continue;
 					int ty = surrBlockData[i][0];
 					int str = strength[i];
-					if((ty==1) || str>0) { signals=1; break; }
+					if((ty==1) || str>0) { signalCount=1; break; }
 				}
 				if(blockData[1]!=(byte)0)
 				{
 					blockData[1]-=(byte)1;
 					if(blockData[1]==(byte)0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
 				}
-				if(signals>0)
+				if(signalCount>0)
 				{
 					if(blockData[1]==(byte)0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
 					blockData[1]+=(byte)2;
 				}
 				addBlockToSet(new CraftrBlock(x,y,blockData[0],blockData[1],blockData[2],blockData[3]));
-				int ty = surrBlockData[pnps][0];
-				if(isUpdated(ty)) addBlockToCheck(new CraftrBlockPos(x+xMovement[pnps],y+yMovement[pnps]));
-				if(oldd1!=blockData[1])
+				int ty = surrBlockData[outputDirection][0];
+				if(isUpdated(ty)) addBlockToCheck(new CraftrBlockPos(x+xMovement[outputDirection],y+yMovement[outputDirection]));
+				if(oldColour!=blockData[1])
 				{
 					addBlockToCheck(new CraftrBlockPos(x,y));
 					for(int i=0;i<4;i++)
@@ -658,8 +655,8 @@ public class CraftrPhysics
 			} break;
 			case 17: // Pusher
 			{
-				int signalz=0;
-				int oldsignalz=(int)blockData[1]&0x01;
+				int signalCount=0;
+				int oldSignalCount=(int)blockData[1]&0x01;
 				int val = (int)blockData[1]>>1;
 				int st = 0;
 				//System.out.println("" + (int)blockData[3]);
@@ -667,9 +664,9 @@ public class CraftrPhysics
 				int i = 0;
 				for(;i<4;i++)
 				{
-					if(strength[i]>0) { signalz++; i=i^1; break;}
+					if(strength[i]>0) { signalCount++; i=i^1; break;}
 				}
-				if(signalz>0 && oldsignalz==0)
+				if(signalCount>0 && oldSignalCount==0)
 				{
 					int activ=0;
 					if (map.piston(x,y,xMovement[i],yMovement[i],false))
@@ -681,7 +678,7 @@ public class CraftrPhysics
 					}
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)(activ | (i<<1)),blockData[2],blockData[3]));
 				}
-				else if(signalz==0 && oldsignalz>0 && val<4)
+				else if(signalCount==0 && oldSignalCount>0 && val<4)
 				{
 					i=val;
 					if(st>0) map.piston(x+xMovement[i],y+yMovement[i],xMovement[i],yMovement[i],true);
@@ -689,7 +686,7 @@ public class CraftrPhysics
 					if(ph.getType()==16 && ph.getChar()==pistonDir[i]) addBlockToClear(new CraftrBlockPos(x+xMovement[val],y+yMovement[val]));
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)((4<<1)),blockData[2],blockData[3]));
 				}
-				else if(signalz==0 && oldsignalz==0 && val<4 && surrBlockData[val][0]==16)
+				else if(signalCount==0 && oldSignalCount==0 && val<4 && surrBlockData[val][0]==16)
 					addBlockToClear(new CraftrBlockPos(x+xMovement[val],y+yMovement[val]));
 				for(i=0;i<4;i++)
 				{
@@ -699,25 +696,25 @@ public class CraftrPhysics
 				}
 			} break;
 			case 20: { // Dupe
-				int signalz=0;
-				int oldsignalz=(int)blockData[1]&0x01;
+				int signalCount=0;
+				int oldSignalCount=(int)blockData[1]&0x01;
 				int chr = (int)blockData[2]&0xFF;
 				int i = 0;
 				int j = 1;
 				for(;i<4;i++)
 				{
-					if(strength[i]>0) { signalz++;}
+					if(strength[i]>0) { signalCount++;}
 					if(chr==pnandDir[i]) { j = i; }
 				}
 				i = j;
-				if(signalz>0 && oldsignalz==0)
+				if(signalCount>0 && oldSignalCount==0)
 				{
 					byte[] tbl = map.getBlock(x+xMovement[i],y+yMovement[i]).getBlockData();
 					i=i^1;
 					addBlockToSet(new CraftrBlock(x+xMovement[i],y+yMovement[i],tbl));
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)1,blockData[2],blockData[3]));
 				}
-				else if(signalz==0 && oldsignalz>0)
+				else if(signalCount==0 && oldSignalCount>0)
 				{
 					addBlockToSet(new CraftrBlock(x,y,blockData[0],(byte)0,blockData[2],blockData[3]));
 				}
