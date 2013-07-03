@@ -56,10 +56,10 @@ public class CraftrChunk {
 		return null;
 	}
 
-	public void setExtendedBlock(int x, int y, CraftrExtendedBlock block) {
+	public void addExtendedBlock(CraftrExtendedBlock block) {
 		int replaceIndex = -1;
 		for(CraftrExtendedBlock eb: extendedBlocks) {
-			if(eb.getX()==x && eb.getY()==y) {
+			if(eb.getX()==block.getX() && eb.getY()==block.getY()) {
 				replaceIndex = extendedBlocks.indexOf(eb);
 			}
 		}
@@ -116,13 +116,14 @@ public class CraftrChunk {
 							map.physics.addBlockToCheck(new CraftrBlockPos(xpos*64+(i&63),ypos*64+(i>>6)));
 					}
 					fixDisplay();
-					/*
-					int extendedBlocks = din.readUnsignedShort();
-					for(int eBi = 0; eBi < extendedBlocks; eBi++) {
+					int extendedBlockCount = din.readUnsignedShort();
+					for(int eBi = 0; eBi < extendedBlockCount; eBi++) {
 						int x = din.readUnsignedByte();
 						int y = din.readUnsignedByte();
+						int ebLength = din.readUnsignedShort();
+						byte[] data = readByteArray(gin, ebLength);
+						addExtendedBlock(new CraftrExtendedBlock(x,y,data));
 					}
-					*/
 					din.close();
 					gin.close();
 					return;
@@ -148,18 +149,37 @@ public class CraftrChunk {
 	}
 	public byte[] saveByte()
 	{
-		byte[] out = new byte[(4096*10)+1+hdrsize];
-		System.arraycopy(type,0,out,1+hdrsize,4096);
-		System.arraycopy(param,0,out,4096+1+hdrsize,8192);
-		System.arraycopy(chr,0,out,(4096*3)+1+hdrsize,8192);
-		System.arraycopy(col,0,out,(4096*5)+1+hdrsize,8192);
- 		System.arraycopy(chrPushable,0,out,(4096*7)+1+hdrsize,4096);
- 		System.arraycopy(colPushable,0,out,(4096*8)+1+hdrsize,4096);
- 		System.arraycopy(bulletParam,0,out,(4096*9)+1+hdrsize,4096);
-		out[0] = LATEST_CHUNK_VERSION; // version
-		out[1] = (byte)spawnX;
-		out[2] = (byte)spawnY;
-		return out;
+		ByteArrayOutputStream baos;
+		DataOutputStream out;
+		try {
+			baos = new ByteArrayOutputStream();
+			out = new DataOutputStream(baos);
+			out.writeByte(LATEST_CHUNK_VERSION);
+			out.writeByte(spawnX);
+			out.writeByte(spawnY);
+			out.write(type,0,4096);
+			out.write(param,0,8192);
+			out.write(chr,0,8192);
+			out.write(col,0,8192);
+			out.write(chrPushable,0,4096);
+			out.write(colPushable,0,4096);
+			out.write(bulletParam,0,4096);
+			// Extended Blocks
+			out.writeShort(extendedBlocks.size());
+			for(int eBi = 0; eBi < extendedBlocks.size(); eBi++) {
+				CraftrExtendedBlock eb = extendedBlocks.get(eBi);
+				out.writeByte(eb.getX());
+				out.writeByte(eb.getY());
+				byte[] data = eb.getData();
+				out.writeShort(data.length);
+				out.write(data,0,data.length);
+			}
+			out.flush();
+			return baos.toByteArray();
+		} catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	public byte[] saveByteNet()
 	{

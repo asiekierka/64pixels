@@ -6,7 +6,7 @@ public class CraftrExtendedBlock
 {
 	private final int x;
 	private final int y;
-	private final byte[] data;
+	private byte[] data;
 
 	public CraftrExtendedBlock(int tx, int ty, byte[] tdata)
 	{
@@ -25,6 +25,10 @@ public class CraftrExtendedBlock
 	public byte[] getData()
 	{
 		return data;
+	}
+	public void setData(byte[] _data)
+	{
+		data = _data;
 	}
 	public boolean equals(Object other)
 	{
