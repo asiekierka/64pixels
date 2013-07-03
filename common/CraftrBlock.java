@@ -7,7 +7,7 @@ public class CraftrBlock
 	public int x = 0;
 	public int y = 0;
 	private byte[] block = new byte[8];
-	public static final int maxType = 22;
+	public static final int maxType = 20;
 	public static final int invalidTypes = 2;
 	public static Random rand = new Random();
 	public static final byte[] extendDir = { 30, 31, 16, 17 };
