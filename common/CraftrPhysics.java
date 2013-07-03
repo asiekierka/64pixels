@@ -119,9 +119,11 @@ public class CraftrPhysics
 				}
 				if(isServer && isSent(cb.getTypeWithVirtual()))
 				{
-					if(cbo.getChar() == cb.getChar() && cbo.getColor() == cb.getColor()) continue;
 					if(cb.isPushable()) modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)cb.getChar(),(byte)cb.getColor());
-					else modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
+					else {
+						if(cbo.getBlockChar() == modifiedMap.updateLook(cb) && cbo.getColor() == cb.getColor()) continue;
+						modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)modifiedMap.updateLook(cb),(byte)cb.getColor());
+					}
 				}
 			}
 		}

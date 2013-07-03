@@ -562,6 +562,7 @@ public class CraftrNet implements Runnable, CraftrNetShim
  									synchronized(game.map)
  									{
  										game.map.setBlock(bx1,by1,t3,(byte)0,ch1,co1);
+										game.map.updateLook(game.map.getBlock(bx1,by1));
  										if(buf[0]!=0x33) game.map.setPushable(bx1,by1,(byte)0,(byte)0);
 										for(int i=0;i<4;i++)
 										{
