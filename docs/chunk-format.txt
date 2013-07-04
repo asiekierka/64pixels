@@ -1,8 +1,6 @@
 CHUNK FORMAT DOCUMENTATION
-version 4
+version 6
 ---
-
-(This version is the first to make the client and server chunk format the same.)
 
 STORAGE:
 map/[y]/chunk[x].cnk
@@ -15,16 +13,22 @@ Filepos		Type		Data		Default		Info
 0		byte		Version		4
 1		byte		SpawnX		0		Spawn X inside of chunk. (deprecated)	
 2		byte		SpawnY		0		Spawn Y inside of chunk. (deprecated)
-3		byte		MapInfType	0		Type of the map generator used.
-4		short		MapInfLen	0		The length of the mapgen info (0..4096), in bytes.
-6		byte[64*64]	Type				Types of the blocks.
-4102		byte[64*64]	Param				Param of the blocks.
-8198		byte[64*64]	Bullets				Bullet type (if any). (pre-0.1 was floor param/unused)
-12294		byte[64*64]	CharWall			Chars (for non-floors).
-16390		byte[64*64]	CharFloor			Chars (for floors).
-20486		byte[64*64]	ColorWall
-24582		byte[64*64]	ColorFloor
-28678		byte[64*64]	CharPushable			Chars (for pushables).
-32774		byte[64*64]	ColorPushable
-36870		byte[MapInfLen]	MapInfo				Map information.
+3		byte[64*64]	Type				Types of the blocks.
+4099		byte[64*64]	Param				Param of the blocks.
+8195		byte[64*64]	Bullets				Bullet type (if any). (pre-0.1 was floor param/unused)
+12291		byte[64*64]	CharWall			Chars (for non-floors).
+16387		byte[64*64]	CharFloor			Chars (for floors).
+20483		byte[64*64]	ColorWall
+24579		byte[64*64]	ColorFloor
+28675		byte[64*64]	CharPushable			Chars (for pushables).
+32771		byte[64*64]	ColorPushable
+36867		short		ExtBlockCount	0		Amount of extended blocks.
+36869		ExtBlockArr	ExtBlocks			ExtendedBlocks.
+
+ExtBlockArr is just a list of (ExtBlockCount) entries:
+
+0		byte		X				X position of block
+1		byte		Y				Y position of block
+2		short		DataLength			Length of data block
+3		byte[]		Data				Data
 
