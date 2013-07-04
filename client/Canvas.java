@@ -113,7 +113,7 @@ public class Canvas extends JComponent
 			System.exit(1);
 		}
 		charsetImage = new BufferedImage[256][16];
-		RedrawCharset();
+		redrawCharset();
 	}
 
 	public void scale(int newX, int newY)
@@ -142,9 +142,8 @@ public class Canvas extends JComponent
 		if(cs!=null) cs.setCanvas(this);
 	}
 
-	public void RedrawCharset()
+	public void redrawCharset()
 	{
-		pixelchrn = new int[256];
 		charsetImage = new BufferedImage[256][16];
 		charsetImage2 = new BufferedImage[256][16];
 		AffineTransform scale2 = new AffineTransform();
@@ -160,21 +159,20 @@ public class Canvas extends JComponent
 			for(int col=0;col<16;col++)
 			{
 				charsetImage[c][col] = new BufferedImage(8,8,BufferedImage.TYPE_INT_ARGB);
-				for(int t3=0;t3<8;t3++)
+				int[] charPixels = new int[64];
+				for(int t3=0;t3<64;t3+=8)
 				{
-					cgat = 255&(int)cga[temp1+t3];
+					cgat = 255&(int)cga[temp1];
 					for(int t2=7;t2>=0;t2--)
 					{
-						if ((cgat&1) == 1 )
-						{
-							pixelchrn[c]++;
-							charsetImage[c][col].setRGB(t2,t3, palcol[col]);
-						} else {
-							charsetImage[c][col].setRGB(t2,t3, 0);
-						}
+						if ((cgat&1) == 1)
+							charPixels[t3+t2]=palcol[col];
 						cgat>>=1;
 					}
+					temp1++;
 				}
+				temp1-=8;
+				charsetImage[c][col].getRaster().setDataElements(0,0,8,8,charPixels);
 				charsetImage2[c][col] = new BufferedImage(16,16,BufferedImage.TYPE_INT_ARGB);
 				Graphics2D g2c = (Graphics2D)charsetImage2[c][col].getGraphics();
 				g2c.drawImage(charsetImage[c][col],new AffineTransformOp(scale2,AffineTransformOp.TYPE_NEAREST_NEIGHBOR),0,0);
