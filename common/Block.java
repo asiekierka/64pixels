@@ -7,8 +7,6 @@ public class Block
 	public int x = 0;
 	public int y = 0;
 	private byte[] block = new byte[8];
-	public static final int maxType = 20;
-	public static final int invalidTypes = 2;
 	public static Random rand = new Random();
 	public static final byte[] extendDir = { 30, 31, 16, 17 };
 
@@ -85,6 +83,16 @@ public class Block
 
 	public boolean isWiriumNeighbour(Block block) {
 		return isWiriumNeighbour(block.getBlockData());
+	}
+
+	public static boolean isPlaceable(int t)
+	{
+		return !(t == 16 || t==18) && (t<=20) && (t>=0);
+	}
+
+	public boolean isPlaceable()
+	{
+		return isPlaceable(0xFF&(int)block[0]);
 	}
 
 	public boolean isPushable()
@@ -228,16 +236,6 @@ public class Block
 	public byte[] getBlockData()
 	{
 		return block;
-	}
-
-	public static boolean isPlaceable(int t)
-	{
-		return !(t == 16 || t==18);
-	}
-
-	public boolean isPlaceable()
-	{
-		return isPlaceable(0xFF&(int)block[0]);
 	}
 
 	public static String getName(int t)

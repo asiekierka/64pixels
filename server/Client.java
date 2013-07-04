@@ -831,7 +831,7 @@ public class Client implements Runnable
 								else
 								{
 									int tat = (int)(at&0xFF);
-									if((tat > Block.maxType && at != -1) || !Block.isPlaceable(tat))
+									if(!Block.isPlaceable(tat))
 									{
 										kick("Invalid block type!");
 									}

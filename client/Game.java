@@ -356,7 +356,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				if(key.contains("drawn-type"))
 				{
 					gs.drawType = nf.parse(val).byteValue();
-					if(gs.drawType>Block.maxType || gs.drawType<-1 || !Block.isPlaceable(gs.drawType)) gs.drawType = 0;
+					if(!Block.isPlaceable(gs.drawType)) gs.drawType = 0;
 				}
 				else if(key.contains("player-char"))
 				{

@@ -44,14 +44,23 @@ public class Window
 	{
 		int i = -1;
 		int j = -1;
-		for(;j<=Block.maxType;j++)
+		for(;j<=255;j++)
 		{
 			if(Block.isPlaceable(j)) i++;
 			if(i==pos) break;
 		}
 		return j;
 	}
-
+	public static int getBlockTypeCount()
+	{
+		int i = -1;
+		int j = -1;
+		for(;j<=255;j++)
+		{
+			if(Block.isPlaceable(j)) i++;
+		}
+		return i;
+	}
 	public void resize()
 	{
 		switch(type)
@@ -73,7 +82,7 @@ public class Window
 				break;
 			case 4: // type screen
 				w = 16;
-				h = Block.maxType+4-Block.invalidTypes;
+				h = getBlockTypeCount()+2+1; // Pushium
 				title = "Types";
 				break;
 			case 5: // help screen
@@ -204,7 +213,7 @@ public class Window
 				break;
 			case 4: // types screen
 				int i = 0;
-				for(int j=-1;j<=Block.maxType;j++)
+				for(int j=-1;j<=255;j++)
 				{
 					if(Block.isPlaceable(j))
 					{

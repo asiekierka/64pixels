@@ -73,17 +73,13 @@ public class GameScreen extends Screen
 		if (insideRect(mx,my,7*16+8,BARPOS_Y,8,8)) // type, up
 		{
 			if(mb==ev.BUTTON3) { invokeHelp("Choose the type."); return false; }
-			drawType-=1;
-			while(!Block.isPlaceable(drawType)) drawType-=1;
-			if(drawType < -1) drawType = Block.maxType;
-			while(!Block.isPlaceable(drawType)) drawType-=1;
+			drawType=(drawType-1)&0xFF;
+			while(!Block.isPlaceable(drawType)) drawType = (drawType-1)&0xFF;
 		} else if (insideRect(mx,my,7*16+8,BARPOS_Y+8,8,8)) // type, down
 		{
 			if(mb==ev.BUTTON3) { invokeHelp("Choose the type."); return false; }
-			drawType+=1;
-			while(!Block.isPlaceable(drawType)) drawType+=1;
-			if(drawType > Block.maxType) drawType = -1;
-			while(!Block.isPlaceable(drawType)) drawType+=1;
+			drawType=(drawType+1)&0xFF;
+			while(!Block.isPlaceable(drawType)) drawType=(drawType+1)&0xFF;
 		}
 		else if (insideRect(mx,my,7*16,BARPOS_Y+8,8,8)) // T
 		{
