@@ -51,7 +51,8 @@ public class Sound implements Runnable
 	public static final int BUF_LAG = 4096; // how much we aim to lag by
 	public static final double FREQ_BASE = 22050.0; // 22kHz should be fine, gets about 10% CPU on this -GM
 	public static final double SPEED_OF_SOUND = 33000.0; // "prepare your colons for the awesome"
-	
+	public static final double TUNING_FREQUENCY = 440.0; // i prefer A-432 myself --asie
+
 	// precalc consts
 	public static final double FREQ_IBASE = 1.0/FREQ_BASE;
 	public static final double ISPEED_OF_SOUND = 1.0/SPEED_OF_SOUND;
@@ -63,7 +64,7 @@ public class Sound implements Runnable
 		// 12th root of 2 normally.
 		// in this case, 24th root of 2 (we're doing half-sharps/flats).
 		for(int i = 0; i < 240; i++)
-			noteTab[i] = 440.0*Math.pow(2.0,(double)(i-114)/24.0);
+			noteTab[i] = TUNING_FREQUENCY*Math.pow(2.0,(double)(i-114)/24.0);
 	}
 	
 	// samples
