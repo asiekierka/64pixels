@@ -33,21 +33,6 @@ public class Physics
 		rand = new Random();
 	}
 
-	public static boolean isUpdated(int type)
-	{
-		return (type>=2 && type<=4) || type==6 || type==7 || (type>=10 && type<=13) || type==15 || type==17 || type==20;
-	}
-	
-	public static boolean isReloaded(int type)
-	{
-		return (type>=21 && type<=23);
-	}
-
-	public static boolean isSent(int type)
-	{
-		return !(type == 5 || type == 6);
-	}
-
 	public boolean shoot(int x, int y, int dir, WorldMap map)
 	{
 		if(dir>3 || dir<0) return false;
@@ -117,7 +102,7 @@ public class Physics
 					modifiedMap.setBullet(cb.x,cb.y,(byte)cb.getBullet(),(byte)cb.getBulletParam());
 					if(isServer) modifiedMap.setBulletNet(cb.x,cb.y,(byte)cb.getBullet());
 				}
-				if(isServer && isSent(cb.getTypeWithVirtual()))
+				if(isServer && cb.isSent())
 				{
 					if(cb.isPushable()) modifiedMap.setBlockNet(cb.x,cb.y,(byte)cb.getTypeWithVirtual(),(byte)cb.getChar(),(byte)cb.getColor());
 					else {
@@ -152,6 +137,10 @@ public class Physics
 		{
 			blocksToSet.add(cb);
 		}
+	}
+	public void updateNeighbours(WorldMap map, int x, int y) {
+		for(int i=0;i<4;i++)
+			if(map.getBlock(x+xMovement[i],y+yMovement[i]).isUpdated()) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
 	}
 
 	public void runPhysics(BlockPos cbp, WorldMap map)
@@ -230,7 +219,7 @@ public class Physics
 					{
 						int tbx = surrBlockO[blockData[6]-1].x+xMovement[i];
 						int tby = surrBlockO[blockData[6]-1].y+yMovement[i];
-						if(isUpdated(map.getBlock(tbx,tby).getType())) addBlockToCheck(new BlockPos(tbx,tby));
+						if(map.getBlock(tbx,tby).isUpdated()) addBlockToCheck(new BlockPos(tbx,tby));
 					}
 				} else
 				{
@@ -285,11 +274,7 @@ public class Physics
 					{
 						addBlockToSet(new Block(x,y,blockData[0],(byte)(maxSignalDir<<4),blockData[2],blockData[3]));
 						addBlockToCheck(new BlockPos(x,y));
-						for(int i=0;i<4;i++)
-						{
-							int ty = surrBlockData[i][0];
-							if(isUpdated(ty)) { addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i])); }
-						}
+						updateNeighbours(map,x,y);
 					}
 				}
 				else
@@ -299,11 +284,7 @@ public class Physics
 					{
 						addBlockToSet(new Block(x,y,blockData[0],(byte)((maxSignal-1) | (maxSignalDir<<4)),blockData[2],blockData[3]));
 						addBlockToCheck(new BlockPos(x,y));
-						for(int i=0;i<4;i++)
-						{
-							int ty = surrBlockData[i][0];
-							if(isUpdated(ty)) { addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i])); }
-						}
+						updateNeighbours(map,x,y);
 					}
 				}
 			} break;
@@ -328,9 +309,8 @@ public class Physics
 				{
 					if(lowParam==0) blockData[3]=(byte)(((blockData[3]>>4)&15)|((blockData[3]<<4)&240));
 					addBlockToSet(new Block(x,y,blockData[0],(byte)15,blockData[2],blockData[3]));
-					int type = surrBlockData[outputDirection][0];
 					blockData[1]=15;
-					if(oldColour!=15 && isUpdated(type)) {
+					if(oldColour!=15 && surrBlockO[outputDirection].isUpdated()) {
 						addBlockToCheck(new BlockPos(x+xMovement[outputDirection],y+yMovement[outputDirection]));
 					}
 				}
@@ -340,19 +320,11 @@ public class Physics
 					addBlockToSet(new Block(x,y,blockData[0],(byte)0,blockData[2],blockData[3]));
 					int type = surrBlockData[outputDirection][0];
 					blockData[1]=0;
-					if(oldColour!=0 && isUpdated(type)) {
+					if(oldColour!=0 && surrBlockO[outputDirection].isUpdated()) {
 						addBlockToCheck(new BlockPos(x+xMovement[outputDirection],y+yMovement[outputDirection]));
 					}
 				}
-				if(oldColour!=blockData[1])
-				{
-					for(int i=0;i<4;i++)
-					{
-						int t = surrBlockData[i][0];
-						int str = strength[i];
-						if(isUpdated(t)) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
-					}
-				}
+				if(oldColour!=blockData[1]) updateNeighbours(map,x,y);
 			} break;
 			case 4:
 			{
@@ -383,12 +355,7 @@ public class Physics
 				if(oldColour!=newParam)
 				{
 					addBlockToSet(new Block(x,y,blockData[0],(byte)newParam,blockData[2],blockData[3]));
-					for(int i=0;i<4;i++)
-					{
-						int t = surrBlockData[i][0];
-						int str = strength[i];
-						if(isUpdated(t)) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
-					}
+					updateNeighbours(map,x,y);
 				}
 			} break;
 			case 5:
@@ -398,12 +365,7 @@ public class Physics
 				if((on!=0) || (co!=0))
 				{
 					addBlockToCheck(new BlockPos(x,y));
-					for(int i=0;i<4;i++)
-					{
-						int t = surrBlockData[i][0];
-						int str = strength[i];
-						if(isUpdated(t)) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
-					}
+					updateNeighbours(map,x,y);
 					blockData[1] = (byte)(on|(co^1));
 					addBlockToSet(new Block(x,y,blockData[0],blockData[1],blockData[2],blockData[3]));
 				}
@@ -442,13 +404,7 @@ public class Physics
 					}
 					addBlockToSet(new Block(x,y,blockData[0],(byte)counter,blockData[2],blockData[3]));
 				}
-				//addBlockToCheck(new BlockPos(x,y));
-				for(int i=0;i<4;i++)
-				{
-					int t = surrBlockData[i][0];
-					int str = strength[i];
-					if(isUpdated(t)) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
-				}
+				updateNeighbours(map,x,y);
 			} break;
 			case 7:
 			{
@@ -495,15 +451,7 @@ public class Physics
 					addBlockToSet(new Block(x,y,blockData[0],0,blockData[2],blockData[3]));
 					addBlockToCheck(new BlockPos(x,y));
 				}
-				if(dc)
-				{
-					for(int i=0;i<4;i++)
-					{
-						int t = surrBlockData[i][0];
-						int str = strength[i];
-						if(isUpdated(t)) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
-					}
-				}
+				if(dc) updateNeighbours(map,x,y);
 			} break;
 			case 10: // Finally, Pumulty
 			{
@@ -607,15 +555,7 @@ public class Physics
 					addBlockToSet(new Block(x,y,blockData[0],0,blockData[2],blockData[3]));
 					addBlockToCheck(new BlockPos(x,y));
 				}
-				if(dc)
-				{
-					for(int i=0;i<4;i++)
-					{
-						int t = surrBlockData[i][0];
-						int str = strength[i];
-						if(isUpdated(t)) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
-					}
-				}
+				if(dc) updateNeighbours(map,x,y);
 			} break;
 			case 15: // Extend
 			{
@@ -643,17 +583,11 @@ public class Physics
 					blockData[1]+=(byte)2;
 				}
 				addBlockToSet(new Block(x,y,blockData[0],blockData[1],blockData[2],blockData[3]));
-				int ty = surrBlockData[outputDirection][0];
-				if(isUpdated(ty)) addBlockToCheck(new BlockPos(x+xMovement[outputDirection],y+yMovement[outputDirection]));
+				if(surrBlockO[outputDirection].isUpdated()) addBlockToCheck(new BlockPos(x+xMovement[outputDirection],y+yMovement[outputDirection]));
 				if(oldColour!=blockData[1])
 				{
 					addBlockToCheck(new BlockPos(x,y));
-					for(int i=0;i<4;i++)
-					{
-						int t = surrBlockData[i][0];
-						int str = strength[i];
-						if(isUpdated(t)) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
-					}
+					updateNeighbours(map,x,y);
 				}
 			} break;
 			case 17: // Pusher
@@ -693,9 +627,7 @@ public class Physics
 					addBlockToClear(new BlockPos(x+xMovement[val],y+yMovement[val]));
 				for(i=0;i<4;i++)
 				{
-					int t = surrBlockData[i][0];
-					int str = strength[i];
-					if(isUpdated(t) && t!=17) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
+					if(surrBlockO[i].isUpdated() && surrBlockO[i].getType()!=17) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
 				}
 			} break;
 			case 20: { // Dupe
@@ -725,7 +657,7 @@ public class Physics
 				{
 					int t = surrBlockData[i][0];
 					int str = strength[i];
-					if(isUpdated(t) && t!=20) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
+					if(surrBlockO[i].isUpdated() && surrBlockO[i].getType()!=20) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
 				}
 			} break;
 			default:

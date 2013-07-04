@@ -110,7 +110,7 @@ public class Chunk {
 							param[i]=(byte)1;
 							map.physics.addBlockToCheck(new BlockPos(xpos*64+(i&63),ypos*64+(i>>6)));
 						}
-						else if(map.physics.isReloaded(type[i])) // Physics refresh
+						else if(Block.isLoaded(type[i])) // Physics refresh
 							map.physics.addBlockToCheck(new BlockPos(xpos*64+(i&63),ypos*64+(i>>6)));
 						else if(param[i+4096] != 0) // Bullet refresh
 							map.physics.addBlockToCheck(new BlockPos(xpos*64+(i&63),ypos*64+(i>>6)));

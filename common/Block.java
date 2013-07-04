@@ -82,6 +82,7 @@ public class Block
 		}
 		return false;
 	}
+
 	public boolean isWiriumNeighbour(Block block) {
 		return isWiriumNeighbour(block.getBlockData());
 	}
@@ -95,9 +96,27 @@ public class Block
 	{
 		return block[6]!=0;
 	}
+
 	public boolean isPistonable()
 	{
 		return (isPushable() || !(block[0]==0 || block[0]==19 || block[0]==18 || block[0]==16 || (block[0]==17 && (0x01&block[1])!=0)));
+	}
+
+	public boolean isUpdated()
+	{
+		int type = block[0];
+		return (type>=2 && type<=4) || type==6 || type==7 || (type>=10 && type<=13) || type==15 || type==17 || type==20;
+	}
+
+	public static boolean isLoaded(int type)
+	{
+		return (type>=21 && type<=23);
+	}
+
+	public boolean isSent()
+	{
+		int type = getTypeWithVirtual();
+		return !(type == 5 || type == 6);
 	}
 
 	public int getBullet()

@@ -857,6 +857,7 @@ public class Client implements Runnable
 									{
 										map.physics.addBlockToCheck(new BlockPos(ax+map.xMovement[i],ay+map.yMovement[i]));
 									}
+									Block outBlock = map.getBlock(ax,ay);
 									synchronized(out)
 									{
 										out.writeByte(0x31);
@@ -866,8 +867,7 @@ public class Client implements Runnable
 										out.writeByte(t33[0]);
 										out.writeByte(t33[2]);
 										out.writeByte(t33[3]);
-										if(map.physics.isUpdated(0xFF&(int)t33[0]) &&
-										   map.physics.isSent(0xFF&(int)t33[0])) {
+										if(outBlock.isUpdated() && outBlock.isSent()) {
 											serv.sendAllOnMap(id, getPacket()); // Wirium reappear fix
 										} else {
 											serv.sendOthersOnMap(id,getPacket());

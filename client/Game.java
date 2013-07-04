@@ -82,6 +82,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		health = h;
 		gs.health = health;
 	}
+
 	public void kill()
 	{
 		if(multiplayer) return;
@@ -99,6 +100,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			playerChange = true;
 		}
 	}
+
 	public void playSound(int tx, int ty, int val)
 	{
 		if(muted) return;
