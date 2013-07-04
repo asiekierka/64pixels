@@ -600,28 +600,6 @@ public class Server extends ServerShim
 					}
 				}
 			}
-			else if(cmd[0].equals("adddungeon"))
-			{
-				if(cmd.length<4) return "Usage: /adddungeon [world] [width] [height]";
-				else if (findWorld(cmdz[1])==null)
-				{
-					return "World '" + cmdz[1] + "' does not exist.";
-				}
-				World w = findWorld(cmdz[1]);
-				DungeonGenerator cdg = new DungeonGenerator();
-				NumberFormat nf = NumberFormat.getNumberInstance();
-				try
-				{
-					GenerationThread genThread = new GenerationThread(this,id,(MapGenerator)cdg,w.map,nf.parse(cmdz[2]).intValue(),nf.parse(cmdz[3]).intValue());
-					Thread dt = new Thread(genThread);
-					dt.start();
-				}
-				catch(Exception e)
-				{
-					return "&cERROR: &fInvalid arguments!";
-				}
-				return "Creating dungeon...";
-			}
 			else if(cmd[0].equals("raycast") && id!=255)
 			{
 				String tmap = "(map " + clients[id].world.name + ")";
