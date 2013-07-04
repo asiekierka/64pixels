@@ -5,16 +5,16 @@ import java.util.*;
 
 public class Main {
 
-	private static CraftrServer serv;
+	private static Server serv;
 	public static void main(String[] args)
 	{
-		serv = new CraftrServer(args);
-		CraftrShutdownHook hook = new CraftrShutdownHook();
+		serv = new Server(args);
+		ShutdownHook hook = new ShutdownHook();
 		Runtime.getRuntime().addShutdownHook( hook );
 		serv.start();
 	}
 
-    private static class CraftrShutdownHook extends Thread {
+    private static class ShutdownHook extends Thread {
       public void run() {
 		System.out.println("VM shutdown happening...");
 		serv.end();
