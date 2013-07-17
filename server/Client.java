@@ -37,6 +37,10 @@ public class Client implements Runnable
 	public boolean isCopying = false;
 	public boolean isPasting = false;
 	public int copyStage = 0;
+	public int protectStage = 0;
+	public int unProtectStage = 0;
+	public boolean isProtecting = false;
+	public boolean isUnprotecting = false;
 	public int cx,cy,deaths;
 
 	public Client(Socket s, WorldMap m, int iz, Server se)
@@ -784,7 +788,7 @@ public class Client implements Runnable
 								byte aco = in.readByte();
 								if(passWait) break;
 								byte[] zc = map.getBlock(ax,ay).getBlockData();
-								if((op && (isCopying || isPasting)) || (serv.mapLock && !op))
+								if((op && (isCopying || isPasting || isProtecting || isUnprotecting)) || (serv.mapLock && !op))
 								{
 									out.writeByte(0x31);
 									out.writeByte((byte)id);
@@ -827,8 +831,66 @@ public class Client implements Runnable
 										System.out.println("[ID " + id + "] Pasted at " + ax + "," + ay + "!");
 										isPasting=false;
 									}
+									
+									else if (isProtecting)
+									{
+										int tcx = ax;
+										int tcy = ay;
+										int ts = 0;
+										if(tcx<cx) { ts=tcx;tcx=cx;cx=ts; }
+										if(tcy<cy) { ts=tcy;tcy=cy;cy=ts; }
+										int tcxs = abs(tcx-cx)+1;
+										int tcys = abs(tcy-cy)+1;
+									
+										if (protectStage == 0)
+										{
+											sendChatMsgSelf("Click on the other corner.");
+											cx=ax;
+											cy=ay;
+											protectStage++;
+										}
+										
+										else if (protectStage == 1)
+										{
+											isProtecting = false;
+											cc.protect(map,cx,cy,tcxs,tcys);
+											sendChatMsgSelf("Protected.");
+										}
+											else 
+											    sendChatMsgSelf("Unprotect error: Invalid size (" + tcxs + ", " + tcys + ")");	
+										
+									}
+									
+									else if (isUnprotecting)
+									{
+										int tcx = ax;
+										int tcy = ay;
+										int ts = 0;
+										if(tcx<cx) { ts=tcx;tcx=cx;cx=ts; }
+										if(tcy<cy) { ts=tcy;tcy=cy;cy=ts; }
+										int tcxs = abs(tcx-cx)+1;
+										int tcys = abs(tcy-cy)+1;
+									
+										if (unProtectStage == 0)
+										{
+											sendChatMsgSelf("Click on the other corner.");
+											cx=ax;
+											cy=ay;
+											unProtectStage++;
+										}
+										
+										else if (unProtectStage == 1)
+										{
+											isUnprotecting = false;
+											cc.unProtect(map,cx,cy,tcxs,tcys);
+											sendChatMsgSelf("Unprotected.");
+										}
+											else 
+											    sendChatMsgSelf("Unprotect error: Invalid size (" + tcxs + ", " + tcys + ")");	
+										
+									}
 								}
-								else
+								else if (!map.isProtected(ax, ay))
 								{
 									int tat = (int)(at&0xFF);
 									if(!Block.isPlaceable(tat))
@@ -885,6 +947,16 @@ public class Client implements Runnable
 	 									}
 									}
 									map.modlock=false;
+								} else
+								{
+									out.writeByte(0x31);
+									out.writeByte((byte)id);
+									out.writeInt(ax);
+									out.writeInt(ay);
+									out.writeByte(zc[0]);
+									out.writeByte(zc[2]);
+									out.writeByte(zc[3]);
+									sendPacket();
 								}
 								break;
 							case 0x40:
