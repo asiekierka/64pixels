@@ -32,7 +32,7 @@ public class Client implements Runnable
 	public int pingsWaiting = 0;
 	private Auth auth;
 	public boolean passWait=false;
-	public Copier cc;
+	public Region region;
 	public World world;
 	public boolean isCopying = false;
 	public boolean isPasting = false;
@@ -66,7 +66,7 @@ public class Client implements Runnable
 			ns = new NetSender(socket.getOutputStream());
 			Thread tns = new Thread(ns);
 			tns.start();
-			cc=new Copier();
+			region=new Region();
 			System.out.println("New user with ID " + id + " connected!");
 		}
 		catch(Exception e)
@@ -819,14 +819,14 @@ public class Client implements Runnable
 											int tcys = abs(tcy-cy)+1;
 											if(tcxs>0 && tcxs<=128 && tcys>0 && tcys<=128)
 											{
-												cc.copy(map,cx,cy,tcxs,tcys);
+												region.copy(map,cx,cy,tcxs,tcys);
 												sendChatMsgSelf("Copied.");
 											} else sendChatMsgSelf("Copy error: Invalid size (" + tcxs + ", " + tcys + ")");
 										}
 									}
 									else if(isPasting)
 									{
-										cc.paste(map,ax,ay);
+										region.paste(map,ax,ay);
 										sendChatMsgSelf("Pasted.");
 										System.out.println("[ID " + id + "] Pasted at " + ax + "," + ay + "!");
 										isPasting=false;
@@ -853,7 +853,7 @@ public class Client implements Runnable
 										else if (protectStage == 1)
 										{
 											isProtecting = false;
-											cc.protect(map,cx,cy,tcxs,tcys);
+											region.protect(map,cx,cy,tcxs,tcys);
 											sendChatMsgSelf("Protected.");
 										}
 											else 
@@ -882,7 +882,7 @@ public class Client implements Runnable
 										else if (unProtectStage == 1)
 										{
 											isUnprotecting = false;
-											cc.unProtect(map,cx,cy,tcxs,tcys);
+											region.unProtect(map,cx,cy,tcxs,tcys);
 											sendChatMsgSelf("Unprotected.");
 										}
 											else 

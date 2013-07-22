@@ -3,14 +3,14 @@ import common.*;
 
 import java.io.*;
 
-public class Copier
+public class Region
 {
 	Block[] paste;
 	int xsize;
 	int ysize;
 	int used;
 
-	public Copier()
+	public Region()
 	{
 	}
 

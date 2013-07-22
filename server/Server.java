@@ -689,12 +689,12 @@ public class Server extends ServerShim
 			}
 			else if(cmd[0].equals("import") && id!=255)
 			{
-				return clients[id].cc.load(cmd[1]);
+				return clients[id].region.load(cmd[1]);
 				
 			}
 			else if(cmd[0].equals("export") && id!=255)
 			{
-				clients[id].cc.save(cmd[1]);
+				clients[id].region.save(cmd[1]);
 				return "Exported! (i hope)";
 			}
 			else if(cmd[0].equals("paste") && id!=255)
