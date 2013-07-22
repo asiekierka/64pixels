@@ -33,7 +33,18 @@ public class HeartThread implements Runnable
 				}	
 				Thread.sleep(speed);
 			}
-			catch(Exception e){e.printStackTrace();try{Thread.sleep(speed); is.close();}catch(Exception e2){}}
+			catch(Exception e){
+			try
+			{
+				System.out.println("Serverlist seems to be down!");
+				Thread.sleep(speed); 
+				is.close();
+			}
+			catch(Exception e2)
+			{
+				System.out.println("Serverlist is down!");
+			}
+			}
 		}
 	}
 }

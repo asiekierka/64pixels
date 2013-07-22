@@ -4,10 +4,13 @@ import java.lang.*;
 import java.io.*;
 import java.util.*;
 import java.util.zip.*;
+import java.awt.Point;
 
 public class WorldMap
 {
 	public Chunk[] chunks;
+	public HashSet<Point> protect = new HashSet<Point>();
+	
 	public int cachesize;
 	public int genMode = 0;
 	public static Random rand = new Random();
@@ -695,5 +698,21 @@ public class WorldMap
 	public void setPushableNet(int x, int y, byte ch1, byte co1)
 	{
 		setBlockNet(x,y,(byte)-1,ch1,co1);
+	}
+	
+	public boolean isProtected(int x, int y)
+	{
+		return protect.contains(new Point(x, y));
+	}
+	
+	public void setProtected(int x, int y, boolean protect)
+	{
+		if (protect) {this.protect.add(new Point(x, y));}
+		if (!protect) {this.protect.remove(new Point(x, y));}
+	}
+	
+	public HashSet<Point> getProtections()
+	{
+		return this.protect;
 	}
 }

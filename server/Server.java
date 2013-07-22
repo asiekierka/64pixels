@@ -503,7 +503,7 @@ public class Server extends ServerShim
 			else if(clients[id].op)
 			{
 
-				return "Commands: who tp warp warps me kick fetch copy paste setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg raycast";
+				return "Commands: who tp warp warps me kick fetch copy paste protect unprotect setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg raycast";
 			}
 			else
 			{
@@ -528,8 +528,10 @@ public class Server extends ServerShim
 			return "";
 		}
 		else if((cmd[0].equals("load") || cmd[0].equals("goto") || cmd[0].equals("l") || cmd[0].equals("join") || cmd[0].equals("world")) && id!=255)
-		{ 
-			World tm = findWorld(cmdz[1]);
+		{
+			World tm = null;
+			try {tm = findWorld(cmdz[1]);}
+			catch (Exception e){}
 			if(tm==null) return "No such world!";
 			else
 			{
@@ -681,6 +683,8 @@ public class Server extends ServerShim
 				clients[id].copyStage=0;
 				clients[id].isCopying=true;
 				clients[id].isPasting=false;
+				clients[id].isProtecting = false;
+				clients[id].isUnprotecting = false;
 				return "Click on the first corner.";
 			}
 			else if(cmd[0].equals("import") && id!=255)
@@ -696,7 +700,30 @@ public class Server extends ServerShim
 			else if(cmd[0].equals("paste") && id!=255)
 			{
 				clients[id].isCopying=false;
+				clients[id].isProtecting = false;
 				clients[id].isPasting=true;
+				clients[id].isUnprotecting = false;
+				return "Click on the top-left destination corner.";
+			}
+			else if (cmd[0].equals("protect") && id!=255)
+			{
+				if (isOp(clients[id].socket.getInetAddress().getHostAddress()))
+				{
+					clients[id].protectStage = 0;
+					clients[id].isProtecting = true;
+					clients[id].isCopying = false;
+					clients[id].isPasting = false;
+					clients[id].isUnprotecting = false;
+					return "Click on the top-left destination corner.";
+				}
+			}
+			else if (cmd[0].equals("unprotect") && id!=255)
+			{
+				clients[id].unProtectStage = 0;
+				clients[id].isProtecting = false;
+				clients[id].isCopying = false;
+				clients[id].isPasting = false;
+				clients[id].isUnprotecting = true;
 				return "Click on the top-left destination corner.";
 			}
 			else if(cmd[0].equals("setspawn") && id!=255)
@@ -940,10 +967,19 @@ public class Server extends ServerShim
 		}
 		catch(Exception e)
 		{
-			System.out.println("Couldn't read " + name + "!");
-			e.printStackTrace();
-			String[] z = new String[0];
-			return z;
+			try 
+			{
+				new File(name).createNewFile();
+				return readNamesFile(name);
+			}
+			
+			catch (IOException a)
+			{
+				System.out.println("Couldn't read " + name + "!");
+				e.printStackTrace();
+				String[] z = new String[0];
+				return z;
+			}
 		}
 	}
 	
@@ -1269,6 +1305,7 @@ public class Server extends ServerShim
 					w.map.saveChunkFile(i);
 				}
 			}
+			w.saveProtections();
 		}
 		mapBeSaved=false;
 	}
