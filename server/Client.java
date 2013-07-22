@@ -853,7 +853,7 @@ public class Client implements Runnable
 										else if (protectStage == 1)
 										{
 											isProtecting = false;
-											region.protect(map,cx,cy,tcxs,tcys);
+											world.setProtected(new Rectangle(cx,cy,tcxs,tcys), true);
 											sendChatMsgSelf("Protected.");
 										}
 											else 
@@ -882,7 +882,7 @@ public class Client implements Runnable
 										else if (unProtectStage == 1)
 										{
 											isUnprotecting = false;
-											region.unProtect(map,cx,cy,tcxs,tcys);
+											world.setProtected(new Rectangle(cx,cy,tcxs,tcys), false);
 											sendChatMsgSelf("Unprotected.");
 										}
 											else 
@@ -890,7 +890,7 @@ public class Client implements Runnable
 										
 									}
 								}
-								else if (!map.isProtected(ax, ay))
+								else if (!world.isProtected(ax, ay))
 								{
 									int tat = (int)(at&0xFF);
 									if(!Block.isPlaceable(tat))

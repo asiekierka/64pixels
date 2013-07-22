@@ -93,36 +93,6 @@ public class Region
 		}
 	}
 	
-	public void protect(WorldMap map, int startx, int starty, int xs, int ys)
-	{
-		if(xs>160 || ys>160) return;
-		xsize=xs;
-		ysize=ys;
-		for(int yp=0;yp<ysize;yp++)
-		{
-			for(int xp=0;xp<xsize;xp++)
-			{
-				map.setProtected(startx+xp,starty+yp, true);
-			}
-		}
-		used=1;
-	}
-	
-	public void unProtect(WorldMap map, int startx, int starty, int xs, int ys)
-	{
-		if(xs>160 || ys>160) return;
-		xsize=xs;
-		ysize=ys;
-		for(int yp=0;yp<ysize;yp++)
-		{
-			for(int xp=0;xp<xsize;xp++)
-			{
-				map.setProtected(startx+xp,starty+yp, false);
-			}
-		}
-		used=1;
-	}
-	
 	public void copy(WorldMap map, int startx, int starty, int xs, int ys)
 	{
 		if(xs>160 || ys>160) return;

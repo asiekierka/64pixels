@@ -16,6 +16,7 @@ public class World
 	public int spawnX = 0;
 	public int spawnY = 0;
 	public boolean isRaycasted = false;
+	public ArrayList<Rectangle> protections;
 
 	public World(String n, WorldMap m, int speed, Warps w)
 	{
@@ -31,6 +32,7 @@ public class World
 		mt.speed = (1000/tickSpeed);
 		t = new Thread(mt);
 		t.start();
+		protections = new ArrayList<Rectangle>();
 	}
 
 	public void stop()
@@ -51,14 +53,17 @@ public class World
 		{
 		if (!f.exists())
 			f.createNewFile();
-			
+		
 		FileOutputStream fos = new FileOutputStream(f);
 		DataOutputStream dos = new DataOutputStream(fos);
-		HashSet<Point> prot = map.getProtections();
-		for (Point p : prot)
+		dos.writeByte((byte)0x01); // VERSION
+		dos.writeInt(protections.size()); // AMOUNT
+		for (Rectangle r: protections)
 		{
-			dos.writeLong((long)p.getX());
-			dos.writeLong((long)p.getY());
+			dos.writeInt(r.getX());
+			dos.writeInt(r.getY());
+			dos.writeInt(r.getW());
+			dos.writeInt(r.getH());
 		}
 		} catch (IOException e) {System.out.println("Cannot create protections file!");}
 	}
@@ -72,9 +77,16 @@ public class World
 			{
 				FileInputStream fis = new FileInputStream(f);
 				DataInputStream dis = new DataInputStream(fis);
-				for (int i = 0; i < ((f.length()/8)); i += 2)
-				{
-					map.setProtected((int)dis.readLong(), (int)dis.readLong(), true);
+				if(dis.readByte() == 0x01) {
+					int amount = dis.readInt();
+					for (int i = 0; i < amount; i++)
+					{
+						int x = dis.readInt();
+						int y = dis.readInt();
+						int w = dis.readInt();
+						int h = dis.readInt();
+						setProtected(new Rectangle(x,y,w,h), true);
+					}
 				}
 			}
 		} catch (Exception e) {System.out.println("LoadProtections error!");}
@@ -85,5 +97,19 @@ public class World
 		tickSpeed=ts;
 		if(tickSpeed>100 || tickSpeed<=0) tickSpeed=10;
 		mt.speed=(1000/tickSpeed);
+	}
+
+	public void setProtected(Rectangle rectangle, boolean mode) {
+		if(mode == true) {
+			protections.add(rectangle);
+		} else {
+			protections.remove(rectangle);
+		}
+	}
+	public boolean isProtected(int x, int y) {
+		for(Rectangle r: protections) {
+			if(r.insideRect(x, y)) return true;
+		}
+		return false;
 	}
 }
