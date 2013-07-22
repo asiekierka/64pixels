@@ -11,7 +11,7 @@ class Dungen:
 		
 		self.w = w
 		self.h = h
-		self.g = [[False for x in range(self.w)] for y in range(self.h)]
+		self.g = [[False for x in xrange(self.w)] for y in xrange(self.h)]
 		# g = new boolean[h][w];
 		
 		self.threshold = (self.w*self.h*40)//100 # aim for 40% roominess
@@ -26,17 +26,14 @@ class Dungen:
 	# private
 	def trim(self):
 		# for(int y = 1; y < this.h-1; y++)
-		for y in range(1,self.h-1,1):
-			for x in range(1,self.w-1,1):
+		for y in xrange(1,self.h-1,1):
+			for x in xrange(1,self.w-1,1):
 				if (not self.g[y][x]) and ((self.g[y-1][x] and self.g[y+1][x]) or (self.g[y][x-1] and self.g[y][x+1])):
 					self.g[y][x] = True
 	
 	# private
 	def scrawl(self):
 		while self.cover < self.threshold:
-			if self.w-2 < 0:
-			    print("Dooby.")
-			    
 			x1 = random.randint(1,self.w-2)
 			# x1 = (int)(Math.random()*self.w);
 			x2 = random.randint(1,self.w-2)
@@ -72,18 +69,18 @@ class Dungen:
 		# NOTE: if nothing is covered, skip this check! otherwise we'll never get anywhere
 		if self.cover != 0:
 			notok = True
-			for y in range(y1,y2+1,1):
-				for x in range(x1,x2+1,1):
+			for y in xrange(y1,y2+1,1):
+				for x in xrange(x1,x2+1,1):
 					if self.g[y][x]:
 						return
 			
-			for y in range(y1,y2+1,1):
+			for y in xrange(y1,y2+1,1):
 				if self.g[y][x1-1] or self.g[y][x2+1]:
 					notok = False
 					break
 			
 			if notok:
-				for x in range(x1,x2+1,1):
+				for x in xrange(x1,x2+1,1):
 					if self.g[y1-1][x] or self.g[y2+1][x]:
 						notok = False
 						break
@@ -93,8 +90,8 @@ class Dungen:
 				return
 		
 		# OK let's draw.
-		for y in range(y1,y2+1,1):
-			for x in range(x1,x2+1,1):
+		for y in xrange(y1,y2+1,1):
+			for x in xrange(x1,x2+1,1):
 				# don't doublecount anything!
 				if not self.g[y][x]:
 					self.g[y][x] = True
@@ -106,6 +103,6 @@ class Dungen:
 		# you're on your own for this one.
 		# should be easy enough to do.
 		for l in self.g:
-			print( ''.join(' ' if v else '#' for v in l))
+			print ''.join(' ' if v else '#' for v in l)
 
 Dungen(64,64).drawme()
