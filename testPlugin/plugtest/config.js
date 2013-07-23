@@ -1,0 +1,3 @@
+{
+	fullClassName: "plug.plugtest.PlugTest"
+}

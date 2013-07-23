@@ -39,6 +39,7 @@ public class Server extends ServerShim
 	public int po = 25566;
 	public boolean mapLock = false;
 	public World world;
+	public PluginHandler pluginHandler;
 
 	public int countPlayers()
 	{
@@ -1021,6 +1022,9 @@ public class Server extends ServerShim
 			world_names=readNamesFile("worlds.txt");
 			System.out.println(world_names.length + " worlds!");
 			worlds.add(world);
+			
+			pluginHandler = new PluginHandler();
+			pluginHandler.reloadPlugins();
 			for(String wn : world_names)
 			{
 				WorldMap tm = new WorldMap(true,map_cache_size,wn);

@@ -1,3 +1,4 @@
 Manifest-Version: 1.0
 Created-By: 1.6.0_22 (Sun Microsystems Inc.)
 Main-Class: server.Main
+Class-Path: lib/minimal-json.jar
