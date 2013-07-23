@@ -16,7 +16,7 @@ public class Canvas extends JComponent
 	public int FULLGRID_W = GRID_W+1;
 	public int FULLGRID_H = GRID_H+1;
 	public int WIDTH = ((FULLGRID_W-1)*16);
-	public int HEIGHT = (FULLGRID_H*16)+8;
+	public int HEIGHT = (FULLGRID_H*16);
 	// Constants.
 	public static Random rand = new Random();
 	public int mx, my;
@@ -118,28 +118,27 @@ public class Canvas extends JComponent
 
 	public void scale(int newX, int newY)
 	{
-		scaleX = (double)newX/WIDTH;
-		scaleY = (double)newY/HEIGHT;
+		if(!resizePlayfield) {
+			sizeX = newX;
+			sizeY = newY;
+			scaleX = (double)Math.floor(newX/WIDTH);
+			scaleY = (double)Math.floor(newY/HEIGHT);
+		} else {
+			scaleX = 1.0;
+			scaleY = 1.0;
+			WIDTH = newX-(newX%16);
+			HEIGHT = newY-(newY%16);
+			sizeX = WIDTH;
+			sizeY = HEIGHT;
+			FULLGRID_W = (WIDTH>>4);
+			FULLGRID_H = (HEIGHT>>4);
+			GRID_W = FULLGRID_W-1;
+			GRID_H = FULLGRID_H-1;
+			if(cs!=null) cs.setCanvas(this);
+		}
 		size = new Dimension(newX,newY);
-		sizeX = newX;
-		sizeY = newY;
-		if(resizePlayfield) remakeVariables();
-		scaleX = (double)newX/WIDTH;
-		scaleY = (double)newY/HEIGHT;
 		setSize(size);
 		setPreferredSize(size);
-	}
-
-	public void remakeVariables()
-	{
-		WIDTH = sizeX-(sizeX%16);
-		HEIGHT = sizeY-(sizeY%16)+8;
-		if(sizeY < HEIGHT) HEIGHT-=16;
-		GRID_W = (WIDTH>>4);
-		FULLGRID_W = GRID_W+1;
-		FULLGRID_H = ((HEIGHT-8)>>4);
-		GRID_H = FULLGRID_H-1;
-		if(cs!=null) cs.setCanvas(this);
 	}
 
 	public void redrawCharset()
@@ -205,13 +204,16 @@ public class Canvas extends JComponent
 		if(tx<WIDTH) tx=WIDTH;
 		if(ty<HEIGHT) ty=HEIGHT;
 		BufferedImage bi = new BufferedImage(tx,ty,BufferedImage.TYPE_INT_RGB);
-		Graphics2D g2 = bi.createGraphics();
-		g = (Graphics)g2;
+		g = (Graphics)bi.createGraphics();
 		cs.paint(mx,my);
-		Graphics2D g2o = (Graphics2D)gz;
-		g2o.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-		img=bi;
-		g2o.drawRenderedImage(bi,AffineTransform.getScaleInstance((float)sizeX/WIDTH,(float)sizeY/HEIGHT));
+		img = bi;
+		if(resizePlayfield) {
+			Graphics2D g2o = (Graphics2D)gz;
+			g2o.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+			g2o.drawRenderedImage(bi,AffineTransform.getScaleInstance((float)sizeX/WIDTH,(float)sizeY/HEIGHT));
+		} else {
+			gz.drawImage(bi, 0, 0, null);
+		}
 	}
 	
 	public void draw(int _mx, int _my)

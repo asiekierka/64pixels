@@ -707,15 +707,12 @@ public class Server extends ServerShim
 			}
 			else if (cmd[0].equals("protect") && id!=255)
 			{
-				if (isOp(clients[id].socket.getInetAddress().getHostAddress()))
-				{
-					clients[id].protectStage = 0;
-					clients[id].isProtecting = true;
-					clients[id].isCopying = false;
-					clients[id].isPasting = false;
-					clients[id].isUnprotecting = false;
-					return "Click on the top-left destination corner.";
-				}
+				clients[id].protectStage = 0;
+				clients[id].isProtecting = true;
+				clients[id].isCopying = false;
+				clients[id].isPasting = false;
+				clients[id].isUnprotecting = false;
+				return "Click on the top-left destination corner.";
 			}
 			else if (cmd[0].equals("unprotect") && id!=255)
 			{
