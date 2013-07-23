@@ -14,6 +14,8 @@ public class PluginHandler
 	
 	public void reloadPlugins()
 	{
+		plugins.clear();
+	
 		File dir = new File("plugins");
 		File[] files = dir.listFiles();
 		
