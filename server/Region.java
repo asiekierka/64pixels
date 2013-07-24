@@ -6,13 +6,9 @@ import java.io.*;
 public class Region
 {
 	Block[] paste;
-	int xsize;
-	int ysize;
-	int used;
+	int xsize, ysize, used;
 
-	public Region()
-	{
-	}
+	public Region() { }
 
 	public String load(String filename)
 	{
@@ -23,7 +19,7 @@ public class Region
 			fin = new FileInputStream(filename + ".6cf");
 			in = new DataInputStream(fin);
 			int version = in.readUnsignedByte(); // to be sure
-			if(version==1)
+			if(version == 1)
 			{
 				xsize = in.readInt();
 				ysize = in.readInt();
@@ -33,18 +29,18 @@ public class Region
 				{
 					for(int ix=0;ix<xsize; ix++)
 					{
-						byte[] blockd = new byte[blockDataSize];
-						in.read(blockd,0,blockDataSize);
-						paste[(iy*xsize)+ix]=new Block(ix,iy,blockd);
+						byte[] blockData = new byte[blockDataSize];
+						in.read(blockData,0,blockDataSize);
+						paste[(iy*xsize)+ix] = new Block(ix,iy,blockData);
 					}
 				}
-				used=1;
+				used = 1;
 			}
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			used=0;
+			used = 0;
 		}
 		finally
 		{
@@ -59,7 +55,7 @@ public class Region
 	}
 	public void save(String filename)
 	{
-		if(used!=1) return;
+		if(used != 1) return;
 		FileOutputStream fout = null;
 		DataOutputStream out = null;
 		try
@@ -74,8 +70,8 @@ public class Region
 			{
 				for(int ix=0;ix<xsize; ix++)
 				{
-					byte[] blockd = paste[(iy*xsize)+ix].getBlockData();
-					out.write(blockd,0,blockd.length);
+					byte[] blockData = paste[(iy*xsize)+ix].getBlockData();
+					out.write(blockData, 0, blockData.length);
 				}
 			}
 		}
@@ -96,9 +92,9 @@ public class Region
 	public void copy(WorldMap map, int startx, int starty, int xs, int ys)
 	{
 		if(xs>160 || ys>160) return;
-		paste = new Block[xs*ys];
 		xsize=xs;
 		ysize=ys;
+		paste = new Block[xsize*ysize];
 		for(int yp=0;yp<ysize;yp++)
 		{
 			for(int xp=0;xp<xsize;xp++)
@@ -115,13 +111,13 @@ public class Region
 		{
 			for(int xp=0;xp<xsize;xp++)
 			{
-				byte[] t = paste[(yp*xsize)+xp].getBlockData();
-				map.setBlock(xpos+xp,ypos+yp,t);
-				map.setBlockNet(xpos+xp,ypos+yp,t[0],t[2],t[3]);
-				if(t[5]!=0)
+				byte[] data = paste[(yp*xsize)+xp].getBlockData();
+				map.setBlock(xpos+xp,ypos+yp,data);
+				map.setBlockNet(xpos+xp,ypos+yp,data[0],data[2],data[3]);
+				if(data[5]!=0)
 				{
-					map.setPushable(xpos+xp,ypos+yp,t[4],t[5]);
-					map.setBlockNet(xpos+xp,ypos+yp,(byte)-1,t[4],t[5]);
+					map.setPushable(xpos+xp,ypos+yp,data[4],data[5]);
+					map.setBlockNet(xpos+xp,ypos+yp,(byte)-1,data[4],data[5]);
 				}
 			}
 		}

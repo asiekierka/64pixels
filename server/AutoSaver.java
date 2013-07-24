@@ -3,24 +3,21 @@ import common.*;
 
 public class AutoSaver implements Runnable
 {
-	public Server serv;
+	public Server server;
 	public int mapspeed=600;
 	
 	public AutoSaver(Server s)
 	{
-		serv=s;
+		server=s;
 	}
 	
 	public void run()
 	{
-		while(serv.run)
+		while(server.run)
 		{
-			try
-			{
-			Thread.sleep(mapspeed*1000);
-			}
+			try { Thread.sleep(mapspeed*1000); }
 			catch(Exception e){}
-			serv.saveMap();
+			server.saveMap();
 			System.out.println("Map saved!");
 		}
 	}

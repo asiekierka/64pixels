@@ -16,25 +16,25 @@ public class Input implements Runnable
 	
 	public void run()
 	{
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		String inp = null;
-		boolean mrun = true;
-		while(serv.run && mrun)
+		BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+		String input = null;
+		boolean running = true;
+		while(serv.run && running)
 		{
 			try
 			{
-				inp = br.readLine();
-				if(inp.length()>=2)
+				input = stdin.readLine();
+				if(input.length()>=2)
 				{
-					String t = serv.parseMessage(inp,255);
-					if(!t.equals("$N") && !t.equals("")) System.out.println(t);
+					String output = serv.parseMessage(input,255);
+					if(!output.equals("$N") && !output.equals("")) System.out.println(output);
 				}
-			Thread.sleep(10);
+				Thread.sleep(10);
 			}
 			catch(NullPointerException ne)
 			{
 				System.out.println("Input null pointer exception, quitting...");
-				mrun = false;
+				running = false;
 			}
 			catch(Exception e)
 			{

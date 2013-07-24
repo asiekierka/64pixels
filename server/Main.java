@@ -5,20 +5,19 @@ import java.util.*;
 
 public class Main {
 
-	private static Server serv;
+	private static Server server;
 	public static void main(String[] args)
 	{
-		serv = new Server(args);
+		server = new Server(args);
 		ShutdownHook hook = new ShutdownHook();
 		Runtime.getRuntime().addShutdownHook( hook );
-		serv.start();
+		server.start();
 	}
 
-    private static class ShutdownHook extends Thread {
-      public void run() {
-		System.out.println("VM shutdown happening...");
-		serv.end();
-      }
-    }
-	
+	private static class ShutdownHook extends Thread {
+		public void run() {
+			System.out.println("Shutting down...");
+			server.end();
+		}
+	}
 }

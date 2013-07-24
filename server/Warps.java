@@ -8,18 +8,20 @@ public class Warps
 	ArrayList<Warp> warps;
 	private DataInputStream in;
 	private DataOutputStream out;
+
 	public Warps()
 	{
 		warps=new ArrayList<Warp>(256);
 	}
+
 	public String readString()
 	{
 		try
 		{
-			int la = in.readUnsignedByte();
-			byte[] t = new byte[la];
-			in.read(t,0,la);
-			return new String(t);
+			int length = in.readUnsignedByte();
+			byte[] data = new byte[length];
+			in.read(data, 0, length);
+			return new String(data);
 		}
 		catch(Exception e)
 		{
@@ -32,11 +34,11 @@ public class Warps
 	{
 		try
 		{
-			byte[] t = s.getBytes();
+			byte[] data = s.getBytes();
 			synchronized(out)
 			{
 				out.writeByte(s.length());
-				out.write(t,0,s.length());
+				out.write(data,0,s.length());
 			}
 		}
 		catch(Exception e)
@@ -46,10 +48,8 @@ public class Warps
 			{
 				synchronized(out){out.writeByte(0x00);}
 			}
-			catch(Exception ee)
-			{
-			}
-		} 
+			catch(Exception ee) { }
+		}
 	}
 	
 	public int findWarpID(String name)
@@ -60,6 +60,7 @@ public class Warps
 		}
 		return -1;
 	}
+
 	public void saveFile(String filename)
 	{
 		try
@@ -76,7 +77,6 @@ public class Warps
 		}
 		catch(Exception e) {}
 	}
-	
 	public void loadFile(String filename)
 	{
 		try
@@ -97,7 +97,6 @@ public class Warps
 			in.close();
 			fin.close();
 		}
-		catch(Exception e)
-		{}
+		catch(Exception e) {}
 	}
 }
