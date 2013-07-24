@@ -4,7 +4,6 @@ import common.*;
 import java.lang.*;
 import javax.swing.*;
 import java.util.*;
-import java.awt.*;
 
 public class Window
 {
@@ -153,17 +152,6 @@ public class Window
 		cc.FillRect(cc.palette[8],(x+1)<<3,(y+1<<3),(w-2)<<3,(h-2)<<3);
 	}
 	
-	public boolean insideRect(int mx, int my, int x, int y, int w, int h)
-	{
-		if(mx >= x && my >= y && mx < x+w && my < y+h)
-		{
-			return true;
-		} else
-		{
-			return false;
-		}
-	}
-
 	public void render(Canvas cc)
 	{
 		resize();
@@ -205,7 +193,7 @@ public class Window
 					int tmx = fx+8+((i&3)<<4);
 					int tmy = fy+8+((i>>2)<<4);
 					cc.DrawChar(tmx,tmy,(byte)recBlockChr[i],(byte)recBlockCol[i]);
-					if(insideRect(cc.mx,cc.my,tmx,tmy,16,16))
+					if(Rectangle.insideRect(cc.mx,cc.my,tmx,tmy,16,16))
 					{
 						cc.DrawRect(0xAAAAAA,tmx,tmy,15,15);
 					}

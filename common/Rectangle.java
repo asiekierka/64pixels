@@ -25,4 +25,7 @@ public class Rectangle {
   public boolean insideRect(int px, int py) {
     return ((px>=x) && (px<xm) && (py>=y) && (py<ym));
   }
+  public static boolean insideRect(int px, int py, int x, int y, int xw, int yw) {
+    return ((px>=x) && (px<(x+xw)) && (py>=y) && (py<(y+yw)));
+  }
 }

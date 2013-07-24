@@ -492,13 +492,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					{
 						if(!isConfig && gs.obstructedWindow(cw,mx,my)) { }
 						else if(isConfig && os != null && os.obstructedWindow(cw,mx,my)) { }
-						else if(insideRect(mx,my,(cw.x+cw.w-1)<<3,cw.y<<3,8,8))
+						else if(Rectangle.insideRect(mx,my,(cw.x+cw.w-1)<<3,cw.y<<3,8,8))
 						{
 							// close button, any window
 							if(isConfig && os != null) os.toggleWindow(cw.type);
 							else gs.toggleWindow(cw.type);
 							canMousePress = false;
-						} else if(insideRect(mx,my,(cw.x+1)<<3,(cw.y+1)<<3,(cw.w-2)<<3,(cw.h-2)<<3))
+						} else if(Rectangle.insideRect(mx,my,(cw.x+1)<<3,(cw.y+1)<<3,(cw.w-2)<<3,(cw.h-2)<<3))
 						{
 							switch(cw.type)
 							{
@@ -518,7 +518,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 									if(isConfig && os != null) os.getWindow(2).colorChosen = confCol;
 									break;
 								case 3:
-									if(insideRect(mx,my,(cw.x+2)<<3,(cw.y+2)<<3,(cw.w-4)<<3,(cw.h-4)<<3))
+									if(Rectangle.insideRect(mx,my,(cw.x+2)<<3,(cw.y+2)<<3,(cw.w-4)<<3,(cw.h-4)<<3))
 									{
 										int ix = (mx-((cw.x+2)<<3))>>4;
 										int iy = (my-((cw.y+2)<<3))>>4;
@@ -539,7 +539,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 								default:
 									break;
 							}
-						} else if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3))
+						} else if(Rectangle.insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3))
 						{ // DRAGGING WINDOWS! :D
 							dragX = (mx-(cw.x<<3))>>3;
 							dragY = (my-(cw.y<<3))>>3;
@@ -591,7 +591,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	{
 		if(mb != ev_no && canMousePress && !isDragging)
 		{
-			if(insideRect(mx,my,0,0,canvas.WIDTH,(canvas.GRID_H<<4)) && !gs.inWindow(mx,my))
+			if(Rectangle.insideRect(mx,my,0,0,canvas.WIDTH,(canvas.GRID_H<<4)) && !gs.inWindow(mx,my))
 			{
 				Window cw = gs.getWindow(3);
 				for(int i=0;i<256;i++)
@@ -668,16 +668,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					updateMouse((int)(mx*canvas.scaleX),(int)(my*canvas.scaleY));
 				}
 			}
-		}
-	}
-	public boolean insideRect(int mx, int my, int x, int y, int w, int h)
-	{
-		if(mx >= x && my >= y && mx < x+w && my < y+h)
-		{
-			return true;
-		} else
-		{
-			return false;
 		}
 	}
 
@@ -1354,14 +1344,14 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		}
 		if(chrArrowWaiter>0) chrArrowWaiter--;
 		else if(mb == ev_1) {
-			if(insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
+			if(Rectangle.insideRect(mx,my,12*16+8,gs.BARPOS_Y+1,8,14))
 			{
 				gs.chrBarOff -= 1;
 				chrArrowWaiter=2;
 				mouseChange=true;
 				if(gs.chrBarOff<0) gs.chrBarOff = 255;
 			}
-			else if(insideRect(mx,my,29*16,gs.BARPOS_Y+1,8,14))
+			else if(Rectangle.insideRect(mx,my,29*16,gs.BARPOS_Y+1,8,14))
 			{
 				gs.chrBarOff += 1;
 				chrArrowWaiter=2;

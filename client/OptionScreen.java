@@ -1,7 +1,6 @@
 package client;
 import common.*;
 
-import java.awt.*;
 import java.awt.image.*;
 import java.util.*;
 import java.awt.event.*;
@@ -31,17 +30,6 @@ public class OptionScreen extends Screen
 		inputStrings=ins;
 	}
 	
-	public boolean insideRect(int mx, int my, int x, int y, int w, int h)
-	{
-		if(mx >= x && my >= y && mx < x+w && my < y+h)
-		{
-			return true;
-		} else
-		{
-			return false;
-		}
-	}
-
 	public boolean obstructedWindow(Window w, int mx, int my)
 	{
 		synchronized(windows)
@@ -49,7 +37,7 @@ public class OptionScreen extends Screen
 			for(int wi = windows.size()-1;wi>windows.indexOf(w);wi--)
 			{
 				Window cw = windows.get(wi);
-				if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3)) return true;
+				if(Rectangle.insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3)) return true;
 			}
 		}
 		return false;
@@ -60,7 +48,7 @@ public class OptionScreen extends Screen
 		synchronized(windows)
 		{
 			for(Window cw : windows)
-				if(insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3)) return true;
+				if(Rectangle.insideRect(mx,my,cw.x<<3,cw.y<<3,cw.w<<3,cw.h<<3)) return true;
 		}
 		return false;
 	}
