@@ -459,7 +459,6 @@ public class Net implements Runnable, NetShim
 								byte col = in.readByte();
 								game.players[t1] = new Player(px,py,chr,col,tmp2);
 								game.players[t1].posChanged = true;
-								game.players[t1].ncol = in.readByte();
 								break;
 							case 0x21:
 								int t2 = in.readUnsignedByte();

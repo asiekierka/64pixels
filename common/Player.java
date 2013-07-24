@@ -3,7 +3,7 @@ package common;
 public class Player
 {
 	public int px, py, health;
-	public byte pchr, pcol, ncol;
+	public byte pchr, pcol;
 	public boolean posChanged;
 	public String name;
 	
@@ -15,7 +15,6 @@ public class Player
 		pcol = _pcol;
 		name = _pn;
 		posChanged = true;
-		ncol = 0;
 	}
 	public Player(int _px, int _py)
 	{
