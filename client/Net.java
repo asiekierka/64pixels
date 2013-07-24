@@ -16,20 +16,20 @@ public class Net implements Runnable, NetShim
 	public ByteArrayOutputStream out2;
 	private DataInputStream in;
 	private byte[] cbuffer;
-	public String nick;
+	public Player player;
 	public int loginStage = 0;
 	public boolean isLoadingChunk = false;
 	public int loadChunkID, lcX, lcY, lcP;
 	public int chunkPacketsLeft, chunkSize, chunkType;
 	public NetSender ns;
-	public boolean isOp=false;
 	public int frames=0;
 	public int pingsWaiting=0;
 	public Auth auth;
 	private byte[] msgenc = new byte[32];
 	
-	public Net()
+	public Net(Player _player)
 	{
+		player = _player;
 		// Here we initalize the socket.
 		try
 		{ 
@@ -348,7 +348,7 @@ public class Net implements Runnable, NetShim
 				synchronized(out)
 				{
 					out.writeByte(0x0F);
-					writeString(nick);
+					writeString(player.name);
 					writeString("eeeeh");
 					out.writeByte(0x00);
 					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE. NEVER. NEVER!!!
@@ -395,9 +395,8 @@ public class Net implements Runnable, NetShim
 									chunkRequest(tx+1,ty);
 									chunkRequest(tx,ty+1);
 									chunkRequest(tx+1,ty+1);
-									nick = readString();
-									isOp=in.readUnsignedShort()==42;
-									game.players[255].name = nick;
+									player.name = readString();
+									player.op=in.readUnsignedShort()==42;
 								}
 								System.out.println("Logged in!");
 								break;
@@ -493,7 +492,7 @@ public class Net implements Runnable, NetShim
 								break;
 							case 0x28:
 								int t28=in.readByte();
-								isOp=t28==42?true:false;
+								player.op=t28==42?true:false;
 								break;
 							case 0x2A:
 							case 0x2B:

@@ -22,6 +22,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 
 	public WorldMap map;
 	public Player players[] = new Player[256];
+	public Player player;
 	
 	public boolean hasShot;
 	public boolean blockChange = false;
@@ -33,7 +34,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public MapThread cmt;
 	public int cmtsp=30;
 	public int overhead=0;
-	public int health=5;
 	public Config config;
 	public Net net;
 	public GameScreen gs;
@@ -79,24 +79,24 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 
 	public void setHealth(int h)
 	{
-		health = h;
-		gs.health = health;
+		player.health = h;
+		gs.health = player.health;
 	}
 
 	public void kill()
 	{
 		if(multiplayer) return;
-		setHealth(health-1);
-		if(health==0)
+		setHealth(player.health-1);
+		if(player.health==0)
 		{
 			gs.addChatMsg("&cYou were killed!");
-			health=5;
+			player.health=5;
 			gs.health=5;
-			map.setPlayer(players[255].x,players[255].y,0);
+			map.setPlayer(player.x,player.y,0);
 			map.setPlayer(0,0,1);
 			oldmx=-1;
 			oldmy=-1;
-			players[255].move(0,0);
+			player.move(0,0);
 			playerChange = true;
 		}
 	}
@@ -109,15 +109,15 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			playSample(tx,ty,val-256);
 			return;
 		}		
-		int x=players[255].x-tx;
-		int y=players[255].y-ty;
+		int x=player.x-tx;
+		int y=player.y-ty;
 		audio.playNote(x,y,val,1.0);
 	}
 	public void playSample(int tx, int ty, int val)
 	{
 		if(muted) return;
-		int x=players[255].x-tx;
-		int y=players[255].y-ty;
+		int x=player.x-tx;
+		int y=player.y-ty;
 		audio.playSampleByNumber(x,y,val,1.0);
 	}
 	public void changeKeyMode(int t)
@@ -151,6 +151,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		map.game = this;
 		map.saveDir = System.getProperty("user.home") + "/.64pixels/";
 		players[255] = new Player(0,0);
+		player = players[255];
 		canMousePress = true;
 		config = new Config(map.saveDir + "config.txt");
 		cmt = new MapThread(map);
@@ -273,10 +274,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					out.newLine();
 				}
 			}
-			s = "player-char=" + players[255].chr;
+			s = "player-char=" + player.chr;
 			out.write(s,0,s.length());
 			out.newLine();
-			s = "player-color=" + players[255].col;
+			s = "player-color=" + player.col;
 			out.write(s,0,s.length());
 			out.newLine();
 			if(map.cachesize != 64)
@@ -285,7 +286,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				out.write(s,0,s.length());
 				out.newLine();
 			}
-			s = "player-name=" + players[255].name;
+			s = "player-name=" + player.name;
 			out.write(s,0,s.length());
 			out.newLine();
 			if(map.genMode != 0)
@@ -316,8 +317,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			out.newLine();
 			if(!multiplayer)
 			{
-				lpx = players[255].x;
-				lpy = players[255].y;
+				lpx = player.x;
+				lpy = player.y;
 			}
 			if(gs.hideousPrompts)
 			{
@@ -360,7 +361,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 				else if(key.contains("player-char"))
 				{
-					players[255].chr = nf.parse(val).byteValue();
+					player.chr = nf.parse(val).byteValue();
 				}
 				else if(key.contains("mapgen-mode"))
 				{
@@ -368,11 +369,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 				else if(key.contains("player-name"))
 				{
-					players[255].name = val;
+					player.name = val;
 				}
 				else if(key.contains("player-color"))
 				{
-					players[255].col = nf.parse(val).byteValue();
+					player.col = nf.parse(val).byteValue();
 				}
 				else if(key.contains("map-cache-length"))
 				{
@@ -380,13 +381,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 				if(key.contains("player-x"))
 				{
-					players[255].x = nf.parse(val).intValue();
-					lpx = players[255].x;
+					player.x = nf.parse(val).intValue();
+					lpx = player.x;
 				}
 				else if(key.contains("player-y"))
 				{
-					players[255].y = nf.parse(val).intValue();
-					lpy = players[255].y;
+					player.y = nf.parse(val).intValue();
+					lpy = player.y;
 				}
 				else if(key.contains("wsad-mode"))
 				{
@@ -561,8 +562,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		my=(int)(umy/canvas.scaleY);
 		if(!isConfig && (mx >= 0 && mx < canvas.WIDTH && my >= 0 && my < (canvas.GRID_H<<4)))
 		{
-			int tx = (players[255].x+(mx>>4))-(canvas.FULLGRID_W/2)+1;
-			int ty = (players[255].y+(my>>4))-(canvas.FULLGRID_H/2)+1;
+			int tx = (player.x+(mx>>4))-(canvas.FULLGRID_W/2)+1;
+			int ty = (player.y+(my>>4))-(canvas.FULLGRID_H/2)+1;
 			gs.hov_type=map.getBlock(tx,ty).getTypeWithVirtual();
 		}
 		if(isDragging)
@@ -594,7 +595,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					if(gs.players[i] != null && gs.players[i].x == mx>>4 && gs.players[i].y == my>>4) return;
 				}
 				byte[] tmparr = new byte[4];
-				Block capturedBlock = map.getBlock(players[255].x-(canvas.FULLGRID_W/2)+1+(mx>>4),players[255].y-(canvas.FULLGRID_H/2)+1+(my>>4));
+				Block capturedBlock = map.getBlock(player.x-(canvas.FULLGRID_W/2)+1+(mx>>4),player.y-(canvas.FULLGRID_H/2)+1+(my>>4));
 				if(!capturedBlock.isPlaceable()) return;
 				if(mb == ev_1)
 				{
@@ -618,8 +619,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					oldmx = mx;
 					oldmy = my;
 					oldmb = mb;
-					int ttx = players[255].x-(canvas.FULLGRID_W/2)+1+(mx>>4);
-					int tty = players[255].y-(canvas.FULLGRID_H/2)+1+(my>>4);
+					int ttx = player.x-(canvas.FULLGRID_W/2)+1+(mx>>4);
+					int tty = player.y-(canvas.FULLGRID_H/2)+1+(my>>4);
 					if(!multiplayer) synchronized(map.physics)
 					{
 						map.physics.addBlockToCheck(new BlockPos(ttx,tty));
@@ -678,8 +679,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 
 	public void shoot(int dir)
 	{
-		int sx=players[255].x+map.xMovement[dir];
-		int sy=players[255].y+map.yMovement[dir];
+		int sx=player.x+map.xMovement[dir];
+		int sy=player.y+map.yMovement[dir];
 		map.setBullet(sx,sy,(byte)(dir+1));
 		blockChange=true;
 		if(multiplayer)
@@ -728,7 +729,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				switch(kc)
 				{
 					case KeyEvent.VK_P:
-						System.out.println("player pos: x = " + players[255].x + ", y = " + players[255].y + ".");
+						System.out.println("player pos: x = " + player.x + ", y = " + player.y + ".");
 						waitTime=2;
 						break;
 					case KeyEvent.VK_T:
@@ -740,13 +741,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						}
 						break;
 					case KeyEvent.VK_R:
-						if(multiplayer && (players[255].x != 0 || players[255].y != 0))
+						if(multiplayer && (player.x != 0 || player.y != 0))
 						{
 							net.respawnRequest();
 						}
 						break;
 					case KeyEvent.VK_F:
-						if(!multiplayer||net.isOp)
+						if(!multiplayer || player.op)
 						{
 							mouseChange=true;
 							gs.viewFloorsMode=!gs.viewFloorsMode;
@@ -845,15 +846,15 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public int movePlayer(int dpx, int dpy)
 	{
 		if(hasShot) return waitTime;
-		int px = players[255].x+dpx;
-		int py = players[255].y+dpy;
+		int px = player.x+dpx;
+		int py = player.y+dpy;
 		Block blockMoveTo=map.getBlock(px,py);
 		if(isShift && blockMoveTo.isEmpty())
 		{
 			for(int i=0;i<4;i++)
 			{
-				int tx = players[255].x+map.xMovement[i];
-				int ty = players[255].y+map.yMovement[i];
+				int tx = player.x+map.xMovement[i];
+				int ty = player.y+map.yMovement[i];
 				if(tx==px && ty==py)
 				{
 					shoot(i);
@@ -868,12 +869,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			{
 				net.playerPush(dpx,dpy);
 			} else {
-				map.setPlayer(players[255].x,players[255].y,0);
+				map.setPlayer(player.x,player.y,0);
 				map.setPlayer(px,py,1);
 				map.setPlayer(px+dpx,py+dpy,1);
 				oldmx=-1;
 				oldmy=-1;
-				players[255].move(px,py);
+				player.move(px,py);
 				playerChange = true;
 			}
 			return 2;
@@ -883,12 +884,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			if(multiplayer) net.playerMove(dpx,dpy);
 			else
 			{
-				map.setPlayer(players[255].x,players[255].y,0);
+				map.setPlayer(player.x,player.y,0);
 				map.setPlayer(px,py,1);
 			}
 			oldmx=-1;
 			oldmy=-1;
-			players[255].move(px,py);
+			player.move(px,py);
 			playerChange = true;
 			return 2;
  		}
@@ -917,8 +918,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	
 	public void render()
 	{
-		int px = players[255].x;
-		int py = players[255].y;
+		int px = player.x;
+		int py = player.y;
 		int sx = px-(canvas.FULLGRID_W/2)+1;
 		int sy = py-(canvas.FULLGRID_H/2)+1;
 		Block t;
@@ -957,8 +958,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					gs.removePlayer(i);
 					continue;
 				}
-				int tx = (players[i].x-players[255].x)+(canvas.FULLGRID_W/2)-1;
-				int ty = (players[i].y-players[255].y)+(canvas.FULLGRID_H/2)-1;
+				int tx = (players[i].x-player.x)+(canvas.FULLGRID_W/2)-1;
+				int ty = (players[i].y-player.y)+(canvas.FULLGRID_H/2)-1;
 				gs.removePlayer(i);
 				if(tx>=0 && ty>=0 && tx<canvas.FULLGRID_W && ty<canvas.FULLGRID_H && gs.blocks[(ty*canvas.FULLGRID_W)+tx] != null)
 				{
@@ -1222,10 +1223,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					is = new InScreen(canvas,1,"Enter nickname:");
 					is.minLen=1;
 					is.maxLen=16;
-					if(players[255].name != "You") is.inString = players[255].name;
+					if(player.name != "You") is.inString = player.name;
 					canvas.cs = (Screen)is;
 					loopInScreen();
-					net.nick = is.inString;
 					inconf = false;
 					break;
 				case 2:
@@ -1241,7 +1241,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						canvas.draw(mx,my);
 						try{ Thread.sleep(33); } catch(Exception e){}
 					}
-					if(confChr!=0) players[255].chr = (byte)confChr;
+					if(confChr!=0) player.chr = (byte)confChr;
 					break;
 				case 5:
 					is.toggleWindow(2);
@@ -1250,7 +1250,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						canvas.draw(mx,my);
 						try{ Thread.sleep(33); } catch(Exception e){}
 					}
-					if(confCol!=0) players[255].col = (byte)confCol;
+					if(confCol!=0) player.col = (byte)confCol;
 					break;
 				case 6:
 					canvas.resizePlayfield=!canvas.resizePlayfield;
@@ -1282,7 +1282,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		window.addKeyListener(this);
 		addKeyListener(this);
 		addComponentListener(this);
-		net = new Net();
+		net = new Net(player);
 		gt = new GameThread(this);
 		window.getRootPane().addMouseListener(this);
 		window.getRootPane().addMouseMotionListener(this);
@@ -1292,8 +1292,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		if (skipConfig) multiplayer=false;
 		else thost = configure();
 		isConfig=false;
-		health = 5;
-		gs.health = 5;
+		setHealth(5);
 		if(!multiplayer)
 		{
 			gs.addChatMsg("you're running 64pixels^2 " + getVersion());
@@ -1384,11 +1383,12 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		}
 		else
 		{
-			playerChange = players[255].posChanged;
-			players[255].posChanged = false;
+			playerChange = player.posChanged;
+			player.posChanged = false;
 		}
-		if(playerChange)
-			map.physics.players[255] = players[255];
+		if(playerChange) {
+			map.physics.players[255] = player;
+		}
 		if(!multiplayer || net.loginStage > 0)
 		{
 			processMouse();

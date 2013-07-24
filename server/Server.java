@@ -431,7 +431,7 @@ public class Server extends ServerShim
 			}
 			return "&c" + ap + "/255&f - " + lol;
 		}
-		else if((cmd[0].equals("tp") || cmd[0].equals("teleport")) && id!=255 && (tpforall>0 || clients[id].op))
+		else if((cmd[0].equals("tp") || cmd[0].equals("teleport")) && id!=255 && (tpforall>0 || clients[id].player.isOp()))
 		{
 			int t = findByNick(cmd[1]);
 			if(t<0 || t>255)
@@ -490,7 +490,7 @@ public class Server extends ServerShim
 			if(!opPassOn) return "Identify disabled!";
 			if(cmdz.length>1 && cmdz[1].equals(opPass))
 			{
-				clients[id].op=true;
+				clients[id].player.op = true;
 				clients[id].sendOpPacket(1);
 				return "You're opped now!";
 			} else return "Incorrect op password! :(";
@@ -501,7 +501,7 @@ public class Server extends ServerShim
 			{
 				return "Commands: who warps kick nick deop save ban unban delwarp lock unlock worlds addworld delworld msg";
 			}
-			else if(clients[id].op)
+			else if(clients[id].player.isOp())
 			{
 
 				return "Commands: who tp warp warps me kick fetch copy paste protect unprotect setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg raycast";
@@ -570,7 +570,7 @@ public class Server extends ServerShim
 		}
 		else
 		{
-			if(id != 255 && !clients[id].op) return "$N";
+			if(id != 255 && !clients[id].player.isOp()) return "$N";
 			if(cmd[0].equals("kick"))
 			{
 				int t = findByNick(cmd[1]);
@@ -793,7 +793,7 @@ public class Server extends ServerShim
 					{
 						addOp(clients[t].socket.getInetAddress().getHostAddress());
 						clients[t].sendChatMsgSelf("You're opped now!");
-						clients[t].op=true;
+						clients[t].player.op=true;
 						clients[t].sendOpPacket(1);
 						saveNamesFile(op_ips,"ops.txt");
 					}
@@ -858,7 +858,7 @@ public class Server extends ServerShim
 					{
 						removeOp(clients[t].socket.getInetAddress().getHostAddress());
 						clients[t].sendChatMsgSelf("You're not opped anymore.");
-						clients[t].op=false;
+						clients[t].player.op=false;
 						clients[t].sendOpPacket(0);
 						saveNamesFile(op_ips,"ops.txt");
 					}

@@ -23,8 +23,6 @@ public class Client implements Runnable
 	public Server serv;
 	public NetSender ns;
 	public Player player;
-	public int health;
-	public boolean op = false;
 	public long frames = 0;
 	public int pingsWaiting = 0;
 	private Auth auth;
@@ -606,7 +604,7 @@ public class Client implements Runnable
 									{
 										if(serv.isOp(socket.getInetAddress().getHostAddress()))
 										{
-											op=true;
+											player.op=true;
 											System.out.println("User " + id + " is an Op!");
 										}
 										synchronized(out)
@@ -615,7 +613,7 @@ public class Client implements Runnable
 											out.writeInt(player.x);
 											out.writeInt(player.y);
 											writeString(player.name);
-											out.writeShort(op?42:0);
+											out.writeShort(player.op?42:0);
 	
 											sendPacket();
 										}
@@ -764,7 +762,7 @@ public class Client implements Runnable
 								byte aco = in.readByte();
 								if(passWait) break;
 								byte[] zc = map.getBlock(ax,ay).getBlockData();
-								if((op && (isCopying || isPasting || isProtecting || isUnprotecting)) || (serv.mapLock && !op))
+								if((player.isOp() && (isCopying || isPasting || isProtecting || isUnprotecting)) || (serv.mapLock && !player.isOp()))
 								{
 									out.writeByte(0x31);
 									out.writeByte((byte)id);

@@ -4,7 +4,8 @@ public class Player
 {
 	public int x, y, health;
 	public byte chr, col;
-	public boolean posChanged;
+	public boolean posChanged = false;
+	public boolean op = false;
 	public String name;
 	
 	public Player(int _px, int _py, byte _pchr, byte _pcol, String _pn)
@@ -14,6 +15,7 @@ public class Player
 		chr = _pchr;
 		col = _pcol;
 		name = _pn;
+		health = 5;
 		posChanged = true;
 	}
 	public Player(int _px, int _py)
@@ -37,4 +39,5 @@ public class Player
 		y += _py;
 		posChanged = true;
 	}
+	public boolean isOp() { return op; }
 }
