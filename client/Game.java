@@ -37,7 +37,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public Config config;
 	public Net net;
 	public GameScreen gs;
-	public InScreen is;
+	public TextInputScreen textInputScreen;
+	public OptionScreen optionScreen;
 	public Sound audio;
 	public boolean advMouseMode = false;
 	public int netThreadRequest = 0;
@@ -241,15 +242,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 
 	public String getData(String name,int len)
 	{
-		is = new InScreen(canvas,1,name);
-		canvas.cs = (Screen)is;
-		is.maxLen=len;
-		is.minLen=1;
-		loopInScreen();
-		String t = is.inString;
+		TextInputScreen screen = new TextInputScreen(canvas,name);
+		canvas.cs = (Screen)screen;
+		screen.maxLen=len;
+		screen.minLen=1;
+		loopScreen();
 		canvas.cs = (Screen)gs;
-		is = null;
-		return t;
+		return screen.inString;
 	}
 	
 	public void saveConfig()
@@ -480,7 +479,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public void processWindows()
 	{
 		ArrayList<Window> w;
-		if(isConfig) w=is.windows;
+		OptionScreen os = null;
+		if(canvas.cs instanceof OptionScreen) os = (OptionScreen)canvas.cs;
+		if(isConfig && canvas.cs instanceof OptionScreen) w = os.windows;
 		else w=gs.windows;
 		try
 		{
@@ -490,11 +491,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					for(Window cw : w)
 					{
 						if(!isConfig && gs.obstructedWindow(cw,mx,my)) { }
-						else if(isConfig && is.obstructedWindow(cw,mx,my)) { }
+						else if(isConfig && os != null && os.obstructedWindow(cw,mx,my)) { }
 						else if(insideRect(mx,my,(cw.x+cw.w-1)<<3,cw.y<<3,8,8))
 						{
 							// close button, any window
-							if(isConfig) is.toggleWindow(cw.type);
+							if(isConfig && os != null) os.toggleWindow(cw.type);
 							else gs.toggleWindow(cw.type);
 							canMousePress = false;
 						} else if(insideRect(mx,my,(cw.x+1)<<3,(cw.y+1)<<3,(cw.w-2)<<3,(cw.h-2)<<3))
@@ -508,13 +509,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 										gs.sdrawChr(confChr);
 										gs.chrBarOff = confChr-8;
 										if(gs.chrBarOff<0) gs.chrBarOff+=256;
-										if(isConfig) is.getWindow(1).charChosen = confChr;
+										if(isConfig && os != null) os.getWindow(1).charChosen = confChr;
 									}				
 									break;
 								case 2:
 									confCol = (((mx-((cw.x+1)<<3))>>3)&15) | (((my-((cw.y+1)<<3))<<1)&240);
 									gs.sdrawCol(confCol);
-									if(isConfig) is.getWindow(2).colorChosen = confCol;
+									if(isConfig && os != null) os.getWindow(2).colorChosen = confCol;
 									break;
 								case 3:
 									if(insideRect(mx,my,(cw.x+2)<<3,(cw.y+2)<<3,(cw.w-4)<<3,(cw.h-4)<<3))
@@ -569,7 +570,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		if(isDragging)
 		{
 			ArrayList<Window> w = gs.windows;
-			if(isConfig) w = is.windows;
+			if(isConfig && canvas.cs instanceof OptionScreen) {
+				OptionScreen os = (OptionScreen)canvas.cs;
+				w = os.windows;
+			}
 			synchronized(w)
 			{
 				Window dcw = w.get(dragID);
@@ -698,14 +702,14 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public void keyPressed(KeyEvent ev)
 	{
 		if(isKick) return;
-		if(is != null)
+		if(canvas.cs != gs)
 		{
-			is.parseKey(ev);
+			canvas.cs.parseKey(ev);
 			return;
 		}
 		int kc = ev.getKeyCode();
 		isShift = ev.isShiftDown();
-		if(is == null && gs.barType == 0)
+		if(canvas.cs == gs && gs.barType == 0)
 		{
 			if(kc==key_left)
 				keyHeld[1] = true;
@@ -1120,11 +1124,11 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		tnew = new Date(told.getTime() + 1000L);
 	}
 	
-	public void loopInScreen()
+	public void loopScreen()
 	{
 		try
 		{
-			while(is.isRunning)
+			while(canvas.cs.isRunning)
 			{
 				canvas.draw(mx,my);
 				if(waitTime>0) waitTime--;
@@ -1140,7 +1144,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		}
 		catch(Exception e)
 		{
-			System.out.println("Fatal loopInScreen error!");
+			System.out.println("Fatal loopScreen error!");
 			System.exit(1);
 		}
 	}
@@ -1148,7 +1152,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public String configure()
 	{
 		boolean inconf = true;
-		is = new InScreen(canvas,2,"Main menu");
 		String[] modes = new String[7];
 		modes[0] = "Singleplayer";
 		modes[1] = "Multiplayer";
@@ -1157,21 +1160,20 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		String ostr = "";
 		while(inconf)
 		{
-			is = new InScreen(canvas,2,"Main menu");
-			is.isRunning=true;
+			OptionScreen screen = new OptionScreen(canvas,"Main menu");
 			modes[2] = "Key mode: " + ((kim>0)?"WSAD":"Arrows");
 			modes[3] = "Hideous prompts: " + ((gs.hideousPrompts)?"On":"Off");
 			modes[6] = "Resize mode: " + ((canvas.resizePlayfield)?"Playfield":"Scale");
-			is.addStrings(modes);
-			canvas.cs = (Screen)is;
-			loopInScreen();
-			switch(is.inSel)
+			screen.addStrings(modes);
+			canvas.cs = (Screen)screen;
+			loopScreen();
+			switch(screen.inSel)
 			{
 				case 0:
 					multiplayer = false;
 					inconf = false;
 					break;
-				case 1:
+				case 1: {
 					multiplayer = true;
 					boolean doCustom = true;
 					KickScreen cks = new KickScreen(canvas,"Loading serverlist...");
@@ -1194,13 +1196,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 							csll[i]=escapeSlashes(csl.keyo[i-1]);
 						}
 						csll[csll.length-1]="<- Back";
-						is = new InScreen(canvas,2,"Choose server");
-						is.addStrings(csll);
-						canvas.cs= (Screen) is;
-						loopInScreen();
-						if(is.inSel==0) doCustom=true;
-						else if(is.inSel==(csll.length-1)) { inconf = true; break; }
-						else ostr=csl.value[is.inSel-1];
+						screen = new OptionScreen(canvas,"Choose server");
+						screen.addStrings(csll);
+						canvas.cs= (Screen)screen;
+						loopScreen();
+						if(screen.inSel==0) doCustom=true;
+						else if(screen.inSel==(csll.length-1)) { inconf = true; break; }
+						else ostr=csl.value[screen.inSel-1];
 					}
 					else
 					{
@@ -1213,21 +1215,21 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					}
 					if(doCustom)
 					{
-						is = new InScreen(canvas,1,"Input address:");
-						is.minLen=0;
-						is.maxLen=60;
-						canvas.cs = (Screen)is;
-						loopInScreen();
-						ostr = is.inString;
+						TextInputScreen aScreen = new TextInputScreen(canvas,"Input address:");
+						aScreen.minLen=0;
+						aScreen.maxLen=60;
+						canvas.cs = (Screen)aScreen;
+						loopScreen();
+						ostr = aScreen.inString;
 					}
-					is = new InScreen(canvas,1,"Enter nickname:");
-					is.minLen=1;
-					is.maxLen=16;
-					if(player.name != "You") is.inString = player.name;
-					canvas.cs = (Screen)is;
-					loopInScreen();
+					TextInputScreen nScreen = new TextInputScreen(canvas,"Enter nickname:");
+					nScreen.minLen=1;
+					nScreen.maxLen=16;
+					if(player.name != "You") nScreen.inString = player.name;
+					canvas.cs = (Screen)nScreen;
+					loopScreen();
 					inconf = false;
-					break;
+					} break;
 				case 2:
 					changeKeyMode(1-(kim%2));
 					break;
@@ -1235,8 +1237,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					gs.hideousPrompts=!gs.hideousPrompts;
 					break;
 				case 4:
-					is.toggleWindow(1);
-					while(is.getWindow(1)!=null)
+					screen.toggleWindow(1);
+					while(screen.getWindow(1)!=null)
 					{
 						canvas.draw(mx,my);
 						try{ Thread.sleep(33); } catch(Exception e){}
@@ -1244,8 +1246,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					if(confChr!=0) player.chr = (byte)confChr;
 					break;
 				case 5:
-					is.toggleWindow(2);
-					while(is.getWindow(2)!=null)
+					screen.toggleWindow(2);
+					while(screen.getWindow(2)!=null)
 					{
 						canvas.draw(mx,my);
 						try{ Thread.sleep(33); } catch(Exception e){}
@@ -1258,7 +1260,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			}
 		}
 		canvas.cs = (Screen)gs;
-		is = null;
 		return ostr;
 	}
 	
