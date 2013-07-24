@@ -426,7 +426,7 @@ public class Server extends ServerShim
 						lol+=", ";
 					}
 					ap++;
-					lol+=clients[i].player.name;
+					lol+=clients[i].getName();
 				}
 			}
 			return "&c" + ap + "/255&f - " + lol;
@@ -513,7 +513,7 @@ public class Server extends ServerShim
 		}
 		else if(cmd[0].equals("me") && id!=255)
 		{
-			String st = "* " + clients[id].player.name + " ";
+			String st = "* " + clients[id].getName() + " ";
 			for(int i=1;i<cmdz.length;i++)
 			{
 				if(i>1) st += " ";
@@ -537,15 +537,15 @@ public class Server extends ServerShim
 			else
 			{
 				clients[id].changeMap(tm.map);
-				if (cmd[1].startsWith("$")) clients[id].sendChatMsgAll("&e" + clients[id].player.name + " loaded a secret map!");
-				else if(!cmd[1].equals("map")) clients[id].sendChatMsgAll("&e" + clients[id].player.name + " loaded map &f'" + cmdz[1] + "'!"); 
-				else clients[id].sendChatMsgAll("&e" + clients[id].player.name + " loaded the main map!");
+				if (cmd[1].startsWith("$")) clients[id].sendChatMsgAll("&e" + clients[id].getName() + " loaded a secret map!");
+				else if(!cmd[1].equals("map")) clients[id].sendChatMsgAll("&e" + clients[id].getName() + " loaded map &f'" + cmdz[1] + "'!"); 
+				else clients[id].sendChatMsgAll("&e" + clients[id].getName() + " loaded the main map!");
 			}
 		}
 		else if(cmd[0].equals("return") && id!=255)
 		{
 			clients[id].changeMap(map);
-			clients[id].sendChatMsgAll("&e" + clients[id].player.name + " loaded the main map!"); 
+			clients[id].sendChatMsgAll("&e" + clients[id].getName() + " loaded the main map!"); 
 		}
 		else if(cmd[0].equals("m") || cmd[0].equals("msg"))
 		{
@@ -563,7 +563,7 @@ public class Server extends ServerShim
 					if(i>2) msg+=" ";
 					msg+=cmdz[i];
 				}
-				String msg2 = "&a[PM] >&f" + clients[id].player.name + ": " + msg;
+				String msg2 = "&a[PM] >&f" + clients[id].getName() + ": " + msg;
 				clients[id].sendChatMsgID(msg2,t);
 				return msg2;
 			}
@@ -581,8 +581,8 @@ public class Server extends ServerShim
 				else
 				{
 					clients[t].kick();
-					if(id!=255) System.out.println("[KICK] user " + clients[t].player.name + ", by user " + clients[id].player.name);
-					return clients[t].player.name + " has been kicked.";
+					if(id!=255) System.out.println("[KICK] user " + clients[t].getName() + ", by user " + clients[id].getName());
+					return clients[t].getName() + " has been kicked.";
 				}
 			}
 			else if(cmd[0].equals("fetch") && id !=255)
@@ -598,7 +598,7 @@ public class Server extends ServerShim
 					{
 						if(clients[id].map!=clients[t].map) clients[t].changeMap(clients[id].map);
 						clients[t].teleport(clients[id].player.x,clients[id].player.y);
-						clients[t].sendChatMsgSelf("Fetched by " + clients[id].player.name + "!");
+						clients[t].sendChatMsgSelf("Fetched by " + clients[id].getName() + "!");
 						return "User fetched!";
 					}
 				}
@@ -647,7 +647,7 @@ public class Server extends ServerShim
 					{
 						if(clients[i] != null && clients[i].dc == 0 && clients[i].map == clients[id].map)
 						{
-							clients[id].sendChatMsgAll("&c" + clients[i].player.name + "&7 - &e" + clients[i].deaths + " times");
+							clients[id].sendChatMsgAll("&c" + clients[i].getName() + "&7 - &e" + clients[i].deaths + " times");
 							clients[i].setPvP(false);
 						}
 					}
@@ -765,7 +765,7 @@ public class Server extends ServerShim
 					}
 					else
 					{
-						String tt = clients[t].player.name;
+						String tt = clients[t].getName();
 						clients[t].changeNickname(cmd[2]);
 						if(id!=255) clients[id].sendChatMsgAll("User " + tt + " is now known as " + cmd[2]);
 						return "Nickname of user " + tt + " changed.";
@@ -773,7 +773,7 @@ public class Server extends ServerShim
 				}
 				else if(cmd.length>1 && id!=255)
 				{
-					String tt = clients[id].player.name;
+					String tt = clients[id].getName();
 					clients[id].changeNickname(cmd[1]);
 					clients[id].sendChatMsgAll("User " + tt + " is now known as " + cmd[1]);
 					return "You're now known as " + cmd[1];	
@@ -867,7 +867,7 @@ public class Server extends ServerShim
 			else if(cmd[0].equals("save") || cmd[0].equals("savemap"))
 			{
 				saveMap();
-				System.out.println("[ID " + id + "] Map saved by user " + clients[id].player.name + "!");
+				System.out.println("[ID " + id + "] Map saved by user " + clients[id].getName() + "!");
 				return "Map saved!";
 			}
 			else if(cmd[0].equals("ban"))
@@ -884,7 +884,7 @@ public class Server extends ServerShim
 						ban(clients[t].socket.getInetAddress().getHostAddress());
 						saveNamesFile(ban_ips,"bans.txt");
 						clients[t].kick("Banned!");
-						if(id!=255) System.out.println("[BAN] user " + clients[t].player.name + ", by user " + clients[id].player.name);
+						if(id!=255) System.out.println("[BAN] user " + clients[t].getName() + ", by user " + clients[id].getName());
 					}
 				}
 			}
@@ -1081,9 +1081,9 @@ public class Server extends ServerShim
 		int curr_id_prob = 255; 
 		for(int i=0;i<255;i++)
 		{
-			if(clients[i] != null && clients[i].player.name.toLowerCase().startsWith(nick.toLowerCase()) && clients[i].dc == 0)
+			if(clients[i] != null && clients[i].getName().toLowerCase().startsWith(nick.toLowerCase()) && clients[i].dc == 0)
 			{
-				int t = clients[i].player.name.toLowerCase().compareTo(nick.toLowerCase());
+				int t = clients[i].getName().toLowerCase().compareTo(nick.toLowerCase());
 				if(t<0) t=-t;
 				if(t<curr_id_prob)
 				{

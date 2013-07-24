@@ -69,13 +69,7 @@ public class Client implements Runnable
 		} 
 	}
 	
-	private int min(int a1, int a2)
-	{
-		if(a1>a2)
-		{
-			return a2;
-		} else return a1;
-	}
+	public String getName() { return player.name; }
 
 	public void kill()
 	{
@@ -85,7 +79,7 @@ public class Client implements Runnable
 		{
 			player.health = 5;
 			deaths++;
-			sendChatMsgAll("&c" + player.name + "&c was killed!");
+			sendChatMsgAll("&c" + getName() + "&c was killed!");
 			teleport(world.spawnX,world.spawnY);
 		}
 		sendHealth(player.health);
@@ -399,7 +393,7 @@ public class Client implements Runnable
 		{
 			map.setPlayer(player.x,player.y,0);
 			despawnPlayer();
-			sendChatMsgAll(player.name + " has left.");
+			sendChatMsgAll(getName() + " has left.");
 		}
 		catch(Exception e)
 		{
@@ -637,7 +631,7 @@ public class Client implements Runnable
 											}
 											passWait=true;
 										}
-										sendChatMsgAll(player.name + " has joined.");
+										sendChatMsgAll(getName() + " has joined.");
 										setRaycasting(world.isRaycasted);
 										map.physics.players[id] = player;
 										map.setPlayer(player.x,player.y,1);
@@ -943,9 +937,9 @@ public class Client implements Runnable
 								break;
 							case 0x40:
 								String al = readString();
-								System.out.println("<" + player.name + "> " + al);
+								System.out.println("<" + getName() + "> " + al);
 								String alt = serv.parseMessage(al,id);
-								if(alt.equals("$N") && !al.equals("")) sendChatMsgAll("<" + player.name + "> " + al);
+								if(alt.equals("$N") && !al.equals("")) sendChatMsgAll("<" + getName() + "> " + al);
 								else if (!alt.equals("")) sendChatMsgSelf(alt);
 								break;
 							case 0x51:
