@@ -879,10 +879,10 @@ public class Client implements Runnable
 	 										map.setPushable(ax,ay,(byte)0,(byte)0);
 	 									}
 	 								}
-									map.physics.addBlockToCheck(new BlockPos(ax,ay));
+									map.physics.addBlockToCheck(new Point(ax,ay));
 									for(int i=0;i<4;i++)
 									{
-										map.physics.addBlockToCheck(new BlockPos(ax+map.xMovement[i],ay+map.yMovement[i]));
+										map.physics.addBlockToCheck(new Point(ax+map.xMovement[i],ay+map.yMovement[i]));
 									}
 									Block outBlock = map.getBlock(ax,ay);
 									synchronized(out)
@@ -946,8 +946,8 @@ public class Client implements Runnable
 								byte bt = in.readByte();
 								map.setBullet(xb,yb,bt);
 								map.setBulletNet(xb,yb,bt);
-								map.physics.addBlockToCheck(new BlockPos(xb,yb));
-								for(int i=0;i<4;i++) map.physics.addBlockToCheck(new BlockPos(xb+map.xMovement[i],yb+map.yMovement[i]));
+								map.physics.addBlockToCheck(new Point(xb,yb));
+								for(int i=0;i<4;i++) map.physics.addBlockToCheck(new Point(xb+map.xMovement[i],yb+map.yMovement[i]));
 								break;
  							case 0xE0:
  								{

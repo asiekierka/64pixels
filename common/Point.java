@@ -1,11 +1,11 @@
 package common;
 
-public class BlockPos
+public class Point
 {
 	private final int x;
 	private final int y;
 	
-	public BlockPos(int tx, int ty)
+	public Point(int tx, int ty)
 	{
 		x=tx;
 		y=ty;
@@ -21,8 +21,8 @@ public class BlockPos
 	public boolean equals(Object other)
 	{
 		if(other==null) return false;
-		if(!(other instanceof BlockPos)) return false;
-		BlockPos co = (BlockPos)other;
+		if(!(other instanceof Point)) return false;
+		Point co = (Point)other;
 		return (co.x==x && co.y==y);
 	}
 	public int hashCode()

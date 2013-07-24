@@ -109,12 +109,12 @@ public class Chunk {
 						if(type[i]==5 && (0x80&(int)param[i])>0)
 						{
 							param[i]=(byte)1;
-							map.physics.addBlockToCheck(new BlockPos(xpos*64+(i&63),ypos*64+(i>>6)));
+							map.physics.addBlockToCheck(new Point(xpos*64+(i&63),ypos*64+(i>>6)));
 						}
 						else if(Block.isLoaded(type[i])) // Physics refresh
-							map.physics.addBlockToCheck(new BlockPos(xpos*64+(i&63),ypos*64+(i>>6)));
+							map.physics.addBlockToCheck(new Point(xpos*64+(i&63),ypos*64+(i>>6)));
 						else if(param[i+4096] != 0) // Bullet refresh
-							map.physics.addBlockToCheck(new BlockPos(xpos*64+(i&63),ypos*64+(i>>6)));
+							map.physics.addBlockToCheck(new Point(xpos*64+(i&63),ypos*64+(i>>6)));
 					}
 					fixDisplay();
 					int extendedBlockCount = din.readUnsignedShort();

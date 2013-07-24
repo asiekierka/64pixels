@@ -19,8 +19,8 @@ public class Window
 	public int[] recBlockChr;
 	public int[] recBlockCol;
 	public int[] recBlockType;
-	public static final String[] note_names={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
-	public static final String[] drum_names={"Kick","Snare","(C) HiHat","(O) HiHat","HiTom","MidTom","LoTom","Crash"};
+	public static final String[] NOTE_NAMES={"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
+	public static final String[] DRUM_NAMES={"Kick","Snare","(C) HiHat","(O) HiHat","HiTom","MidTom","LoTom","Crash"};
 	public int uid;
 	private int oldtype;
 
@@ -36,8 +36,8 @@ public class Window
 	public static String getNoteName(int v)
 	{
 		int chr = v%248;
-		if(chr>=240) return drum_names[chr-240];
-		else return note_names[(chr%24)>>1]+"-"+(chr/24);
+		if(chr>=240) return DRUM_NAMES[chr-240];
+		else return NOTE_NAMES[(chr%24)>>1]+"-"+(chr/24);
 	}
 
 	public static int getBlockType(int pos)

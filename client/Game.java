@@ -1,7 +1,7 @@
 package client;
 import common.*;
 
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.event.*;
 import java.awt.datatransfer.*;
 import java.io.*;
@@ -623,10 +623,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					int tty = player.y-(canvas.FULLGRID_H/2)+1+(my>>4);
 					if(!multiplayer) synchronized(map.physics)
 					{
-						map.physics.addBlockToCheck(new BlockPos(ttx,tty));
+						map.physics.addBlockToCheck(new Point(ttx,tty));
 						for(int i=0;i<4;i++)
 						{
-							map.physics.addBlockToCheck(new BlockPos(ttx+map.xMovement[i],tty+map.yMovement[i]));
+							map.physics.addBlockToCheck(new Point(ttx+map.xMovement[i],tty+map.yMovement[i]));
 						}
 					}
 					if(mb == ev_1 && advMouseMode) tmparr[0] = (byte)map.getBlock(ttx,tty).getTypeWithVirtual();
@@ -689,8 +689,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		}
 		else
 		{
-			map.physics.addBlockToCheck(new BlockPos(sx,sy));
-			for(int i=0;i<4;i++) map.physics.addBlockToCheck(new BlockPos(sx+map.xMovement[i],sy+map.yMovement[i]));
+			map.physics.addBlockToCheck(new Point(sx,sy));
+			for(int i=0;i<4;i++) map.physics.addBlockToCheck(new Point(sx+map.xMovement[i],sy+map.yMovement[i]));
 		}
 	}
 

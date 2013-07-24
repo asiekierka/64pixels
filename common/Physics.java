@@ -5,10 +5,10 @@ import java.util.*;
 
 public class Physics
 {
-	private Set<BlockPos> blocksToCheck = new HashSet<BlockPos>();
-	private Set<BlockPos> blocksToCheckOld = new HashSet<BlockPos>();
-	private Set<BlockPos> blocksToClear = new HashSet<BlockPos>();
-	private Set<BlockPos> blocksToClearOld = new HashSet<BlockPos>();
+	private Set<Point> blocksToCheck = new HashSet<Point>();
+	private Set<Point> blocksToCheckOld = new HashSet<Point>();
+	private Set<Point> blocksToClear = new HashSet<Point>();
+	private Set<Point> blocksToClearOld = new HashSet<Point>();
 	private Set<Block> blocksToSet = new HashSet<Block>();
 	private Set<Block> blocksToSetOld = new HashSet<Block>();
 	private static final int[] pnandDir = {26,27,25,24};
@@ -43,7 +43,7 @@ public class Physics
 		{
 			nb.setBullet((byte)(dir+1));
 			addBlockToSet(nb);
-			addBlockToCheck(new BlockPos(nx,ny));
+			addBlockToCheck(new Point(nx,ny));
 			return true;
 		}
 		else return false;
@@ -51,7 +51,7 @@ public class Physics
 
 	public void tick(WorldMap modifiedMap)
 	{
-		Set<BlockPos> tempb;
+		Set<Point> tempb;
 		synchronized(blocksToCheck)
 		{
 			tempb = blocksToCheck;
@@ -64,14 +64,14 @@ public class Physics
 			changeBullets=true;
 			lastBUpdate = new Date();
 		}
-		for(BlockPos cbp:blocksToCheckOld)
+		for(Point cbp:blocksToCheckOld)
 		{
 			runPhysics(cbp,modifiedMap);
 		}
 		changeBullets=false;
 		synchronized(modifiedMap)
 		{
-			Set<BlockPos> tempc;
+			Set<Point> tempc;
 			synchronized(blocksToClear)
 			{
 				tempc = blocksToClear;
@@ -79,7 +79,7 @@ public class Physics
 				blocksToClearOld = tempc;
 				blocksToClear.clear();
 			}
-			for (BlockPos cbp:blocksToClearOld)
+			for (Point cbp:blocksToClearOld)
 			{
 				modifiedMap.clearBlock(cbp.getX(),cbp.getY());
 				if(isServer) modifiedMap.clearBlockNet(cbp.getX(),cbp.getY());
@@ -115,7 +115,7 @@ public class Physics
 		blocksToSetOld.clear();
 	}
 	
-	public void addBlockToCheck(BlockPos cbp)
+	public void addBlockToCheck(Point cbp)
 	{
 		synchronized(blocksToCheck)
 		{
@@ -123,7 +123,7 @@ public class Physics
 		}
 	}
 
-	public void addBlockToClear(BlockPos cbp)
+	public void addBlockToClear(Point cbp)
 	{
 		synchronized(blocksToClear)
 		{
@@ -140,10 +140,10 @@ public class Physics
 	}
 	public void updateNeighbours(WorldMap map, int x, int y) {
 		for(int i=0;i<4;i++)
-			if(map.getBlock(x+xMovement[i],y+yMovement[i]).isUpdated()) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
+			if(map.getBlock(x+xMovement[i],y+yMovement[i]).isUpdated()) addBlockToCheck(new Point(x+xMovement[i],y+yMovement[i]));
 	}
 
-	public void runPhysics(BlockPos cbp, WorldMap map)
+	public void runPhysics(Point cbp, WorldMap map)
 	{
 		int x = cbp.getX();
 		int y = cbp.getY();
@@ -214,17 +214,17 @@ public class Physics
 				{
 					surrBlockO[blockData[6]-1].setBullet((byte)blockO.getBullet());
 					addBlockToSet(surrBlockO[blockData[6]-1]);
-					addBlockToCheck(new BlockPos(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y));
+					addBlockToCheck(new Point(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y));
 					for(int i=0;i<4;i++)
 					{
 						int tbx = surrBlockO[blockData[6]-1].x+xMovement[i];
 						int tby = surrBlockO[blockData[6]-1].y+yMovement[i];
-						if(map.getBlock(tbx,tby).isUpdated()) addBlockToCheck(new BlockPos(tbx,tby));
+						if(map.getBlock(tbx,tby).isUpdated()) addBlockToCheck(new Point(tbx,tby));
 					}
 				} else
 				{
 					int tmpt = surrBlockO[blockData[6]-1].getType();
-					if(tmpt == 23 || tmpt == 21) addBlockToClear(new BlockPos(x+xMovement[blockData[6]-1],y+yMovement[blockData[6]-1]));
+					if(tmpt == 23 || tmpt == 21) addBlockToClear(new Point(x+xMovement[blockData[6]-1],y+yMovement[blockData[6]-1]));
 					for(int i=0;i<256;i++)
 					{
 						if(players[i]!=null && players[i].x==blockO.x+xMovement[blockData[6]-1] && players[i].y==blockO.y+yMovement[blockData[6]-1])
@@ -240,15 +240,15 @@ public class Physics
 			}
 			if(surrBlockO[blockData[6]-1].getType()==14)
 			{
-				addBlockToClear(new BlockPos(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y)); // this makes an empty block.
+				addBlockToClear(new Point(surrBlockO[blockData[6]-1].x,surrBlockO[blockData[6]-1].y)); // this makes an empty block.
 			}
 			blockO.setBullet((byte)0);
 			addBlockToSet(blockO);
-			addBlockToCheck(new BlockPos(blockO.x,blockO.y));
+			addBlockToCheck(new Point(blockO.x,blockO.y));
 		}
 		else if(!changeBullets && blockData[6]!=0)
 		{
-			addBlockToCheck(new BlockPos(x,y));
+			addBlockToCheck(new Point(x,y));
 		}
 		byte oldColour = blockData[3];
 		byte oldParam = blockData[1];
@@ -273,7 +273,7 @@ public class Physics
 					if(oldColour!=((byte)(maxSignalDir<<4)))
 					{
 						addBlockToSet(new Block(x,y,blockData[0],(byte)(maxSignalDir<<4),blockData[2],blockData[3]));
-						addBlockToCheck(new BlockPos(x,y));
+						addBlockToCheck(new Point(x,y));
 						updateNeighbours(map,x,y);
 					}
 				}
@@ -283,7 +283,7 @@ public class Physics
 					if(oldColour!=((byte)((maxSignal-1) | (maxSignalDir<<4))))
 					{
 						addBlockToSet(new Block(x,y,blockData[0],(byte)((maxSignal-1) | (maxSignalDir<<4)),blockData[2],blockData[3]));
-						addBlockToCheck(new BlockPos(x,y));
+						addBlockToCheck(new Point(x,y));
 						updateNeighbours(map,x,y);
 					}
 				}
@@ -311,7 +311,7 @@ public class Physics
 					addBlockToSet(new Block(x,y,blockData[0],(byte)15,blockData[2],blockData[3]));
 					blockData[1]=15;
 					if(oldColour!=15 && surrBlockO[outputDirection].isUpdated()) {
-						addBlockToCheck(new BlockPos(x+xMovement[outputDirection],y+yMovement[outputDirection]));
+						addBlockToCheck(new Point(x+xMovement[outputDirection],y+yMovement[outputDirection]));
 					}
 				}
 				else
@@ -321,7 +321,7 @@ public class Physics
 					int type = surrBlockData[outputDirection][0];
 					blockData[1]=0;
 					if(oldColour!=0 && surrBlockO[outputDirection].isUpdated()) {
-						addBlockToCheck(new BlockPos(x+xMovement[outputDirection],y+yMovement[outputDirection]));
+						addBlockToCheck(new Point(x+xMovement[outputDirection],y+yMovement[outputDirection]));
 					}
 				}
 				if(oldColour!=blockData[1]) updateNeighbours(map,x,y);
@@ -364,7 +364,7 @@ public class Physics
 				int on = (int)blockData[1]&0x80;
 				if((on!=0) || (co!=0))
 				{
-					addBlockToCheck(new BlockPos(x,y));
+					addBlockToCheck(new Point(x,y));
 					updateNeighbours(map,x,y);
 					blockData[1] = (byte)(on|(co^1));
 					addBlockToSet(new Block(x,y,blockData[0],blockData[1],blockData[2],blockData[3]));
@@ -433,7 +433,7 @@ public class Physics
 				if(co>0)
 				{
 					dc=true;
-					if(co>1) addBlockToCheck(new BlockPos(x,y));
+					if(co>1) addBlockToCheck(new Point(x,y));
 					else on=0;
 					addBlockToSet(new Block(x,y,blockData[0],on|(co-1),blockData[2],blockData[3]));
 				}
@@ -442,14 +442,14 @@ public class Physics
 					dc=true;
 					on=0x80;
 					addBlockToSet(new Block(x,y,blockData[0],0x82,blockData[2],blockData[3]));
-					addBlockToCheck(new BlockPos(x,y));
+					addBlockToCheck(new Point(x,y));
 				}
 				else if(on>0 && si==0)
 				{
 					dc=true;
 					on=0;
 					addBlockToSet(new Block(x,y,blockData[0],0,blockData[2],blockData[3]));
-					addBlockToCheck(new BlockPos(x,y));
+					addBlockToCheck(new Point(x,y));
 				}
 				if(dc) updateNeighbours(map,x,y);
 			} break;
@@ -519,7 +519,7 @@ public class Physics
 						{
 							surrBlockO[(non-1)].setBullet((byte)non);
 							addBlockToSet(surrBlockO[(non-1)]);
-							addBlockToCheck(new BlockPos(surrBlockO[(non-1)].x,surrBlockO[(non-1)].y));
+							addBlockToCheck(new Point(surrBlockO[(non-1)].x,surrBlockO[(non-1)].y));
 						}
 					}
 				}
@@ -537,7 +537,7 @@ public class Physics
 				if(co>0)
 				{
 					dc=true;
-					if(co>1) addBlockToCheck(new BlockPos(x,y));
+					if(co>1) addBlockToCheck(new Point(x,y));
 					else on=0;
 					addBlockToSet(new Block(x,y,blockData[0],on|(co-1),blockData[2],blockData[3]));
 				}
@@ -546,14 +546,14 @@ public class Physics
 					dc=true;
 					on=0x80;
 					addBlockToSet(new Block(x,y,blockData[0],0x82,blockData[2],blockData[3]));
-					addBlockToCheck(new BlockPos(x,y));
+					addBlockToCheck(new Point(x,y));
 				}
 				else if(on>0 && si==0)
 				{
 					dc=true;
 					on=0;
 					addBlockToSet(new Block(x,y,blockData[0],0,blockData[2],blockData[3]));
-					addBlockToCheck(new BlockPos(x,y));
+					addBlockToCheck(new Point(x,y));
 				}
 				if(dc) updateNeighbours(map,x,y);
 			} break;
@@ -583,10 +583,10 @@ public class Physics
 					blockData[1]+=(byte)2;
 				}
 				addBlockToSet(new Block(x,y,blockData[0],blockData[1],blockData[2],blockData[3]));
-				if(surrBlockO[outputDirection].isUpdated()) addBlockToCheck(new BlockPos(x+xMovement[outputDirection],y+yMovement[outputDirection]));
+				if(surrBlockO[outputDirection].isUpdated()) addBlockToCheck(new Point(x+xMovement[outputDirection],y+yMovement[outputDirection]));
 				if(oldColour!=blockData[1])
 				{
-					addBlockToCheck(new BlockPos(x,y));
+					addBlockToCheck(new Point(x,y));
 					updateNeighbours(map,x,y);
 				}
 			} break;
@@ -620,14 +620,14 @@ public class Physics
 					i=val;
 					if(st>0) map.piston(x+xMovement[i],y+yMovement[i],xMovement[i],yMovement[i],true);
 					Block ph = map.getBlock(x+xMovement[i],y+yMovement[i]);
-					if(ph.getType()==16 && ph.getChar()==pistonDir[i]) addBlockToClear(new BlockPos(x+xMovement[val],y+yMovement[val]));
+					if(ph.getType()==16 && ph.getChar()==pistonDir[i]) addBlockToClear(new Point(x+xMovement[val],y+yMovement[val]));
 					addBlockToSet(new Block(x,y,blockData[0],(byte)((4<<1)),blockData[2],blockData[3]));
 				}
 				else if(signalCount==0 && oldSignalCount==0 && val<4 && surrBlockData[val][0]==16)
-					addBlockToClear(new BlockPos(x+xMovement[val],y+yMovement[val]));
+					addBlockToClear(new Point(x+xMovement[val],y+yMovement[val]));
 				for(i=0;i<4;i++)
 				{
-					if(surrBlockO[i].isUpdated() && surrBlockO[i].getType()!=17) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
+					if(surrBlockO[i].isUpdated() && surrBlockO[i].getType()!=17) addBlockToCheck(new Point(x+xMovement[i],y+yMovement[i]));
 				}
 			} break;
 			case 20: { // Dupe
@@ -657,7 +657,7 @@ public class Physics
 				{
 					int t = surrBlockData[i][0];
 					int str = strength[i];
-					if(surrBlockO[i].isUpdated() && surrBlockO[i].getType()!=20) addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
+					if(surrBlockO[i].isUpdated() && surrBlockO[i].getType()!=20) addBlockToCheck(new Point(x+xMovement[i],y+yMovement[i]));
 				}
 			} break;
 			default:

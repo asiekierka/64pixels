@@ -4,7 +4,6 @@ import java.lang.*;
 import java.io.*;
 import java.util.*;
 import java.util.zip.*;
-import java.awt.Point;
 
 public class WorldMap
 {
@@ -298,8 +297,8 @@ public class WorldMap
  				}
 				for(int i=0;i<4;i++)
 				{
-					physics.addBlockToCheck(new BlockPos(lolx+xMovement[i],loly+yMovement[i]));
-					physics.addBlockToCheck(new BlockPos(lolx+lolvx+xMovement[i],loly+lolvy+yMovement[i]));
+					physics.addBlockToCheck(new Point(lolx+xMovement[i],loly+yMovement[i]));
+					physics.addBlockToCheck(new Point(lolx+lolvx+xMovement[i],loly+lolvy+yMovement[i]));
 				}
  			}
  			return true;
@@ -394,10 +393,10 @@ public class WorldMap
 				while(maplock) { try{ Thread.sleep(1); } catch(Exception e) {} }
 				modlock=true;
 				setBlock(x,y,block.getType(),(byte)d15,block.getBlockChar(),block.getBlockColor());
-				physics.addBlockToCheck(new BlockPos(x,y));
+				physics.addBlockToCheck(new Point(x,y));
 				for(int i=0;i<4;i++)
 				{
-					physics.addBlockToCheck(new BlockPos(x+xMovement[i],y+yMovement[i]));
+					physics.addBlockToCheck(new Point(x+xMovement[i],y+yMovement[i]));
 				}
 				
 				if(isServer)
@@ -477,7 +476,7 @@ public class WorldMap
 					}
 					for(int moveDir=0;moveDir<4;moveDir++)
 					{
-						physics.addBlockToCheck(new BlockPos(ox+xMovement[moveDir],oy+yMovement[moveDir]));
+						physics.addBlockToCheck(new Point(ox+xMovement[moveDir],oy+yMovement[moveDir]));
 					}
 				}
 			}
