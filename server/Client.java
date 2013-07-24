@@ -108,7 +108,7 @@ public class Client implements Runnable
 		}
 	}
 	
-	public void changeMap(WorldMap nmap) // it's a friendly smile, on an open port
+	public void changeMap(WorldMap newMap) // it's a friendly smile, on an open port
 	{
 		try
 		{
@@ -116,10 +116,9 @@ public class Client implements Runnable
 			map.physics.players[id] = null;
 			despawnPlayer();
 			despawnOthers();
-			map=nmap;
+			map=newMap;
 			world=serv.findWorld(map.mapName);
-			player.x=world.spawnX;
-			player.y=world.spawnY;
+			player.move(world.spawnX, world.spawnY);
 			map.physics.players[id] = player;
 			map.setPlayer(player.x,player.y,1);
 			spawnPlayer();
@@ -133,7 +132,7 @@ public class Client implements Runnable
 			}
 			setRaycasting(world.isRaycasted);
 			setPvP(world.isPvP);
-			sendChatMsgSelf("&aMap changed to &f" + nmap.mapName);
+			sendChatMsgSelf("&aMap changed to &f" + newMap.mapName);
 		}
 		catch(Exception e)
 		{
@@ -565,12 +564,8 @@ public class Client implements Runnable
 						{
 							case 0x0F:
 								if(loginStage>=1)
-						
-		{
+								{
 									readString();
-									readString();
-									in.readByte();
-									in.readByte();
 									in.readInt();
 									in.readByte();
 									in.readByte();
@@ -578,14 +573,10 @@ public class Client implements Runnable
 								} else {
 									loginStage = 1;
 									player.name = readString();
-									readString();
-									in.readByte();
-									in.readByte();
 									version = in.readInt();
 									player.chr = in.readByte();
 									player.col = in.readByte();
-									player.x=serv.spawnX;
-									player.y=serv.spawnY;
+									player.move(serv.spawnX, serv.spawnY);
 									if(serv.anonMode) player.name = "User"+id;
 									System.out.println("User " + id + " (IP " + socket.getInetAddress().getHostAddress() + ") connected!");
 									if(player.name.length()>20)

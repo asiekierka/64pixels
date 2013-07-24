@@ -2,7 +2,7 @@ package common;
 
 public class Version
 {
-	private static final int protocolVer = 269;
+	private static final int protocolVer = 270;
 	private static final int releaseVer = 0;
 	private static final int majorVer = 3;
 	private static final int minorVer = 0;

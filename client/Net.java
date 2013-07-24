@@ -349,9 +349,6 @@ public class Net implements Runnable, NetShim
 				{
 					out.writeByte(0x0F);
 					writeString(player.name);
-					writeString("eeeeh");
-					out.writeByte(0x00);
-					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE. NEVER. NEVER!!!
 					out.writeInt(Version.getProtocolVersion());
 					out.writeByte(game.players[255].chr);
 					out.writeByte(game.players[255].col);
