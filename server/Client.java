@@ -97,7 +97,7 @@ public class Client implements Runnable
 			{
 				try
 				{
-					out.writeByte(0x60);
+					out.writeByte(NetConstServer.PLAY_SOUND);
 					out.writeByte((byte)ax);
 					out.writeByte((byte)ay);
 					out.writeByte((byte)val);
@@ -108,7 +108,7 @@ public class Client implements Runnable
 		}
 	}
 	
-	public void changeMap(WorldMap newMap) // it's a friendly smile, on an open port
+	public void changeMap(WorldMap newMap)
 	{
 		try
 		{
@@ -125,7 +125,7 @@ public class Client implements Runnable
 			spawnOthers();
 			synchronized(out)
 			{
-				out.writeByte(0x80);	
+				out.writeByte(NetConstServer.CHANGE_MAP);	
 				out.writeInt(player.x);
 				out.writeInt(player.y);
 				sendPacket();
@@ -148,11 +148,11 @@ public class Client implements Runnable
 			player.name=newn;
 			synchronized(out)
 			{
-				out.writeByte(0x26);
+				out.writeByte(NetConstServer.PLAYER_NICKNAME);
 				out.writeByte(255);
 				writeString(newn);
 				sendPacket();
-				out.writeByte(0x26);
+				out.writeByte(NetConstServer.PLAYER_NICKNAME);
 				out.writeByte((byte)id);
 				writeString(newn);
 				serv.sendOthersOnMap(id,getPacket());
@@ -173,12 +173,12 @@ public class Client implements Runnable
 			{
 				while(m2.length()>40)
 				{
-					out.writeByte(0x41);
+					out.writeByte(NetConstServer.CHAT);
 					out.writeByte((byte)id);
 					writeString(m2.substring(0,40));
 					m2=m2.substring(40);
 				}
-				out.writeByte(0x41);
+				out.writeByte(NetConstServer.CHAT);
 				out.writeByte((byte)id);
 				writeString(m2);
 				sendPacket();
@@ -199,12 +199,12 @@ public class Client implements Runnable
 			{
 				while(m2.length()>40)
 				{
-					out.writeByte(0x41);
+					out.writeByte(NetConstServer.CHAT);
 					out.writeByte((byte)i);
 					writeString(m2.substring(0,40));
 					m2=m2.substring(40);
 				}
-				out.writeByte(0x41);
+				out.writeByte(NetConstServer.CHAT);
 				out.writeByte((byte)i);
 				writeString(m2);
 				serv.clients[i].sendPacket(getPacket());
@@ -225,12 +225,12 @@ public class Client implements Runnable
 				String m2=m;
 				while(m2.length()>40)
 				{
-					out.writeByte(0x41);
+					out.writeByte(NetConstServer.CHAT);
 					out.writeByte((byte)id);
 					writeString(m2.substring(0,40));
 					m2=m2.substring(40);
 				}
-				out.writeByte(0x41);
+				out.writeByte(NetConstServer.CHAT);
 				out.writeByte((byte)id);
 				writeString(m2);
 				serv.sendAll(getPacket());
@@ -253,7 +253,7 @@ public class Client implements Runnable
 		{
 			synchronized(out)
 			{
-				out.writeByte(0xF5);
+				out.writeByte(NetConstServer.KICK);
 				writeString(msg);
 				sendPacket();
 			}
@@ -291,12 +291,12 @@ public class Client implements Runnable
 			player.y=ty;
 			synchronized(out)
 			{
-				out.writeByte(0x24);
+				out.writeByte(NetConstServer.MOVE_ABSOLUTE);
 				out.writeByte(255);
 				out.writeInt(player.x);
 				out.writeInt(player.y);
 				sendPacket();
-				out.writeByte(0x24);
+				out.writeByte(NetConstServer.MOVE_ABSOLUTE);
 				out.writeByte((byte)id);
 				out.writeInt(player.x);
 				out.writeInt(player.y);
@@ -370,7 +370,7 @@ public class Client implements Runnable
 		{
 			synchronized(out)
 			{
-				out.writeByte(0x28);
+				out.writeByte(NetConstServer.OP);
 				out.writeShort((short)val*42);
 				sendPacket();
 			}
@@ -404,8 +404,8 @@ public class Client implements Runnable
 		{
 			synchronized(out)
 			{
-				if(r) out.writeByte(0x82);
-				else out.writeByte(0x81);
+				if(r) out.writeByte(NetConstServer.RAYCAST_ON);
+				else out.writeByte(NetConstServer.RAYCAST_OFF);
 				sendPacket();
 			}
 		}
@@ -423,7 +423,7 @@ public class Client implements Runnable
 		{
 			synchronized(out)
 			{
-				out.writeByte(0x22);
+				out.writeByte(NetConstServer.DESPAWN);
 				out.writeByte((byte)id);
 				serv.sendOthersOnMap(id,getPacket());
 			}
@@ -434,49 +434,39 @@ public class Client implements Runnable
 		}
 	}
 
-	public void spawnPlayer()
-	{
-		try
-		{
-			synchronized(out)
-			{
-				out.writeByte(0x20);
-				out.writeByte(id);
-				writeString(player.name);
-				out.writeInt(player.x);
-				out.writeInt(player.y);
-				out.writeByte(player.chr);
-				out.writeByte(player.col);
-				serv.sendOthersOnMap(id,getPacket());
-			}
+	private void writeSpawnPacket(Client client) {
+		try {
+			out.writeByte(NetConstServer.SPAWN);
+			out.writeByte(client.id);
+			writeString(client.player.name);
+			out.writeInt(client.player.x);
+			out.writeInt(client.player.y);
+			out.writeByte(client.player.chr);
+			out.writeByte(client.player.col);
 		}
 		catch(Exception e)
 		{
-			System.out.println("Non-fatal spawnPlayer error");
+			System.out.println("Non-fatal writeSpawnPacket error");
 		}
 	}
 
+	public void spawnPlayer()
+	{
+		synchronized(out) {
+			writeSpawnPacket(this);
+			serv.sendOthersOnMap(id,getPacket());
+		}
+	}
 	public void spawnOthers()
 	{
 		try
 		{
-			for(int pli=0;pli<255;pli++)
-			{
+			for(int pli=0;pli<255;pli++) // < 255, we don't want 255 (self) in it.
 				if(pli != id && serv.clients[pli] != null && serv.clients[pli].dc == 0 && serv.clients[pli].map == map)
-				{
-					synchronized(out)
-					{
-						out.writeByte(0x20);
-						out.writeByte(serv.clients[pli].id);
-						writeString(serv.clients[pli].player.name);
-						out.writeInt(serv.clients[pli].player.x);
-						out.writeInt(serv.clients[pli].player.y);
-						out.writeByte(serv.clients[pli].player.chr);
-						out.writeByte(serv.clients[pli].player.col);
+					synchronized(out) {
+						writeSpawnPacket(serv.clients[pli]);
 						sendPacket();
 					}
-				}	
-			}
 		}
 		catch(Exception e)
 		{
@@ -490,7 +480,7 @@ public class Client implements Runnable
 		{
 			synchronized(out)
 			{
-				out.writeByte(0x91);
+				out.writeByte(NetConstServer.HEALTH);
 				out.writeByte((byte)h);
 				sendPacket();
 			}
@@ -507,7 +497,7 @@ public class Client implements Runnable
 		{
 			synchronized(out)
 			{
-				out.writeByte(0x92);
+				out.writeByte(NetConstServer.PVP);
 				if(mpvp) out.writeByte(1);
 				else out.writeByte(0);
 				sendPacket();
@@ -529,7 +519,7 @@ public class Client implements Runnable
 				{
 					synchronized(out)
 					{
-						out.writeByte(0x22);
+						out.writeByte(NetConstServer.DESPAWN);
 						out.writeByte(serv.clients[pli].id);
 						sendPacket();
 					}
@@ -538,13 +528,12 @@ public class Client implements Runnable
 		}
 		catch(Exception e)
 		{
-			System.out.println("Non-fatal spawnOthers error");
+			System.out.println("Non-fatal despawnOthers error");
 		}
 	}
-	// This game is a TEMPORARY MEASURE!!! -asie
+
 	public void run()
 	{
-		// Inner loop.
 		try
 		{
 			while(dc == 0)
@@ -562,7 +551,7 @@ public class Client implements Runnable
 						packets++;
 						switch((int)(buf[0]&0xFF))
 						{
-							case 0x0F:
+							case NetConstClient.LOGIN:
 								if(loginStage>=1)
 								{
 									readString();
@@ -600,7 +589,7 @@ public class Client implements Runnable
 										}
 										synchronized(out)
 										{
-											out.writeByte(0x01);
+											out.writeByte(NetConstServer.LOGIN);
 											out.writeInt(player.x);
 											out.writeInt(player.y);
 											writeString(player.name);
@@ -614,7 +603,7 @@ public class Client implements Runnable
 											byte[] ae = auth.encrypt();
 											synchronized(out)
 											{
-												out.writeByte(0x50);
+												out.writeByte(NetConstServer.ENCRYPTED_DATA);
 												out.write(ae,0,32);
 												sendPacket();
 											}
@@ -629,7 +618,7 @@ public class Client implements Runnable
 									}
 								}
 								break;
-							case 0x10:
+							case NetConstClient.CHUNK_REQUEST:
 								rcX = in.readInt();
 								rcY = in.readInt();
 								System.out.println("[ID " + id + "] sending chunk " + rcX + "," + rcY);
@@ -650,8 +639,8 @@ public class Client implements Runnable
 								int pp = t2.length;
 								synchronized(out)
 								{
-									out.writeByte(0x11);
-									out.writeByte(0x01); // type
+									out.writeByte(NetConstServer.DATA_START);
+									out.writeByte(NetConstServer.DATA_TYPE_CHUNK); // type
 									out.writeInt(rcX);
 									out.writeInt(rcY);
 									out.writeInt(t2.length);
@@ -663,7 +652,7 @@ public class Client implements Runnable
 									if(pl<pls) pls=pl;
 									synchronized(out)
 									{
-										out.writeByte(0x12);
+										out.writeByte(NetConstServer.DATA);
 										out.writeShort(pls);
 										out.write(t2,pp-pl,pls);
 										sendPacket();
@@ -674,13 +663,13 @@ public class Client implements Runnable
 								synchronized(map.chunks) { if(map.chunks[z10].xpos == rcX && map.chunks[z10].ypos == rcY) map.chunks[z10].isUsed=false; }
 								synchronized(out)
 								{
-									out.writeByte(0x13);
+									out.writeByte(NetConstServer.DATA_END);
 									sendPacket();
 								}
 								break;
-							case 0x23:
+							case NetConstClient.MOVE_DELTA:
 								byte[] ta = new byte[4];
-								ta[0] = 0x21;
+								ta[0] = NetConstServer.MOVE_DELTA;
 								ta[1] = (byte)id;
 								ta[2] = in.readByte();
 								ta[3] = in.readByte();
@@ -695,7 +684,7 @@ public class Client implements Runnable
 								player.y+=ta[3];
 								map.setPlayer(player.x,player.y,1);
 								break;
-							case 0x25:
+							case NetConstClient.RESPAWN:
 								if(world.isPvP) break;
 								map.setPlayer(player.x,player.y,0);
 								if(map==serv.map)
@@ -707,7 +696,7 @@ public class Client implements Runnable
 									teleport(world.spawnX,world.spawnY);
 								}
 								break;
-							case 0x28:
+							case NetConstClient.MOVE_ABSOLUTE:
 								int x29 = in.readInt();
 								int y29 = in.readInt();
 								if(passWait) break;
@@ -717,7 +706,7 @@ public class Client implements Runnable
 									player.y=y29;
 									synchronized(out)
 									{
-										out.writeByte(0x24);
+										out.writeByte(NetConstServer.MOVE_ABSOLUTE);
 										out.writeByte(id);
 										out.writeInt(x29);
 										out.writeInt(y29);
@@ -725,10 +714,10 @@ public class Client implements Runnable
 									}
 								}
 								break;
-							case 0x2A:
+							case NetConstClient.DISCONNECT:
 								disconnect();
 								break;
-							case 0x2C:
+							case NetConstClient.MOVE_COMPRESSED:
 							case 0x2D:
 							case 0x2E:
 							case 0x2F:
@@ -745,7 +734,7 @@ public class Client implements Runnable
 								player.y+=dy2f;
 								map.setPlayer(player.x,player.y,1);
 								break;
-							case 0x30:
+							case NetConstClient.PUT_BLOCK:
 								int ax = in.readInt();
 								int ay = in.readInt();
 								byte at = in.readByte();
@@ -755,7 +744,7 @@ public class Client implements Runnable
 								byte[] zc = map.getBlock(ax,ay).getBlockData();
 								if((player.isOp() && (isCopying || isPasting || isProtecting || isUnprotecting)) || (serv.mapLock && !player.isOp()))
 								{
-									out.writeByte(0x31);
+									out.writeByte(NetConstServer.PLACE_BLOCK_PLAYER);
 									out.writeByte((byte)id);
 									out.writeInt(ax);
 									out.writeInt(ay);
@@ -887,7 +876,7 @@ public class Client implements Runnable
 									Block outBlock = map.getBlock(ax,ay);
 									synchronized(out)
 									{
-										out.writeByte(0x31);
+										out.writeByte(NetConstServer.PLACE_BLOCK_PLAYER);
 										out.writeByte((byte)id);
 										out.writeInt(ax);
 										out.writeInt(ay);
@@ -901,7 +890,7 @@ public class Client implements Runnable
 										}
 	 									if(at != -1 && zc[5] != 0)
 	 									{
-	 										out.writeByte(0x31);
+	 										out.writeByte(NetConstServer.PLACE_BLOCK_PLAYER);
 	 										out.writeByte((byte)id);
 	 										out.writeInt(ax);
 	 										out.writeInt(ay);
@@ -914,7 +903,7 @@ public class Client implements Runnable
 									map.modlock=false;
 								} else
 								{
-									out.writeByte(0x31);
+									out.writeByte(NetConstServer.PLACE_BLOCK_PLAYER);
 									out.writeByte((byte)id);
 									out.writeInt(ax);
 									out.writeInt(ay);
@@ -924,14 +913,14 @@ public class Client implements Runnable
 									sendPacket();
 								}
 								break;
-							case 0x40:
+							case NetConstClient.CHAT:
 								String al = readString();
 								System.out.println("<" + getName() + "> " + al);
 								String alt = serv.parseMessage(al,id);
 								if(alt.equals("$N") && !al.equals("")) sendChatMsgAll("<" + getName() + "> " + al);
 								else if (!alt.equals("")) sendChatMsgSelf(alt);
 								break;
-							case 0x51:
+							case NetConstClient.DECRYPTED_DATA:
 								byte[] t51 = new byte[32];
 								in.read(t51,0,32);
 								if(!auth.testDecrypt(t51))
@@ -940,7 +929,7 @@ public class Client implements Runnable
 								}
 								else passWait=false;
  								break;
-							case 0x70:
+							case NetConstClient.SHOOT:
 								int xb = in.readInt();
 								int yb = in.readInt();
 								byte bt = in.readByte();
@@ -949,7 +938,7 @@ public class Client implements Runnable
 								map.physics.addBlockToCheck(new Point(xb,yb));
 								for(int i=0;i<4;i++) map.physics.addBlockToCheck(new Point(xb+map.xMovement[i],yb+map.yMovement[i]));
 								break;
- 							case 0xE0:
+ 							case NetConstClient.PUSH:
  								{
  									int lolx = player.x;
  									int loly = player.y;
@@ -975,7 +964,7 @@ public class Client implements Runnable
  											player.y = loly+lolvy;
  											synchronized(out)
  											{
- 												out.writeByte(0x32);
+ 												out.writeByte(NetConstServer.PLACE_PUSHABLE_PLAYER);
  												out.writeByte(255);
  												out.writeInt(lolx+lolvx);
  												out.writeInt(loly+lolvy);
@@ -984,7 +973,7 @@ public class Client implements Runnable
  												out.writeByte(dq[4]);
  												out.writeByte(dq[5]);
  												sendPacket();
- 												out.writeByte(0x32);
+ 												out.writeByte(NetConstServer.PLACE_PUSHABLE_PLAYER);
  												out.writeByte(id);
  												out.writeInt(lolx+lolvx);
  												out.writeInt(loly+lolvy);
@@ -992,6 +981,7 @@ public class Client implements Runnable
  												out.writeByte((byte)lolvy);
  												out.writeByte(dq[4]);
  												out.writeByte(dq[5]);
+
  												serv.sendOthersOnMap(id,getPacket());
  												map.setPlayer(player.x,player.y,1);
  												map.setPlayer(player.x+lolvx,player.y+lolvy,1);
@@ -1000,14 +990,14 @@ public class Client implements Runnable
  									}
  								}
 								break;
-							case 0xF0:
+							case NetConstClient.PING:
 								synchronized(out)
 								{
-									out.writeByte(0xF1);
+									out.writeByte(NetConstServer.PONG);
 									sendPacket();
 								}
 								break;
-							case 0xF1:
+							case NetConstClient.PONG:
 								pingsWaiting--;
 								break;
 							default:
@@ -1022,11 +1012,11 @@ public class Client implements Runnable
 				{
 					synchronized(out)
 					{
-						out.writeByte(0xF0);
+						out.writeByte(NetConstServer.PING);
 						sendPacket();
 					}
 					pingsWaiting++;
-					if(pingsWaiting>20) disconnect();
+					if(pingsWaiting>10) disconnect();
 				}
 			}
 		}
@@ -1038,5 +1028,4 @@ public class Client implements Runnable
 			ns.isRunning=false;
 		}
 	}
-	// for people who didn't get the earlier comment, it's an inside joke of sorts
 }

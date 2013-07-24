@@ -93,7 +93,7 @@ public class Net implements Runnable, NetShim
 			{
 				synchronized(out)
 				{
-					out.writeByte(0x2A);
+					out.writeByte(NetConstClient.DISCONNECT);
 				}
 				sendPacket();
 			}
@@ -161,7 +161,7 @@ public class Net implements Runnable, NetShim
 			System.out.println("request-net: " + x + " " + y);
 			synchronized(out)
 			{
-				out.writeByte(0x10);
+				out.writeByte(NetConstClient.CHUNK_REQUEST);
 				out.writeInt(x);
 				out.writeInt(y);
 				sendPacket();
@@ -179,7 +179,7 @@ public class Net implements Runnable, NetShim
 		{
 			synchronized(out)
 			{
-				out.writeByte(0x70);
+				out.writeByte(NetConstClient.SHOOT);
 				out.writeInt(x);
 				out.writeInt(y);
 				out.writeByte((byte)dir);
@@ -199,7 +199,7 @@ public class Net implements Runnable, NetShim
  		{
  			synchronized(out)
  			{
- 				out.writeByte(0xE0);
+ 				out.writeByte(NetConstClient.PUSH);
  				out.writeByte((byte)dx);
  				out.writeByte((byte)dy);
  				sendPacket();
@@ -218,7 +218,7 @@ public class Net implements Runnable, NetShim
 		{
 			synchronized(out)
 			{
-				out.writeByte(0x40);
+				out.writeByte(NetConstClient.CHAT);
 				writeString(msg);
 				sendPacket();
 			}
@@ -236,7 +236,7 @@ public class Net implements Runnable, NetShim
 		{
 			synchronized(out)
 			{
-				out.writeByte(0x30);
+				out.writeByte(NetConstClient.PUT_BLOCK);
 				out.writeInt(dx);
 				out.writeInt(dy);
 				out.writeByte(t);
@@ -260,19 +260,19 @@ public class Net implements Runnable, NetShim
 			{
 				if(WorldMap.xMovement[i]==dx && WorldMap.yMovement[i]==dy)
 				{
-					i+=0x2C;
+					i+=NetConstClient.MOVE_COMPRESSED;
 					break;
 				}
 			}
 			synchronized(out)
 			{
-				if(i>=0x2C)
+				if(i>=NetConstClient.MOVE_COMPRESSED)
 				{
 					out.writeByte((byte)i);
 				}
 				else
 				{
-					out.writeByte(0x23);
+					out.writeByte(NetConstClient.MOVE_DELTA);
 					out.writeByte((byte)dx);
 					out.writeByte((byte)dy);
 				}
@@ -309,13 +309,13 @@ public class Net implements Runnable, NetShim
 		{
 			synchronized(out)
 			{
-				out.writeByte(0x25);
+				out.writeByte(NetConstClient.RESPAWN);
 				sendPacket();
 			}
 		}
 		catch(Exception e)
 		{
-			System.out.println("Fatal craftrNet playerMove Error!");
+			System.out.println("Fatal craftrNet respawnRequest Error!");
 			System.exit(1);
 		}
 	}
@@ -326,7 +326,7 @@ public class Net implements Runnable, NetShim
 		{
 			synchronized(out)
 			{
-				out.writeByte(0x51);
+				out.writeByte(NetConstClient.DECRYPTED_DATA);
 				auth = new Auth(pass);
 				byte[] dec = auth.decryptClient(msgenc);
 				out.write(dec,0,32);
@@ -347,7 +347,7 @@ public class Net implements Runnable, NetShim
 			{
 				synchronized(out)
 				{
-					out.writeByte(0x0F);
+					out.writeByte(NetConstClient.LOGIN);
 					writeString(player.name);
 					out.writeInt(Version.getProtocolVersion());
 					out.writeByte(game.players[255].chr);
@@ -374,7 +374,7 @@ public class Net implements Runnable, NetShim
 					{
 						switch((int)(buf[0]&0xFF))
 						{
-							case 0x01:
+							case NetConstServer.LOGIN:
 							{
 								if(loginStage>=2)
 								{
@@ -398,7 +398,7 @@ public class Net implements Runnable, NetShim
 								System.out.println("Logged in!");
 								break;
 							}
-							case 0x11:
+							case NetConstServer.DATA_START:
 								chunkType = in.readUnsignedByte();
 								isLoadingChunk=true;
 								lcX = in.readInt();
@@ -419,7 +419,7 @@ public class Net implements Runnable, NetShim
 								chunkSize=chunkPacketsLeft;
 								cbuffer = new byte[chunkPacketsLeft];
 								break;
-							case 0x12:
+							case NetConstServer.DATA:
 								int tp = in.readUnsignedShort();
 								if(isLoadingChunk)
 								{
@@ -432,7 +432,7 @@ public class Net implements Runnable, NetShim
 									for(int i=0;i<tp;i++) in.readByte();
 								}
 								break;
-							case 0x13:
+							case NetConstServer.DATA_END:
 								if(isLoadingChunk)
 								{
 									isLoadingChunk=false;
@@ -446,7 +446,7 @@ public class Net implements Runnable, NetShim
 									game.netChange=true;
 								}
 								break;
-							case 0x20:
+							case NetConstServer.SPAWN:
 								int t1 = in.readUnsignedByte();
 								String tmp2 = readString();
 								int px = in.readInt();
@@ -456,7 +456,7 @@ public class Net implements Runnable, NetShim
 								game.players[t1] = new Player(px,py,chr,col,tmp2);
 								game.players[t1].posChanged = true;
 								break;
-							case 0x21:
+							case NetConstServer.MOVE_DELTA:
 								int t2 = in.readUnsignedByte();
 								int dx1 = in.readByte();
 								int dy1 = in.readByte();
@@ -465,12 +465,12 @@ public class Net implements Runnable, NetShim
 									game.players[t2].moveDelta(dx1,dy1);
 								}
 								break;
-							case 0x22:
+							case NetConstServer.DESPAWN:
 								int t22 = in.readUnsignedByte();
 								if(t22==255) break;
 								game.players[t22] = null;
 								break;
-							case 0x24:
+							case NetConstServer.MOVE_ABSOLUTE:
 								int ta1 = in.readUnsignedByte();
 								int dx2 = in.readInt();
 								int dy2 = in.readInt();
@@ -480,18 +480,15 @@ public class Net implements Runnable, NetShim
 								}
 								game.netChange=true;
 								break;
-							case 0x26:
+							case NetConstServer.PLAYER_NICKNAME:
 								int ta25 = in.readUnsignedByte();
 								if(game.players[ta25]!=null) game.players[ta25].name = readString();
 								break;
-							case 0x27:
-								game.netThreadRequest = 1;
-								break;
-							case 0x28:
+							case NetConstServer.OP:
 								int t28=in.readByte();
 								player.op=t28==42?true:false;
 								break;
-							case 0x2A:
+							case NetConstServer.STEP:
 							case 0x2B:
 								int bx2c=in.readInt();
 								int by2c=in.readInt();
@@ -525,7 +522,7 @@ public class Net implements Runnable, NetShim
 									}
 								}  
 								break;
-							case 0x2C:
+							case NetConstServer.MOVE_COMPRESSED:
 							case 0x2D:
 							case 0x2E:
 							case 0x2F:
@@ -538,9 +535,9 @@ public class Net implements Runnable, NetShim
 									game.players[id2f].moveDelta(dx2f,dy2f);
 								}
 								break;
-							case 0x31:
-							case 0x33:
+							case NetConstServer.PLACE_BLOCK_PLAYER:
 								in.readUnsignedByte();
+							case NetConstServer.PLACE_BLOCK_MAP:
 								int bx1 = in.readInt();
 								int by1 = in.readInt();
 								byte t3 = in.readByte();
@@ -568,7 +565,7 @@ public class Net implements Runnable, NetShim
  								}
 								game.blockChange=true;
 								break;
- 							case 0x32:
+ 							case NetConstServer.PLACE_PUSHABLE_PLAYER:
 								int pid = in.readUnsignedByte();
 								int lolx = in.readInt();
 								int loly = in.readInt();
@@ -587,7 +584,7 @@ public class Net implements Runnable, NetShim
 									{
 										synchronized(out)
 										{
-											out.writeByte(0x28);
+											out.writeByte(NetConstClient.MOVE_ABSOLUTE);
 											out.writeInt(lolx);
 											out.writeInt(loly);
 											sendPacket();
@@ -597,29 +594,29 @@ public class Net implements Runnable, NetShim
 								}
 								game.blockChange=true;
 								break;
-							case 0x34:
+							case NetConstServer.CLEAR_BLOCK_MAP:
 								int lol2x = in.readInt();
 								int lol2y = in.readInt();
 								game.map.clearBlock(lol2x,lol2y);
 								break;
-							case 0x41:
+							case NetConstServer.CHAT:
 								int ta41 = in.readUnsignedByte();
 								String tmp3 = readString();
 								game.gs.addChatMsg(tmp3);
 								game.netChange = true;
 								break;
-							case 0x50:
+							case NetConstServer.ENCRYPTED_DATA:
 								in.read(msgenc,0,32);
 								game.netThreadRequest = 1;
 								break;
-							case 0x60: // sound GET
+							case NetConstServer.PLAY_SOUND:
 								int ta60x = in.readByte();
 								int ta60y = in.readByte();
 								int ta60v = in.readUnsignedByte();
 								// best not to screw up meloders --GM
 								if(!game.muted) game.audio.playNote(ta60x,ta60y,ta60v,1.0);
 								break;
-							case 0x70:
+							case NetConstServer.BULLET:
 								int x70 = in.readInt();
 								int y70 = in.readInt();
 								byte t70 = in.readByte();
@@ -628,7 +625,7 @@ public class Net implements Runnable, NetShim
  									game.map.setBullet(x70,y70,t70);
  								}
 								break;
-							case 0x80: // reload map
+							case NetConstServer.CHANGE_MAP:
 							{
 								game.players[255].x=in.readInt();
 								game.players[255].y=in.readInt();
@@ -644,52 +641,47 @@ public class Net implements Runnable, NetShim
 								}
 								break;
 							}
-							case 0x81:
+							case NetConstServer.RAYCAST_OFF:
 							{
 								game.raycasting=false;
 								break;
 							}
-							case 0x82:
+							case NetConstServer.RAYCAST_ON:
 							{
 								game.raycasting=true;
 								break;
 							}
-							case 0x90: // die
-							{
-								game.kill();
-								break;
-							}
-							case 0x91: // set health
+							case NetConstServer.HEALTH:
 							{
 								game.setHealth(in.readUnsignedByte()%6);
 								break;
 							}
-							case 0x92: // toggle health bar
+							case NetConstServer.PVP:
 							{
 								game.gs.showHealthBar = (in.readByte()==1);
 								break;
 							}
-							case 0xE1: // push me
-							case 0xE2: // push me
+							case NetConstServer.PUSH:
+							case NetConstServer.PULL:
 								int e1x = in.readInt();
 								int e1y = in.readInt();
 								int e1xs = in.readShort();
 								int e1ys = in.readShort();
 								int e1dx = in.readByte();
 								int e1dy = in.readByte();
-								game.map.pushMultiple(e1x,e1y,e1xs,e1ys,e1dx,e1dy,((int)(buf[0]&0xFF)==0xE2));
+								game.map.pushMultiple(e1x,e1y,e1xs,e1ys,e1dx,e1dy,((int)(buf[0]&0xFF)==NetConstServer.PULL));
 								break;
-							case 0xF0:
+							case NetConstServer.PING:
 								synchronized(out)
 								{
-									out.writeByte(0xF1);
+									out.writeByte(NetConstClient.PONG);
 									sendPacket();
 								}
 								break;
-							case 0xF1:
+							case NetConstServer.PONG:
 								pingsWaiting--;
 								break;
-							case 0xF5:
+							case NetConstServer.KICK:
 								String tmp4 = readString();
 								game.kickOut(tmp4);
 								break;
@@ -701,7 +693,7 @@ public class Net implements Runnable, NetShim
 				{
 					synchronized(out)
 					{
-						out.writeByte(0x28);
+						out.writeByte(NetConstClient.MOVE_ABSOLUTE);
 						out.writeInt(game.players[255].x);
 						out.writeInt(game.players[255].y);
 						sendPacket();
@@ -711,7 +703,7 @@ public class Net implements Runnable, NetShim
 				{
 					synchronized(out)
 					{
-						out.writeByte(0xF0);
+						out.writeByte(NetConstClient.PING);
 						sendPacket();
 					}
 					pingsWaiting++;

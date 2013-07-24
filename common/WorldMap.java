@@ -354,7 +354,7 @@ public class WorldMap
 	{
 		try
 		{
-			se.out.writeByte(0x70);
+			se.out.writeByte(NetConstServer.BULLET);
 			se.out.writeInt(x);
 			se.out.writeInt(y);
 			se.out.writeByte(aType);
@@ -368,7 +368,7 @@ public class WorldMap
 	{
 		try
 		{
-			se.out.writeByte(0x2A|on);
+			se.out.writeByte(NetConstServer.STEP|on);
 			se.out.writeInt(x);
 			se.out.writeInt(y);
 			byte[] t = se.getPacket();
@@ -423,8 +423,8 @@ public class WorldMap
 			{
 				try
 				{
-					if(pull) se.out.writeByte(0xE2);
-					else se.out.writeByte(0xE1);
+					if(pull) se.out.writeByte(NetConstServer.PULL);
+					else se.out.writeByte(NetConstServer.PUSH);
 					se.out.writeInt(x);
 					se.out.writeInt(y);
 					se.out.writeShort(xsize);
@@ -659,7 +659,7 @@ public class WorldMap
 		{ 
 			int px = x&63;
 			int py = y&63;
-			se.out.writeByte(0x34);
+			se.out.writeByte(NetConstServer.CLEAR_BLOCK_MAP);
 			se.out.writeInt(x);
 			se.out.writeInt(y);
 			byte[] t = se.getPacket();
@@ -677,8 +677,7 @@ public class WorldMap
 		{ 
 			int px = x&63;
 			int py = y&63;
-			se.out.writeByte(0x33);
-			se.out.writeByte((byte)255);
+			se.out.writeByte(NetConstServer.PLACE_BLOCK_MAP);
 			se.out.writeInt(x);
 			se.out.writeInt(y);
 			se.out.writeByte(t1);
