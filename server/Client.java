@@ -164,81 +164,50 @@ public class Client implements Runnable
 		}
 	}
 	
-	public void sendChatMsgSelf(String m)
-	{
+	private void writeChatMsgInternal(String m, byte id) {
 		try
 		{
 			String m2 = m;
-			synchronized(out)
+			while(m2.length()>40)
 			{
-				while(m2.length()>40)
-				{
-					out.writeByte(NetConstServer.CHAT);
-					out.writeByte((byte)id);
-					writeString(m2.substring(0,40));
-					m2=m2.substring(40);
-				}
 				out.writeByte(NetConstServer.CHAT);
-				out.writeByte((byte)id);
-				writeString(m2);
-				sendPacket();
+				out.writeByte(id);
+				writeString(m2.substring(0,40));
+				m2=m2.substring(40);
 			}
+			out.writeByte(NetConstServer.CHAT);
+			out.writeByte(id);
+			writeString(m2);
 		}
 		catch(Exception e)
 		{
-			System.out.println("Non-fatal sendChatMsgSelf error!");
+			System.out.println("Non-fatal writeChatMsgInternal error!");
+		}
+	}
+	public void sendChatMsgSelf(String m)
+	{
+		synchronized(out)
+		{
+			writeChatMsgInternal(m,(byte)id);
+			sendPacket();
 		}
 	}
 
 	public void sendChatMsgID(String m, int i)
 	{
-		try
+		synchronized(out)
 		{
-			String m2 = m;
-			synchronized(out)
-			{
-				while(m2.length()>40)
-				{
-					out.writeByte(NetConstServer.CHAT);
-					out.writeByte((byte)i);
-					writeString(m2.substring(0,40));
-					m2=m2.substring(40);
-				}
-				out.writeByte(NetConstServer.CHAT);
-				out.writeByte((byte)i);
-				writeString(m2);
-				serv.clients[i].sendPacket(getPacket());
-			}
-		}
-		catch(Exception e)
-		{
-			System.out.println("Non-fatal sendChatMsgSelf error!");
+			writeChatMsgInternal(m,(byte)i);
+			sendPacket();
 		}
 	}
 	
 	public void sendChatMsgAll(String m)
 	{
-		try
+		synchronized(out)
 		{
-			synchronized(out)
-			{
-				String m2=m;
-				while(m2.length()>40)
-				{
-					out.writeByte(NetConstServer.CHAT);
-					out.writeByte((byte)id);
-					writeString(m2.substring(0,40));
-					m2=m2.substring(40);
-				}
-				out.writeByte(NetConstServer.CHAT);
-				out.writeByte((byte)id);
-				writeString(m2);
-				serv.sendAll(getPacket());
-			}
-		}
-		catch(Exception e)
-		{
-			System.out.println("Non-fatal sendChatMsgAll error!");
+			writeChatMsgInternal(m,(byte)id);
+			serv.sendAll(getPacket());
 		}
 	}
 	
