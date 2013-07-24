@@ -26,7 +26,7 @@ public class Chunk {
 	public boolean isSet;
 	public boolean isReUsed;
 	public static final int hdrsize = 2;
-	public static final int LATEST_CHUNK_VERSION = 6;
+	public static final int LATEST_CHUNK_VERSION = 7;
 
 	public Chunk(int xp, int yp, boolean used)
 	{
@@ -94,6 +94,7 @@ public class Chunk {
 				case 5:
 					din.readUnsignedByte();
 					din.readUnsignedShort(); // skip 3 bytes of now-missing information
+				case 6:
 				case LATEST_CHUNK_VERSION:
 					type = readByteArray(gin, 4096);
 					param = readByteArray(gin, 4096 * 2); // Second half stores bullet.
@@ -120,9 +121,10 @@ public class Chunk {
 					for(int eBi = 0; eBi < extendedBlockCount; eBi++) {
 						int x = din.readUnsignedByte();
 						int y = din.readUnsignedByte();
+						int flags = (version > 6) ? din.readUnsignedByte() : 0;
 						int ebLength = din.readUnsignedShort();
 						byte[] data = readByteArray(gin, ebLength);
-						addExtendedBlock(new ExtendedBlock(x,y,data));
+						addExtendedBlock(new ExtendedBlock(x,y,data,flags));
 					}
 					din.close();
 					gin.close();
@@ -147,7 +149,7 @@ public class Chunk {
 			catch (Exception e) { System.out.println("[CHUNK] ReadChunk: warning - streams did not close"); }
 		}
 	}
-	public byte[] saveByte()
+	private byte[] saveByteInternal(boolean isNetwork)
 	{
 		ByteArrayOutputStream baos;
 		DataOutputStream out;
@@ -165,11 +167,19 @@ public class Chunk {
 			out.write(colPushable,0,4096);
 			out.write(bulletParam,0,4096);
 			// Extended Blocks
-			out.writeShort(extendedBlocks.size());
+			if(isNetwork) {
+				int netBlocksSize = 0;
+				for(ExtendedBlock e: extendedBlocks)
+					if(e.isNetwork()) netBlocksSize++;
+				out.writeShort(netBlocksSize);
+			} else out.writeShort(extendedBlocks.size());
+
 			for(int eBi = 0; eBi < extendedBlocks.size(); eBi++) {
 				ExtendedBlock eb = extendedBlocks.get(eBi);
+				if(isNetwork && !eb.isNetwork()) continue;
 				out.writeByte(eb.getX());
 				out.writeByte(eb.getY());
+				out.writeByte(eb.getFlags());
 				byte[] data = eb.getData();
 				out.writeShort(data.length);
 				out.write(data,0,data.length);
@@ -181,9 +191,13 @@ public class Chunk {
 			return null;
 		}
 	}
+	public byte[] saveByte()
+	{
+		return saveByteInternal(false);
+	}
 	public byte[] saveByteNet()
 	{
-		return saveByte();
+		return saveByteInternal(true);
 	}
 	public void fixDisplay()
 	{
