@@ -26,10 +26,12 @@ public class Net implements Runnable, NetShim
 	public int pingsWaiting=0;
 	public Auth auth;
 	private byte[] msgenc = new byte[32];
+	private Game game;
 	
-	public Net(Player _player)
+	public Net(Game _game)
 	{
-		player = _player;
+		game = _game;
+		player = game.player;
 		// Here we initalize the socket.
 		try
 		{ 
@@ -284,15 +286,13 @@ public class Net implements Runnable, NetShim
 		}
 	}
 	
-	Game gaa;
-	
 	public void run()
 	{
 		try
 		{
 			while(loginStage != 255 && socket.isConnected())
 			{
-				loop(gaa);
+				loop(game);
 				Thread.sleep(5);
 			}
 		}

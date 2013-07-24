@@ -1282,7 +1282,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		window.addKeyListener(this);
 		addKeyListener(this);
 		addComponentListener(this);
-		net = new Net(player);
+		net = new Net(this);
 		gt = new GameThread(this);
 		window.getRootPane().addMouseListener(this);
 		window.getRootPane().addMouseMotionListener(this);
@@ -1312,7 +1312,6 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			canvas.cs = (Screen)gs;
 			gs.showHealthBar = false;
 			map.net = net;
-			net.gaa = this;
 			map.multiplayer = true;
 			Thread t1 = new Thread(net);
 			t1.start();
