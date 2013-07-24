@@ -97,8 +97,8 @@ public class Client implements Runnable
 
 	public void playSound(int tx,int ty, int val)
 	{
-		int ax=player.px-tx;
-		int ay=player.py-ty;
+		int ax=player.x-tx;
+		int ay=player.y-ty;
 		if(ax>=-128 && ax<128 && ay>=-128 && ay<128)
 		{
 			synchronized(out)
@@ -120,23 +120,23 @@ public class Client implements Runnable
 	{
 		try
 		{
-			map.setPlayer(player.px,player.py,0);
+			map.setPlayer(player.x,player.y,0);
 			map.physics.players[id] = null;
 			despawnPlayer();
 			despawnOthers();
 			map=nmap;
 			world=serv.findWorld(map.mapName);
-			player.px=world.spawnX;
-			player.py=world.spawnY;
+			player.x=world.spawnX;
+			player.y=world.spawnY;
 			map.physics.players[id] = player;
-			map.setPlayer(player.px,player.py,1);
+			map.setPlayer(player.x,player.y,1);
 			spawnPlayer();
 			spawnOthers();
 			synchronized(out)
 			{
 				out.writeByte(0x80);	
-				out.writeInt(player.px);
-				out.writeInt(player.py);
+				out.writeInt(player.x);
+				out.writeInt(player.y);
 				sendPacket();
 			}
 			setRaycasting(world.isRaycasted);
@@ -296,19 +296,19 @@ public class Client implements Runnable
 	{
 		try
 		{
-			player.px=tx;
-			player.py=ty;
+			player.x=tx;
+			player.y=ty;
 			synchronized(out)
 			{
 				out.writeByte(0x24);
 				out.writeByte(255);
-				out.writeInt(player.px);
-				out.writeInt(player.py);
+				out.writeInt(player.x);
+				out.writeInt(player.y);
 				sendPacket();
 				out.writeByte(0x24);
 				out.writeByte((byte)id);
-				out.writeInt(player.px);
-				out.writeInt(player.py);
+				out.writeInt(player.x);
+				out.writeInt(player.y);
 				serv.sendOthersOnMap(id,getPacket());
 			}
 		}
@@ -397,7 +397,7 @@ public class Client implements Runnable
 		ns.isRunning=false;
 		try
 		{
-			map.setPlayer(player.px,player.py,0);
+			map.setPlayer(player.x,player.y,0);
 			despawnPlayer();
 			sendChatMsgAll(player.name + " has left.");
 		}
@@ -452,10 +452,10 @@ public class Client implements Runnable
 				out.writeByte(0x20);
 				out.writeByte(id);
 				writeString(player.name);
-				out.writeInt(player.px);
-				out.writeInt(player.py);
-				out.writeByte(player.pchr);
-				out.writeByte(player.pcol);
+				out.writeInt(player.x);
+				out.writeInt(player.y);
+				out.writeByte(player.chr);
+				out.writeByte(player.col);
 				serv.sendOthersOnMap(id,getPacket());
 			}
 		}
@@ -478,10 +478,10 @@ public class Client implements Runnable
 						out.writeByte(0x20);
 						out.writeByte(serv.clients[pli].id);
 						writeString(serv.clients[pli].player.name);
-						out.writeInt(serv.clients[pli].player.px);
-						out.writeInt(serv.clients[pli].player.py);
-						out.writeByte(serv.clients[pli].player.pchr);
-						out.writeByte(serv.clients[pli].player.pcol);
+						out.writeInt(serv.clients[pli].player.x);
+						out.writeInt(serv.clients[pli].player.y);
+						out.writeByte(serv.clients[pli].player.chr);
+						out.writeByte(serv.clients[pli].player.col);
 						sendPacket();
 					}
 				}	
@@ -590,10 +590,10 @@ public class Client implements Runnable
 									in.readByte();
 									in.readByte();
 									version = in.readInt();
-									player.pchr = in.readByte();
-									player.pcol = in.readByte();
-									player.px=serv.spawnX;
-									player.py=serv.spawnY;
+									player.chr = in.readByte();
+									player.col = in.readByte();
+									player.x=serv.spawnX;
+									player.y=serv.spawnY;
 									if(serv.anonMode) player.name = "User"+id;
 									System.out.println("User " + id + " (IP " + socket.getInetAddress().getHostAddress() + ") connected!");
 									if(player.name.length()>20)
@@ -618,8 +618,8 @@ public class Client implements Runnable
 										synchronized(out)
 										{
 											out.writeByte(0x01);
-											out.writeInt(player.px);
-											out.writeInt(player.py);
+											out.writeInt(player.x);
+											out.writeInt(player.y);
 											writeString(player.name);
 											out.writeShort(op?42:0);
 	
@@ -640,7 +640,7 @@ public class Client implements Runnable
 										sendChatMsgAll(player.name + " has joined.");
 										setRaycasting(world.isRaycasted);
 										map.physics.players[id] = player;
-										map.setPlayer(player.px,player.py,1);
+										map.setPlayer(player.x,player.y,1);
 										spawnPlayer();
 										spawnOthers();
 									}
@@ -707,14 +707,14 @@ public class Client implements Runnable
 									kick("Invalid movement!");
 								}
 								serv.sendOthersOnMap(id,ta,4);
-								map.setPlayer(player.px,player.py,0);
-								player.px+=ta[2];
-								player.py+=ta[3];
-								map.setPlayer(player.px,player.py,1);
+								map.setPlayer(player.x,player.y,0);
+								player.x+=ta[2];
+								player.y+=ta[3];
+								map.setPlayer(player.x,player.y,1);
 								break;
 							case 0x25:
 								if(world.isPvP) break;
-								map.setPlayer(player.px,player.py,0);
+								map.setPlayer(player.x,player.y,0);
 								if(map==serv.map)
 								{
 									map.setPlayer(serv.spawnX,serv.spawnY,1);
@@ -728,10 +728,10 @@ public class Client implements Runnable
 								int x29 = in.readInt();
 								int y29 = in.readInt();
 								if(passWait) break;
-								if(abs(x29-player.px)<=16 || abs(y29-player.py)<=16)
+								if(abs(x29-player.x)<=16 || abs(y29-player.y)<=16)
 								{
-									player.px=x29;
-									player.py=y29;
+									player.x=x29;
+									player.y=y29;
 									synchronized(out)
 									{
 										out.writeByte(0x24);
@@ -757,10 +757,10 @@ public class Client implements Runnable
 								ta2f[1] = (byte)id;
 								if(passWait) break;
 								serv.sendOthersOnMap(id,ta2f,2);
-								map.setPlayer(player.px,player.py,0);
-								player.px+=dx2f;
-								player.py+=dy2f;
-								map.setPlayer(player.px,player.py,1);
+								map.setPlayer(player.x,player.y,0);
+								player.x+=dx2f;
+								player.y+=dy2f;
+								map.setPlayer(player.x,player.y,1);
 								break;
 							case 0x30:
 								int ax = in.readInt();
@@ -968,8 +968,8 @@ public class Client implements Runnable
 								break;
  							case 0xE0:
  								{
- 									int lolx = player.px;
- 									int loly = player.py;
+ 									int lolx = player.x;
+ 									int loly = player.y;
  									int lolvx = in.readByte();
  									int lolvy = in.readByte();
 
@@ -987,9 +987,9 @@ public class Client implements Runnable
  										}
  										if(pa)
  										{
- 											map.setPlayer(player.px,player.py,0);
- 											player.px = lolx+lolvx;
- 											player.py = loly+lolvy;
+ 											map.setPlayer(player.x,player.y,0);
+ 											player.x = lolx+lolvx;
+ 											player.y = loly+lolvy;
  											synchronized(out)
  											{
  												out.writeByte(0x32);
@@ -1010,8 +1010,8 @@ public class Client implements Runnable
  												out.writeByte(dq[4]);
  												out.writeByte(dq[5]);
  												serv.sendOthersOnMap(id,getPacket());
- 												map.setPlayer(player.px,player.py,1);
- 												map.setPlayer(player.px+lolvx,player.py+lolvy,1);
+ 												map.setPlayer(player.x,player.y,1);
+ 												map.setPlayer(player.x+lolvx,player.y+lolvy,1);
  											}
  										}
  									}

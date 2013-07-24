@@ -199,7 +199,7 @@ public class Physics
 			boolean bshot = false;
 			for(int i=0;i<256;i++)
 			{
-				if(players[i]!=null && players[i].px==blockO.x && players[i].py==blockO.y)
+				if(players[i]!=null && players[i].x==blockO.x && players[i].y==blockO.y)
 				{
 					synchronized(map)
 					{
@@ -227,7 +227,7 @@ public class Physics
 					if(tmpt == 23 || tmpt == 21) addBlockToClear(new BlockPos(x+xMovement[blockData[6]-1],y+yMovement[blockData[6]-1]));
 					for(int i=0;i<256;i++)
 					{
-						if(players[i]!=null && players[i].px==blockO.x+xMovement[blockData[6]-1] && players[i].py==blockO.y+yMovement[blockData[6]-1])
+						if(players[i]!=null && players[i].x==blockO.x+xMovement[blockData[6]-1] && players[i].y==blockO.y+yMovement[blockData[6]-1])
 						{
 							synchronized(map)
 							{

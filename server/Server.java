@@ -61,7 +61,7 @@ public class Server extends ServerShim
 	{
 		int tX=clients[pid].world.spawnX;
 		int tY=clients[pid].world.spawnY;
-		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0 && (clients[pid].player.px!=tX || clients[pid].player.py!=tY))
+		if(pid>=0 && pid<256 && clients[pid]!=null && clients[pid].dc==0 && (clients[pid].player.x!=tX || clients[pid].player.y!=tY))
 		{
 			clients[pid].kill();
 		}
@@ -441,7 +441,7 @@ public class Server extends ServerShim
 			else
 			{
 				if(clients[id].map!=clients[t].map) clients[id].changeMap(clients[t].map);
-				clients[id].teleport(clients[t].player.px,clients[t].player.py);
+				clients[id].teleport(clients[t].player.x,clients[t].player.y);
 				return "";
 			}
 		}
@@ -597,7 +597,7 @@ public class Server extends ServerShim
 					else
 					{
 						if(clients[id].map!=clients[t].map) clients[t].changeMap(clients[id].map);
-						clients[t].teleport(clients[id].player.px,clients[id].player.py);
+						clients[t].teleport(clients[id].player.x,clients[id].player.y);
 						clients[t].sendChatMsgSelf("Fetched by " + clients[id].player.name + "!");
 						return "User fetched!";
 					}
@@ -728,14 +728,14 @@ public class Server extends ServerShim
 			{
 				if(clients[id].map!=map)
 				{
-					clients[id].world.spawnX = clients[id].player.px;
-					clients[id].world.spawnY = clients[id].player.py;
+					clients[id].world.spawnX = clients[id].player.x;
+					clients[id].world.spawnY = clients[id].player.y;
 				}
 	 			else
 				{
-					changeMainSpawnXY(clients[id].player.px,clients[id].player.py);
+					changeMainSpawnXY(clients[id].player.x,clients[id].player.y);
 				}
-				return "New spawn set at [" + clients[id].player.px + "," + clients[id].player.py + "].";
+				return "New spawn set at [" + clients[id].player.x + "," + clients[id].player.y + "].";
 			}
 			else if(cmd[0].equals("say") && id!=255)
 			{
@@ -906,14 +906,14 @@ public class Server extends ServerShim
 				int t = clients[id].world.warps.findWarpID(cmd[1]);
 				if(t>=0)
 				{
-					clients[id].world.warps.warps.get(t).x=clients[id].player.px;
-					clients[id].world.warps.warps.get(t).y=clients[id].player.py;
+					clients[id].world.warps.warps.get(t).x=clients[id].player.x;
+					clients[id].world.warps.warps.get(t).y=clients[id].player.y;
 					clients[id].world.saveWarps();
 					return "Warp location changed.";
 				}
 				else
 				{
-					clients[id].world.warps.warps.add(new Warp(clients[id].player.px,clients[id].player.py,cmd[1]));
+					clients[id].world.warps.warps.add(new Warp(clients[id].player.x,clients[id].player.y,cmd[1]));
 					clients[id].world.saveWarps();
 					return "New warp added.";
 				}

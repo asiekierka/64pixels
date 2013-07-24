@@ -353,8 +353,8 @@ public class Net implements Runnable, NetShim
 					out.writeByte(0x00);
 					out.writeByte(0x7F); // compatibility purposes, NEVER REMOVE. NEVER. NEVER!!!
 					out.writeInt(Version.getProtocolVersion());
-					out.writeByte(game.players[255].pchr);
-					out.writeByte(game.players[255].pcol);
+					out.writeByte(game.players[255].chr);
+					out.writeByte(game.players[255].col);
 					sendPacket();
 				}
 				loginStage = 1;
@@ -387,10 +387,10 @@ public class Net implements Runnable, NetShim
 									in.readShort();
 								} else {
 									loginStage=2;
-									game.players[255].px=in.readInt();
-									game.players[255].py=in.readInt();
-									int tx = game.players[255].px>>6;
-									int ty = game.players[255].py>>6;
+									game.players[255].x=in.readInt();
+									game.players[255].y=in.readInt();
+									int tx = game.players[255].x>>6;
+									int ty = game.players[255].y>>6;
 									chunkRequest(tx,ty);
 									chunkRequest(tx+1,ty);
 									chunkRequest(tx,ty+1);
@@ -634,10 +634,10 @@ public class Net implements Runnable, NetShim
 								break;
 							case 0x80: // reload map
 							{
-								game.players[255].px=in.readInt();
-								game.players[255].py=in.readInt();
-								int tx = game.players[255].px>>6;
-								int ty = game.players[255].py>>6;
+								game.players[255].x=in.readInt();
+								game.players[255].y=in.readInt();
+								int tx = game.players[255].x>>6;
+								int ty = game.players[255].y>>6;
 								chunkRequest(tx,ty);
 								chunkRequest(tx+1,ty);
 								chunkRequest(tx,ty+1);
@@ -706,8 +706,8 @@ public class Net implements Runnable, NetShim
 					synchronized(out)
 					{
 						out.writeByte(0x28);
-						out.writeInt(game.players[255].px);
-						out.writeInt(game.players[255].py);
+						out.writeInt(game.players[255].x);
+						out.writeInt(game.players[255].y);
 						sendPacket();
 					}
 				}

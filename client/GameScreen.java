@@ -298,8 +298,8 @@ public class GameScreen extends Screen
 		{
 			if(players[i]!=null)
 			{
-				c.FillRect(0x000000,players[i].px<<4,players[i].py<<4,16,16);
-				c.DrawChar(players[i].px<<4,players[i].py<<4,players[i].pchr,players[i].pcol);
+				c.FillRect(0x000000,players[i].x<<4,players[i].y<<4,16,16);
+				c.DrawChar(players[i].x<<4,players[i].y<<4,players[i].chr,players[i].col);
 			}
 		}
 		switch(barType)
@@ -314,9 +314,9 @@ public class GameScreen extends Screen
 		{
 			if(players[i] != null)
 			{
-				if(mx>>4 == players[i].px && my>>4 == players[i].py && !inWindow(mx,my))
+				if(mx>>4 == players[i].x && my>>4 == players[i].y && !inWindow(mx,my))
 				{
-					writeChat((players[i].px*16+8)-((players[i].name.length()*8)>>1),players[i].py*16-10,new ChatMsg(players[i].name));
+					writeChat((players[i].x*16+8)-((players[i].name.length()*8)>>1),players[i].y*16-10,new ChatMsg(players[i].name));
 				}
 			}
 		}

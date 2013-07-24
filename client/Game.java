@@ -92,7 +92,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			gs.addChatMsg("&cYou were killed!");
 			health=5;
 			gs.health=5;
-			map.setPlayer(players[255].px,players[255].py,0);
+			map.setPlayer(players[255].x,players[255].y,0);
 			map.setPlayer(0,0,1);
 			oldmx=-1;
 			oldmy=-1;
@@ -109,15 +109,15 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			playSample(tx,ty,val-256);
 			return;
 		}		
-		int x=players[255].px-tx;
-		int y=players[255].py-ty;
+		int x=players[255].x-tx;
+		int y=players[255].y-ty;
 		audio.playNote(x,y,val,1.0);
 	}
 	public void playSample(int tx, int ty, int val)
 	{
 		if(muted) return;
-		int x=players[255].px-tx;
-		int y=players[255].py-ty;
+		int x=players[255].x-tx;
+		int y=players[255].y-ty;
 		audio.playSampleByNumber(x,y,val,1.0);
 	}
 	public void changeKeyMode(int t)
@@ -273,10 +273,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					out.newLine();
 				}
 			}
-			s = "player-char=" + players[255].pchr;
+			s = "player-char=" + players[255].chr;
 			out.write(s,0,s.length());
 			out.newLine();
-			s = "player-color=" + players[255].pcol;
+			s = "player-color=" + players[255].col;
 			out.write(s,0,s.length());
 			out.newLine();
 			if(map.cachesize != 64)
@@ -316,8 +316,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			out.newLine();
 			if(!multiplayer)
 			{
-				lpx = players[255].px;
-				lpy = players[255].py;
+				lpx = players[255].x;
+				lpy = players[255].y;
 			}
 			if(gs.hideousPrompts)
 			{
@@ -360,7 +360,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 				else if(key.contains("player-char"))
 				{
-					players[255].pchr = nf.parse(val).byteValue();
+					players[255].chr = nf.parse(val).byteValue();
 				}
 				else if(key.contains("mapgen-mode"))
 				{
@@ -372,7 +372,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 				else if(key.contains("player-color"))
 				{
-					players[255].pcol = nf.parse(val).byteValue();
+					players[255].col = nf.parse(val).byteValue();
 				}
 				else if(key.contains("map-cache-length"))
 				{
@@ -380,13 +380,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				}
 				if(key.contains("player-x"))
 				{
-					players[255].px = nf.parse(val).intValue();
-					lpx = players[255].px;
+					players[255].x = nf.parse(val).intValue();
+					lpx = players[255].x;
 				}
 				else if(key.contains("player-y"))
 				{
-					players[255].py = nf.parse(val).intValue();
-					lpy = players[255].py;
+					players[255].y = nf.parse(val).intValue();
+					lpy = players[255].y;
 				}
 				else if(key.contains("wsad-mode"))
 				{
@@ -561,8 +561,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		my=(int)(umy/canvas.scaleY);
 		if(!isConfig && (mx >= 0 && mx < canvas.WIDTH && my >= 0 && my < (canvas.GRID_H<<4)))
 		{
-			int tx = (players[255].px+(mx>>4))-(canvas.FULLGRID_W/2)+1;
-			int ty = (players[255].py+(my>>4))-(canvas.FULLGRID_H/2)+1;
+			int tx = (players[255].x+(mx>>4))-(canvas.FULLGRID_W/2)+1;
+			int ty = (players[255].y+(my>>4))-(canvas.FULLGRID_H/2)+1;
 			gs.hov_type=map.getBlock(tx,ty).getTypeWithVirtual();
 		}
 		if(isDragging)
@@ -591,10 +591,10 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				Window cw = gs.getWindow(3);
 				for(int i=0;i<256;i++)
 				{
-					if(gs.players[i] != null && gs.players[i].px == mx>>4 && gs.players[i].py == my>>4) return;
+					if(gs.players[i] != null && gs.players[i].x == mx>>4 && gs.players[i].y == my>>4) return;
 				}
 				byte[] tmparr = new byte[4];
-				Block capturedBlock = map.getBlock(players[255].px-(canvas.FULLGRID_W/2)+1+(mx>>4),players[255].py-(canvas.FULLGRID_H/2)+1+(my>>4));
+				Block capturedBlock = map.getBlock(players[255].x-(canvas.FULLGRID_W/2)+1+(mx>>4),players[255].y-(canvas.FULLGRID_H/2)+1+(my>>4));
 				if(!capturedBlock.isPlaceable()) return;
 				if(mb == ev_1)
 				{
@@ -618,8 +618,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					oldmx = mx;
 					oldmy = my;
 					oldmb = mb;
-					int ttx = players[255].px-(canvas.FULLGRID_W/2)+1+(mx>>4);
-					int tty = players[255].py-(canvas.FULLGRID_H/2)+1+(my>>4);
+					int ttx = players[255].x-(canvas.FULLGRID_W/2)+1+(mx>>4);
+					int tty = players[255].y-(canvas.FULLGRID_H/2)+1+(my>>4);
 					if(!multiplayer) synchronized(map.physics)
 					{
 						map.physics.addBlockToCheck(new BlockPos(ttx,tty));
@@ -678,8 +678,8 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 
 	public void shoot(int dir)
 	{
-		int sx=players[255].px+map.xMovement[dir];
-		int sy=players[255].py+map.yMovement[dir];
+		int sx=players[255].x+map.xMovement[dir];
+		int sy=players[255].y+map.yMovement[dir];
 		map.setBullet(sx,sy,(byte)(dir+1));
 		blockChange=true;
 		if(multiplayer)
@@ -728,7 +728,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				switch(kc)
 				{
 					case KeyEvent.VK_P:
-						System.out.println("player pos: x = " + players[255].px + ", y = " + players[255].py + ".");
+						System.out.println("player pos: x = " + players[255].x + ", y = " + players[255].y + ".");
 						waitTime=2;
 						break;
 					case KeyEvent.VK_T:
@@ -740,7 +740,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						}
 						break;
 					case KeyEvent.VK_R:
-						if(multiplayer && (players[255].px != 0 || players[255].py != 0))
+						if(multiplayer && (players[255].x != 0 || players[255].y != 0))
 						{
 							net.respawnRequest();
 						}
@@ -845,15 +845,15 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 	public int movePlayer(int dpx, int dpy)
 	{
 		if(hasShot) return waitTime;
-		int px = players[255].px+dpx;
-		int py = players[255].py+dpy;
+		int px = players[255].x+dpx;
+		int py = players[255].y+dpy;
 		Block blockMoveTo=map.getBlock(px,py);
 		if(isShift && blockMoveTo.isEmpty())
 		{
 			for(int i=0;i<4;i++)
 			{
-				int tx = players[255].px+map.xMovement[i];
-				int ty = players[255].py+map.yMovement[i];
+				int tx = players[255].x+map.xMovement[i];
+				int ty = players[255].y+map.yMovement[i];
 				if(tx==px && ty==py)
 				{
 					shoot(i);
@@ -868,7 +868,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			{
 				net.playerPush(dpx,dpy);
 			} else {
-				map.setPlayer(players[255].px,players[255].py,0);
+				map.setPlayer(players[255].x,players[255].y,0);
 				map.setPlayer(px,py,1);
 				map.setPlayer(px+dpx,py+dpy,1);
 				oldmx=-1;
@@ -883,7 +883,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 			if(multiplayer) net.playerMove(dpx,dpy);
 			else
 			{
-				map.setPlayer(players[255].px,players[255].py,0);
+				map.setPlayer(players[255].x,players[255].y,0);
 				map.setPlayer(px,py,1);
 			}
 			oldmx=-1;
@@ -910,15 +910,15 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		{
 			for(int j=0;j<64;j++)
 			{
-				if(pc.getBlockType(i,j) == 0) { players[id].px = cx+i; players[id].py = cy+j; return; }
+				if(pc.getBlockType(i,j) == 0) { players[id].x = cx+i; players[id].y = cy+j; return; }
 			}
 		}
 	}
 	
 	public void render()
 	{
-		int px = players[255].px;
-		int py = players[255].py;
+		int px = players[255].x;
+		int py = players[255].y;
 		int sx = px-(canvas.FULLGRID_W/2)+1;
 		int sy = py-(canvas.FULLGRID_H/2)+1;
 		Block t;
@@ -957,13 +957,13 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 					gs.removePlayer(i);
 					continue;
 				}
-				int tx = (players[i].px-players[255].px)+(canvas.FULLGRID_W/2)-1;
-				int ty = (players[i].py-players[255].py)+(canvas.FULLGRID_H/2)-1;
+				int tx = (players[i].x-players[255].x)+(canvas.FULLGRID_W/2)-1;
+				int ty = (players[i].y-players[255].y)+(canvas.FULLGRID_H/2)-1;
 				gs.removePlayer(i);
 				if(tx>=0 && ty>=0 && tx<canvas.FULLGRID_W && ty<canvas.FULLGRID_H && gs.blocks[(ty*canvas.FULLGRID_W)+tx] != null)
 				{
-					Block blockAtPlayer = map.getBlock(players[i].px,players[i].py);
-					if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].pchr,players[i].pcol);
+					Block blockAtPlayer = map.getBlock(players[i].x,players[i].y);
+					if(blockAtPlayer.getType()!=8) gs.addPlayer(i,tx,ty,players[i].name,players[i].chr,players[i].col);
 				}
 			}
 		}
@@ -1241,7 +1241,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						canvas.draw(mx,my);
 						try{ Thread.sleep(33); } catch(Exception e){}
 					}
-					if(confChr!=0) players[255].pchr = (byte)confChr;
+					if(confChr!=0) players[255].chr = (byte)confChr;
 					break;
 				case 5:
 					is.toggleWindow(2);
@@ -1250,7 +1250,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 						canvas.draw(mx,my);
 						try{ Thread.sleep(33); } catch(Exception e){}
 					}
-					if(confCol!=0) players[255].pcol = (byte)confCol;
+					if(confCol!=0) players[255].col = (byte)confCol;
 					break;
 				case 6:
 					canvas.resizePlayfield=!canvas.resizePlayfield;

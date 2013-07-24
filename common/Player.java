@@ -2,17 +2,17 @@ package common;
 
 public class Player
 {
-	public int px, py, health;
-	public byte pchr, pcol;
+	public int x, y, health;
+	public byte chr, col;
 	public boolean posChanged;
 	public String name;
 	
 	public Player(int _px, int _py, byte _pchr, byte _pcol, String _pn)
 	{
-		px = _px;
-		py = _py;
-		pchr = _pchr;
-		pcol = _pcol;
+		x = _px;
+		y = _py;
+		chr = _pchr;
+		col = _pcol;
 		name = _pn;
 		posChanged = true;
 	}
@@ -27,14 +27,14 @@ public class Player
 	
 	public void move(int _px, int _py)
 	{
-		px = _px;
-		py = _py;
+		x = _px;
+		y = _py;
 		posChanged = true;
 	}
 	public void moveDelta(int _px, int _py)
 	{
-		px += _px;
-		py += _py;
+		x += _px;
+		y += _py;
 		posChanged = true;
 	}
 }
