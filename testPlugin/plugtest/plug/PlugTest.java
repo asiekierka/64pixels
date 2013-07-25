@@ -1,6 +1,6 @@
 package plug;
 
-public class PlugTest
+public class PlugTest implements Plugin
 {
 	public void onEnable()
 	{

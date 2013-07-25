@@ -1,6 +1,6 @@
 package server;
 
-//import com.eclipsesource.json.*;
+import com.eclipsesource.json.*;
 import java.util.Scanner;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
@@ -25,14 +25,13 @@ public class PluginLoader
 			ZipEntry ze = zf.getEntry("config.js");
 			if (ze == null) throw new MalformedPluginException("Plugin " + jarFile + " has a malformed configuration!");
 			
-			//JsonObject jo = JsonObject.readFrom(new Scanner(zf.getInputStream(ze)).useDelimiter("\\A").next());
-			//String classToLoad = jo.get("fullClassName").asString();
-			String classToLoad = "";
+			JsonObject jo = JsonObject.readFrom(new Scanner(zf.getInputStream(ze)).useDelimiter("\\A").next());
+			String classToLoad = jo.get("fullClassName").asString();
 
 			URL[] a = {new File(myJar).toURL()};
 			URLClassLoader child = new URLClassLoader(a, this.getClass().getClassLoader());
 			Class type = Class.forName(classToLoad, true, child);
-			plugin = new Plugin(type);
+			plugin = (Plugin)type.newInstance();
 		}
 		
 		catch (Exception e)
