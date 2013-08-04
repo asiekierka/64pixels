@@ -36,7 +36,7 @@ public class Server extends ServerShim
 	public boolean opPassOn = false;
 	public String opPass;
 	public Warps warps;
-	public int po = 25566;
+	public int po = 20064;
 	public boolean mapLock = false;
 	public World world;
 	public PluginHandler pluginHandler;
@@ -1044,7 +1044,7 @@ public class Server extends ServerShim
 					}
 					else if(args[i].equals("/h"))
 					{
-						System.out.println("64px-srvr\nUsage: 64px-srvr [params]\n\nparams - parameters:\n    /a - anonymous mode (default nicknames) (off by default)\n    /h - show help\n    /p port - change port (25566 is default)");
+						System.out.println("64px-srvr\nUsage: 64px-srvr [params]\n\nparams - parameters:\n    /a - anonymous mode (default nicknames) (off by default)\n    /h - show help\n    /p port - change port (20064 is default)");
 						System.exit(0);
 					}
 					else if(args[i].equals("/p"))
