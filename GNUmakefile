@@ -14,7 +14,7 @@ jars: clientjar serverjar
 
 serverjar: server
 	@echo [[[ MAKING SERVER JAR ]]]
-	jar cvfm 64px-srvr.jar manifests/srv-std.MF server/*.class common/*.class
+	jar cvfm 64px-srvr.jar manifests/srv-std.MF server/*.class common/*.class lib/*.jar
 
 clientjar: client
 	@echo [[[ MAKING CLIENT JARs ]]]
@@ -30,4 +30,4 @@ client: common
 	
 server: common
 	@echo [[[ MAKING SERVER CODE ]]]
-	javac -source 1.5 -target 1.5 -cp . server/*.java
+	javac -source 1.5 -target 1.5 -cp "lib/*:." server/*.java
