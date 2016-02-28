@@ -524,6 +524,8 @@ public class Client implements Runnable
 								if(loginStage>=1)
 								{
 									readString();
+									in.readByte();
+									in.readByte(); // compatibility purposes, NEVER REMOVE. NEVER. NEVER!!!
 									in.readInt();
 									in.readByte();
 									in.readByte();

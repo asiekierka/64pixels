@@ -88,50 +88,63 @@ public class Chunk {
 			int version = din.readUnsignedByte();
 			spawnX = din.readUnsignedByte();
 			spawnY = din.readUnsignedByte();
-			switch(version)
+
+			if(version < 3 || version > LATEST_CHUNK_VERSION)
 			{
-				case 4:
-				case 5:
-					din.readUnsignedByte();
-					din.readUnsignedShort(); // skip 3 bytes of now-missing information
-				case 6:
-				case LATEST_CHUNK_VERSION:
-					type = readByteArray(gin, 4096);
-					param = readByteArray(gin, 4096 * 2); // Second half stores bullet.
-					chr = readByteArray(gin, 4096 * 2); // Second half stores display char & colour
-					col = readByteArray(gin, 4096 * 2);
-					chrPushable = readByteArray(gin, 4096);
-					colPushable = readByteArray(gin, 4096);
-					bulletParam = readByteArray(gin, 4096);
-					for(int i=0;i<4096;i++)
+				System.out.println("[CHUNK] ReadChunk: unknown version: " + version);
+				din.close();
+				gin.close();
+				return;
+			}
+
+			if(version >= 3 && version <= 5)
+			{
+				din.readUnsignedByte(); // skip map information byte
+			}
+
+			if(version >= 4 && version <= 5)
+			{
+				din.readUnsignedShort(); // skip a short
+			}
+
+			if(version >= 3)
+			{
+				type = readByteArray(gin, 4096);
+				param = readByteArray(gin, 4096 * 2); // Second half stores bullet.
+				chr = readByteArray(gin, 4096 * 2); // Second half stores display char & colour
+				col = readByteArray(gin, 4096 * 2);
+			}
+			if(version >= 4)
+			{
+				chrPushable = readByteArray(gin, 4096);
+				colPushable = readByteArray(gin, 4096);
+				bulletParam = readByteArray(gin, 4096);
+				for(int i=0;i<4096;i++)
+				{
+					// Plate refresh
+					if(type[i]==5 && (0x80&(int)param[i])>0)
 					{
-						// Plate refresh
-						if(type[i]==5 && (0x80&(int)param[i])>0)
-						{
-							param[i]=(byte)1;
-							map.physics.addBlockToCheck(new Point(xpos*64+(i&63),ypos*64+(i>>6)));
-						}
-						else if(Block.isLoaded(type[i])) // Physics refresh
-							map.physics.addBlockToCheck(new Point(xpos*64+(i&63),ypos*64+(i>>6)));
-						else if(param[i+4096] != 0) // Bullet refresh
-							map.physics.addBlockToCheck(new Point(xpos*64+(i&63),ypos*64+(i>>6)));
+						param[i]=(byte)1;
+						map.physics.addBlockToCheck(new Point(xpos*64+(i&63),ypos*64+(i>>6)));
 					}
-					fixDisplay();
-					int extendedBlockCount = din.readUnsignedShort();
-					for(int eBi = 0; eBi < extendedBlockCount; eBi++) {
-						int x = din.readUnsignedByte();
-						int y = din.readUnsignedByte();
-						int flags = (version > 6) ? din.readUnsignedByte() : 0;
-						int ebLength = din.readUnsignedShort();
-						byte[] data = readByteArray(gin, ebLength);
-						addExtendedBlock(new ExtendedBlock(x,y,data,flags));
-					}
-					din.close();
-					gin.close();
-					return;
-				default:
-					System.out.println("[CHUNK] ReadChunk: unknown version: " + version);
-					break;
+					else if(Block.isLoaded(type[i])) // Physics refresh
+						map.physics.addBlockToCheck(new Point(xpos*64+(i&63),ypos*64+(i>>6)));
+					else if(param[i+4096] != 0) // Bullet refresh
+						map.physics.addBlockToCheck(new Point(xpos*64+(i&63),ypos*64+(i>>6)));
+				}
+				fixDisplay();
+				int extendedBlockCount = din.readUnsignedShort();
+				for(int eBi = 0; eBi < extendedBlockCount; eBi++) {
+					int x = din.readUnsignedByte();
+					int y = din.readUnsignedByte();
+					int flags = (version > 6) ? din.readUnsignedByte() : 0;
+					int ebLength = din.readUnsignedShort();
+					byte[] data = readByteArray(gin, ebLength);
+					addExtendedBlock(new ExtendedBlock(x,y,data,flags));
+				}
+				din.close();
+				gin.close();
+				return;
 			}
 		}
 		catch (Exception e)
