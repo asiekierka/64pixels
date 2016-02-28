@@ -21,7 +21,7 @@ public class HeartThread implements Runnable
 			InputStream input = null;
 			try
 			{
-				String urlString = "http://admin.64pixels.org/heartbeat.php?name=" + server.name + "&port=" + server.po + "&players=" + server.countPlayers() + "&maxplayers=255&version=" + Version.getProtocolVersion();
+				String urlString = "http://game.asie.pl/64pixels/heartbeat.php?name=" + server.name + "&port=" + server.po + "&players=" + server.countPlayers() + "&maxplayers=255&version=" + Version.getProtocolVersion();
 				urlString = urlString.replaceAll(" ","%20");
 				URL url = new URL(urlString);
 				input = url.openStream();

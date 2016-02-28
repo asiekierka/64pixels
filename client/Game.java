@@ -188,7 +188,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		FileOutputStream fos;
 		try
 		{
-			u1 = new URL("http://admin.64pixels.org/serverlist.php?asie=1");
+			u1 = new URL("http://game.asie.pl/64pixels/serverlist.php?asie=1");
 			is = u1.openStream();
 			fos = new FileOutputStream(map.saveDir + "slist.txt");
 			int count = 1;
