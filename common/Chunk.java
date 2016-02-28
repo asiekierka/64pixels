@@ -100,10 +100,6 @@ public class Chunk {
 			if(version >= 3 && version <= 5)
 			{
 				din.readUnsignedByte(); // skip map information byte
-			}
-
-			if(version >= 4 && version <= 5)
-			{
 				din.readUnsignedShort(); // skip a short
 			}
 

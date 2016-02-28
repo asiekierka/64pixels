@@ -1,13 +1,10 @@
 package common;
 
-import java.util.Random;
-
 public class Block
 {
 	public int x = 0;
 	public int y = 0;
 	private byte[] block = new byte[8];
-	public static Random rand = new Random();
 	public static final byte[] extendDir = { 30, 31, 16, 17 };
 
 	public Block()
@@ -47,15 +44,7 @@ public class Block
 	
 	public static int getParam(int type)
 	{
-		switch(type)
-		{
-			case 21:
-				return rand.nextInt(10);
-			case 22:
-				return (rand.nextInt(7)<<4)|rand.nextInt(12);
-			default:
-				return 0;
-		}
+		return 0;
 	}
 
 	public boolean isEmpty()
@@ -87,7 +76,7 @@ public class Block
 
 	public static boolean isPlaceable(int t)
 	{
-		return !(t == 16 || t==18) && (t<=20) && (t>=0);
+		return !(t == 16 || t==18) && (t<=20) && (t>=-1);
 	}
 
 	public boolean isPlaceable()
