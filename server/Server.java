@@ -39,7 +39,7 @@ public class Server extends ServerShim
 	public int po = 20064;
 	public boolean mapLock = false;
 	public World world;
-	public PluginHandler pluginHandler;
+	//public PluginHandler pluginHandler;
 
 	public int countPlayers()
 	{
@@ -503,8 +503,7 @@ public class Server extends ServerShim
 			}
 			else if(clients[id].player.isOp())
 			{
-
-				return "Commands: who tp warp warps me kick fetch copy paste protect unprotect setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld load return msg raycast";
+				return "Commands: who tp warp warps me kick fetch copy paste protect unprotect setspawn say nick op deop save ban unban setwarp delwarp id import export pvp lock unlock worlds addworld delworld adddungeon load return msg raycast";
 			}
 			else
 			{
@@ -1045,8 +1044,8 @@ public class Server extends ServerShim
 			System.out.println(world_names.length + " worlds!");
 			worlds.add(world);
 			
-			pluginHandler = new PluginHandler();
-			pluginHandler.reloadPlugins();
+			//pluginHandler = new PluginHandler();
+			//pluginHandler.reloadPlugins();
 			for(String wn : world_names)
 			{
 				WorldMap tm = new WorldMap(true,map_cache_size,wn);
@@ -1255,8 +1254,6 @@ public class Server extends ServerShim
 	public void start()
 	{
 		System.out.println("64px-srvr version " + Version.getVersionName());
-		System.out.println("Svetlana, I'm sorry.");
-		System.out.println("Also let's create servers with Haruhi Suzumiya! (yeah, haruhiism plug FTW)");
 		System.out.print("Initializing: #");
 		run = true;
 		ci = new Input(this);

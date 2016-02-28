@@ -533,6 +533,8 @@ public class Client implements Runnable
 								} else {
 									loginStage = 1;
 									player.name = readString();
+									in.readByte();
+									in.readByte(); // compatibility purposes, NEVER REMOVE. NEVER. NEVER!!!
 									version = in.readInt();
 									player.chr = in.readByte();
 									player.col = in.readByte();

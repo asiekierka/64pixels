@@ -33,6 +33,7 @@ public class HeartThread implements Runnable
 			catch(Exception e) {
 				try
 				{
+					e.printStackTrace();
 					System.out.println("Serverlist seems to be down!");
 					Thread.sleep(speed); 
 					input.close();
