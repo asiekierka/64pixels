@@ -1,10 +1,6 @@
 64pixels source code
-asiekierka, 2010-2011
 
-Read the LICENSE file before publishing your forks, please. (i should change it to a real license, any help/0
-Some tips:
-
-1. use make and make clean. (thanks AJF!)
+See docs/LICENSE for licensing.
 
 notes from GM:
 	the *Shim files are used as interfaces.

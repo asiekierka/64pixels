@@ -14,11 +14,11 @@ jars: clientjar serverjar
 
 serverjar: server
 	@echo [[[ MAKING SERVER JAR ]]]
-	jar cvfm 64px-srvr.jar manifests/srv-std.MF server/*.class common/*.class lib/*.jar
+	jar cvfm 64px-srvr.jar manifests/srv-std.MF server/*.class common/*.class docs/LICENSE
 
 clientjar: client
 	@echo [[[ MAKING CLIENT JARs ]]]
-	jar cvfm 64pixels.jar manifests/cli-std.MF common/*.class client/*.class client/rawcga.bin client/*.wav
+	jar cvfm 64pixels.jar manifests/cli-std.MF common/*.class client/*.class client/rawcga.bin client/*.wav docs/LICENSE
 	
 common:
 	@echo [[[ MAKING COMMON CODE ]]]

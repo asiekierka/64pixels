@@ -188,7 +188,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 		FileOutputStream fos;
 		try
 		{
-			u1 = new URL("http://game.asie.pl/64pixels/serverlist.php?asie=1");
+			u1 = new URL("http://game.asie.pl/64pixels/serverlist.php?asie=" + Version.getProtocolVersion());
 			is = u1.openStream();
 			fos = new FileOutputStream(map.saveDir + "slist.txt");
 			int count = 1;
@@ -303,9 +303,9 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				out.write(s,0,s.length());
 				out.newLine();
 			}
-			if(cmtsp!=30)
+			if(true) // map-ticks
 			{
-				s = "physics-speed=";
+				s = "map-ticks=";
 				if(cmtsp==0) s += "max";
 				else s += cmtsp;
 				out.write(s,0,s.length());
@@ -397,7 +397,7 @@ implements MouseListener, MouseMotionListener, KeyListener, ComponentListener, F
 				{
 					nagle = nf.parse(val).intValue();
 				}
-				else if(key.contains("physics-speed"))
+				else if(key.contains("physics-speed") || key.contains("map-ticks"))
 				{
 					if(val.equals("max"))
 					{
