@@ -14,7 +14,7 @@ public final class Convert
 			if(splitter>0)
 			{
 				String tmp = hn.substring(splitter+1,hn.length());
-				int test = new Integer(tmp).intValue();
+				int test = Integer.parseInt(tmp);
 				if(test<=0 || test>32767) test=20064;
 				return test;
 			}

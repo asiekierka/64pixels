@@ -100,7 +100,7 @@ public class Canvas extends JComponent
 			else
 			{
 				System.out.println("[CANVAS] Using default charset!");
-				ain = Canvas.class.getResourceAsStream("rawcga.bin");
+				ain = Canvas.class.getClassLoader().getResourceAsStream("rawcga.bin");
 				for(int i=0; i<256; i++)
 				{
 					ain.read(cga,i<<3,8);

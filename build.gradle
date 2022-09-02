@@ -1,0 +1,71 @@
+plugins {
+	id 'java'
+}
+
+archivesBaseName = '64pixels'
+version = '0.2.2'
+group = 'pl.asie.64pixels'
+
+sourceSets {
+	main {
+		java {
+			srcDirs("src/common/java")
+		}
+	}
+
+	client {
+		compileClasspath += sourceSets.main.output
+		runtimeClasspath += sourceSets.main.output
+
+		java {
+			srcDirs("src/client/java")
+		}
+	}
+
+	server {
+		compileClasspath += sourceSets.main.output
+		runtimeClasspath += sourceSets.main.output
+
+		java {
+			srcDirs("src/server/java")
+		}
+	}
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+dependencies {
+	serverImplementation files("lib/minimal-json.jar")
+}
+
+jar {
+	from sourceSets.main.output.classesDirs
+	from sourceSets.main.output.resourcesDir
+	from sourceSets.client.output.classesDirs
+	from sourceSets.client.output.resourcesDir
+
+	manifest {
+		attributes (
+			'Main-Class': 'client.Main'
+		)
+	}
+}
+
+task serverJar(type: Jar) {
+	baseName = '64px-srvr'
+	from zipTree("lib/minimal-json.jar")
+
+	from sourceSets.main.output.classesDirs
+	from sourceSets.main.output.resourcesDir
+	from sourceSets.server.output.classesDirs
+	from sourceSets.server.output.resourcesDir
+
+	manifest {
+		attributes (
+			'Main-Class': 'server.Main'
+		)
+	}
+}
+
+build.dependsOn serverJar

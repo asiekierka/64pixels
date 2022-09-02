@@ -295,7 +295,7 @@ public class Sound implements Runnable
 			try
 			{
 				ByteArrayOutputStream bfp = new ByteArrayOutputStream();
-				InputStream fp = Sound.class.getResourceAsStream(fname);
+				InputStream fp = Sound.class.getClassLoader().getResourceAsStream(fname);
 				
 				// SKIP HEADER, ASSUME 44kHz 16-bit little-endian signed mono!!! -GM
 				byte[] hdr = new byte[44];

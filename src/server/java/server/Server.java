@@ -1071,7 +1071,7 @@ public class Server extends ServerShim
 					else if(args[i].equals("/p"))
 					{
 						i++;
-						po = new Integer(args[i]).intValue();
+						po = Integer.parseInt(args[i]);
 					}
 				}
 			}
